@@ -9,16 +9,16 @@ module Bora
       @processed_events = Set.new
     end
 
-    def create(params, &block)
-      call_cfn_action(:create, params, &block)
+    def create(options, &block)
+      call_cfn_action(:create, options, &block)
     end
 
-    def update(params, &block)
-      call_cfn_action(:update, params, &block)
+    def update(options, &block)
+      call_cfn_action(:update, options, &block)
     end
 
-    def create_or_update(params, &block)
-      exists? ? update(params, &block) : create(params, &block)
+    def create_or_update(options, &block)
+      exists? ? update(options, &block) : create(options, &block)
     end
 
     def delete(&block)
@@ -31,6 +31,13 @@ module Bora
       events.reverse.map { |e| Event.new(e) }
     end
 
+    def template(pretty = true)
+      return if !exists?
+      template = @cfn.get_template({stack_name: @stack_name}).template_body
+      template = JSON.pretty_generate(JSON.parse(template)) if pretty
+      template
+    end
+
     def exists?
       underlying_stack && underlying_stack.stack_status != 'DELETE_COMPLETE'
     end
@@ -38,13 +45,13 @@ module Bora
 
     private
 
-    def call_cfn_action(action, params = {}, &block)
+    def call_cfn_action(action, options = {}, &block)
       underlying_stack(refresh: true)
       return true if action == :delete && !exists?
       @previous_event_time = last_event_time
-      params[:stack_name] = @stack_name
+      options[:stack_name] = @stack_name
       begin
-        @cfn.method("#{action.to_s.downcase}_stack").call(params)
+        @cfn.method("#{action.to_s.downcase}_stack").call(options)
         wait_for_completion(&block)
       rescue Aws::CloudFormation::Errors::ValidationError => e
         raise e unless e.message.include?("No updates are to be performed")

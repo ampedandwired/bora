@@ -11,7 +11,7 @@ module Bora
       define_tasks
     end
 
-    attr_accessor :stack_params, :colorize
+    attr_accessor :stack_options, :colorize
 
     private
 
@@ -19,13 +19,14 @@ module Bora
       define_apply_task
       define_delete_task
       define_events_task
+      define_template_task
     end
 
     def define_apply_task
       within_namespace do
         desc "Creates (or updates) the #{@stack_name} stack"
         task :apply do
-          invoke_action(@stack.exists? ? "update" : "create", stack_params)
+          invoke_action(@stack.exists? ? "update" : "create", stack_options)
         end
       end
     end
@@ -49,6 +50,16 @@ module Bora
           else
             puts "No events for stack #{@stack_name}"
           end
+        end
+      end
+    end
+
+    def define_template_task
+      within_namespace do
+        desc "Shows the current template for #{@stack_name} stack"
+        task :template do
+          template = @stack.template
+          puts template ? template : "Stack #{@stack_name} does not exist"
         end
       end
     end
