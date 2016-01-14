@@ -1,5 +1,6 @@
 require 'set'
 require 'aws-sdk'
+require 'diffy'
 
 module Bora
   class Stack
@@ -46,6 +47,10 @@ module Bora
       else
         raise Exception("new_template not yet implemented for template_url stack option")
       end
+    end
+
+    def diff(options)
+      Diffy::Diff.new(template, new_template(options))
     end
 
     def exists?

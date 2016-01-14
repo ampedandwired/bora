@@ -18,6 +18,7 @@ module Bora
     def define_tasks
       define_apply_task
       define_delete_task
+      define_diff_task
       define_events_task
       define_template_task
       define_new_template_task
@@ -37,6 +38,15 @@ module Bora
         desc "Deletes the #{@stack_name} stack"
         task :delete do
           invoke_action("delete")
+        end
+      end
+    end
+
+    def define_diff_task
+      within_namespace do
+        desc "Diffs the new template with the #{@stack_name} stack's current template"
+        task :diff do
+          puts @stack.diff(@stack_options).to_s(@colorize ? :color : :text)
         end
       end
     end
