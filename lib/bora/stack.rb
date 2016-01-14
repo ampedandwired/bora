@@ -25,6 +25,12 @@ module Bora
       call_cfn_action(:delete, &block)
     end
 
+    def events
+      return [] if !underlying_stack
+      events = @cfn.describe_stack_events({stack_name: underlying_stack.stack_id}).stack_events
+      events.reverse.map { |e| Event.new(e) }
+    end
+
     def exists?
       underlying_stack && underlying_stack.stack_status != 'DELETE_COMPLETE'
     end

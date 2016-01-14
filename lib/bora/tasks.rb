@@ -18,6 +18,7 @@ module Bora
     def define_tasks
       define_apply_task
       define_delete_task
+      define_events_task
     end
 
     def define_apply_task
@@ -34,6 +35,15 @@ module Bora
         desc "Deletes the #{@stack_name} stack"
         task :delete do
           invoke_action("delete")
+        end
+      end
+    end
+
+    def define_events_task
+      within_namespace do
+        desc "Outputs the latest events from the #{@stack_name} stack"
+        task :events do
+          @stack.events.each { |e| puts e }
         end
       end
     end
