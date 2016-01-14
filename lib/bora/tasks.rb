@@ -43,7 +43,12 @@ module Bora
       within_namespace do
         desc "Outputs the latest events from the #{@stack_name} stack"
         task :events do
-          @stack.events.each { |e| puts e }
+          events = @stack.events
+          if events.length > 0
+            @stack.events.each { |e| puts e }
+          else
+            puts "No events for stack #{@stack_name}"
+          end
         end
       end
     end
