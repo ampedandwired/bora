@@ -20,6 +20,7 @@ module Bora
       define_delete_task
       define_events_task
       define_template_task
+      define_new_template_task
     end
 
     def define_apply_task
@@ -60,6 +61,15 @@ module Bora
         task :template do
           template = @stack.template
           puts template ? template : "Stack #{@stack_name} does not exist"
+        end
+      end
+    end
+
+    def define_new_template_task
+      within_namespace do
+        desc "Shows the new template for #{@stack_name} stack"
+        task :new_template do
+          puts @stack.new_template(@stack_options)
         end
       end
     end

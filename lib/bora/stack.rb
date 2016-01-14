@@ -38,6 +38,16 @@ module Bora
       template
     end
 
+    def new_template(options, pretty = true)
+      if options[:template_body]
+        template = options[:template_body]
+        template = JSON.pretty_generate(JSON.parse(template)) if pretty
+        template
+      else
+        raise Exception("new_template not yet implemented for template_url stack option")
+      end
+    end
+
     def exists?
       underlying_stack && underlying_stack.stack_status != 'DELETE_COMPLETE'
     end
