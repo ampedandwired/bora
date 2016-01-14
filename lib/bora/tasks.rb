@@ -17,10 +17,10 @@ module Bora
 
     def define_tasks
       define_apply_task
+      define_current_template_task
       define_delete_task
       define_diff_task
       define_events_task
-      define_template_task
       define_new_template_task
     end
 
@@ -29,6 +29,16 @@ module Bora
         desc "Creates (or updates) the #{@stack_name} stack"
         task :apply do
           invoke_action(@stack.exists? ? "update" : "create", stack_options)
+        end
+      end
+    end
+
+    def define_current_template_task
+      within_namespace do
+        desc "Shows the current template for #{@stack_name} stack"
+        task :current_template do
+          template = @stack.template
+          puts template ? template : "Stack #{@stack_name} does not exist"
         end
       end
     end
@@ -61,16 +71,6 @@ module Bora
           else
             puts "No events for stack #{@stack_name}"
           end
-        end
-      end
-    end
-
-    def define_template_task
-      within_namespace do
-        desc "Shows the current template for #{@stack_name} stack"
-        task :template do
-          template = @stack.template
-          puts template ? template : "Stack #{@stack_name} does not exist"
         end
       end
     end
