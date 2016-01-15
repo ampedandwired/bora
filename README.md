@@ -1,8 +1,12 @@
 # Bora
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/bora`. To experiment with that code, run `bin/console` for an interactive prompt.
+> 1. A cold and often gusty katabatic wind in the Adriatic
+> 2. A tool for pushing around your cloud formations
 
-TODO: Delete this and the text above, and describe your gem
+This gem contains Ruby [rake](https://github.com/ruby/rake) tasks that help you work with [CloudFormation](https://aws.amazon.com/cloudformation/) stacks.
+You don't need to use it with rake though - you can use the underlaying classes
+in any Ruby app.
+
 
 ## Installation
 
@@ -22,15 +26,69 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### Quick Start
+
+Add this to your `Rakefile`
+
+```ruby
+require 'bora'
+
+Bora::Tasks.new("example") do |t|
+  t.stack_options = {
+    template_body: File.read("example.json")
+  }
+end
+```
+
+This will give you the following rake tasks
+
+```shell
+rake stack:example:apply             # Creates (or updates) the example stack
+rake stack:example:current_template  # Shows the current template for example stack
+rake stack:example:delete            # Deletes the example stack
+rake stack:example:diff              # Diffs the new template with the example stack's current template
+rake stack:example:events            # Outputs the latest events from the example stack
+rake stack:example:new_template      # Shows the new template for example stack
+```
+
+You can add as many templates as you like into your Rakefile, simply define an instance of `Bora::Tasks` for each one.
+
+### Task Options
+
+When you define the Bora tasks, you can pass in a number of options that control how Bora works and what gets passed to CloudFormation.
+The available options are shown below with their default values.
+
+```ruby
+Bora::Tasks.new("example") do |t|
+  t.colorize = true
+  t.stack_options = {}
+end
+```
+
+* `colorize` - A boolean that controls whether console output is colored or not
+* `stack_options` - A hash of options that are passed directly to the CloudFormation [create_stack](http://docs.aws.amazon.com/sdkforruby/api/Aws/CloudFormation/Client.html#create_stack-instance_method) and [update_stack](http://docs.aws.amazon.com/sdkforruby/api/Aws/CloudFormation/Client.html#update_stack-instance_method) APIs.
+  You must at a minimum specify either the `template_body` or `template_url` option.
+
+
+### API
+
+You can use this gem without using Rake. Most of the logic is implemented in [stack.rb](https://github.com/ampedandwired/bora/blob/master/lib/bora/stack.rb) and is fairly self-explanatory.
+
+```ruby
+require 'bora'
+
+stack = Bora::Stack.new("my-stack")
+result = stack.update({template_body: File.read("example.json")}) do |event|
+  puts event
+end
+
+puts "Update #{result ? "succeeded" : "failed"}"
+```
 
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
-
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/bora.
-
+Bug reports and pull requests are welcome on GitHub at https://github.com/ampedandwired/bora.
