@@ -38,22 +38,33 @@ describe Bora::Stack do
     allow(Aws::CloudFormation::Client).to receive(:new).and_return(@cfn)
   end
 
-  describe "#create" do
-    it "creates the stack" do
-      @call_count = 0
+  context "when the stack does not yet exist" do
+
+    before :each do
+      @describe_stacks_call_count = 0
       allow(@cfn).to receive(:describe_stacks) do
-        @call_count += 1
-        raise Aws::CloudFormation::Errors::ValidationError.new("Stack does not exist", "Error") if @call_count == 1
+        @describe_stacks_call_count += 1
+        raise Aws::CloudFormation::Errors::ValidationError.new("Stack does not exist", "Error") if @describe_stacks_call_count == 1
         describe_stacks_result
       end
-
-      allow(@cfn).to receive(:describe_stack_events).with(anything).and_return(empty_describe_stack_events_result, describe_stack_events_result(reason: "just because"))
-
-      options = { stack_name: TEST_STACK_NAME, template_body: "foo" }
-      expect(@cfn).to receive(:create_stack).with(options)
       @stack = Bora::Stack.new(TEST_STACK_NAME)
-      @stack.create(options) { |e| expect(e.resource_status_reason).to eq("just because") }
     end
+
+    describe "#create" do
+      it "creates the stack" do
+        allow(@cfn).to receive(:describe_stack_events).with(anything).and_return(empty_describe_stack_events_result, describe_stack_events_result(reason: "just because"))
+        options = { stack_name: TEST_STACK_NAME, template_body: "foo" }
+        expect(@cfn).to receive(:create_stack).with(options)
+        @stack.create(options) { |e| expect(e.resource_status_reason).to eq("just because") }
+      end
+    end
+
+    describe "#exists?" do
+      it "returns false" do
+        expect(@stack.exists?).to be_falsy
+      end
+    end
+
   end
 
   describe "#update" do
@@ -67,4 +78,5 @@ describe Bora::Stack do
       @stack.update(options) { |e| expect(e.resource_status_reason).to eq("just because") }
     end
   end
+
 end
