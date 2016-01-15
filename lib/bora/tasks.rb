@@ -22,6 +22,7 @@ module Bora
       define_diff_task
       define_events_task
       define_new_template_task
+      define_recreate_task
     end
 
     def define_apply_task
@@ -80,6 +81,16 @@ module Bora
         desc "Shows the new template for #{@stack_name} stack"
         task :new_template do
           puts @stack.new_template(@stack_options)
+        end
+      end
+    end
+
+    def define_recreate_task
+      within_namespace do
+        desc "Recreates (deletes then creates) the #{@stack_name} stack"
+        task :recreate do
+          invoke_action("delete")
+          invoke_action("create", stack_options)
         end
       end
     end

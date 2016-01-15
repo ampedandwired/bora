@@ -1,11 +1,7 @@
 # Bora
 
-> 1. A cold and often gusty katabatic wind in the Adriatic
-> 2. A tool for pushing around your cloud formations
-
 This gem contains Ruby [rake](https://github.com/ruby/rake) tasks that help you work with [CloudFormation](https://aws.amazon.com/cloudformation/) stacks.
-You don't need to use it with rake though - you can use the underlaying classes
-in any Ruby app.
+You don't need to use it with rake though - you can use the underlying classes in any Ruby app.
 
 
 ## Installation
@@ -49,6 +45,7 @@ rake stack:example:delete            # Deletes the example stack
 rake stack:example:diff              # Diffs the new template with the example stack's current template
 rake stack:example:events            # Outputs the latest events from the example stack
 rake stack:example:new_template      # Shows the new template for example stack
+rake stack:example:recreate          # Recreates (deletes then creates) the example stack
 ```
 
 You can add as many templates as you like into your Rakefile, simply define an instance of `Bora::Tasks` for each one.
