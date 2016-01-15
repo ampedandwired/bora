@@ -5,17 +5,21 @@ require 'bora'
 # Make sure we don't accidentally make calls to AWS during tests
 Aws.config[:stub_responses] = true
 
-def describe_stack_events_result(timestamp: Time.new, status: "CREATE_COMPLETE", reason: nil)
+def stack_event(timestamp: Time.new, status: "CREATE_COMPLETE", reason: nil)
   OpenStruct.new({
-    stack_events: [
-      OpenStruct.new({
-        timestamp: timestamp,
-        resource_type: "AWS::CloudFormation::Stack",
-        logical_resource_id: TEST_STACK_NAME,
-        resource_status: status,
-        resource_status_reason: reason
-      })
-    ]
+    timestamp: timestamp,
+    resource_type: "AWS::CloudFormation::Stack",
+    logical_resource_id: TEST_STACK_NAME,
+    resource_status: status,
+    resource_status_reason: reason
+  })
+end
+
+def describe_stack_events_result(timestamp: Time.new, status: "CREATE_COMPLETE", reason: nil, count: 1)
+  events = []
+  count.times { events << stack_event(timestamp: timestamp, status: status, reason: reason) }
+  OpenStruct.new({
+    stack_events: events
   })
 end
 
