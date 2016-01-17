@@ -22,6 +22,11 @@ module Bora
       exists? ? update(options, &block) : create(options, &block)
     end
 
+    def recreate(options, &block)
+      delete(&block) if exists?
+      create(options, &block) if !exists?
+    end
+
     def delete(&block)
       call_cfn_action(:delete, &block)
     end

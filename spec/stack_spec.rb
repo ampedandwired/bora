@@ -4,27 +4,25 @@ require 'spec_helper'
 
 TEST_STACK_NAME = "test-stack"
 
+now = Time.now
+
 describe Bora::Stack do
   before :each do
     @cfn = double(Aws::CloudFormation::Client)
     allow(Aws::CloudFormation::Client).to receive(:new).and_return(@cfn)
+    @stack = Bora::Stack.new(TEST_STACK_NAME)
   end
 
   context "when the stack does not exist" do
-    def setup_create_stack
-      @describe_stacks_call_count = 0
-      allow(@cfn).to receive(:describe_stacks) do
-        @describe_stacks_call_count += 1
-        raise Aws::CloudFormation::Errors::ValidationError.new("Stack does not exist", "Error") if @describe_stacks_call_count == 1
-        describe_stacks_result
+    def expect_create_stack(options)
+      allow(@cfn).to receive(:describe_stack_events).and_return(describe_stack_events_result(reason: "just because"))
+      expect(@cfn).to receive(:create_stack).with(options) do
+        allow(@cfn).to receive(:describe_stacks).and_return(describe_stacks_result)
       end
-      allow(@cfn).to receive(:describe_stack_events).and_return(empty_describe_stack_events_result, describe_stack_events_result(reason: "just because"))
     end
 
     before :each do
       allow(@cfn).to receive(:describe_stacks).and_raise(Aws::CloudFormation::Errors::ValidationError.new("Stack does not exist", "Error"))
-      allow(@cfn).to receive(:describe_stack_events).at_least(:once).and_return(empty_describe_stack_events_result)
-      @stack = Bora::Stack.new(TEST_STACK_NAME)
     end
 
     describe "#exists?" do
@@ -35,19 +33,26 @@ describe Bora::Stack do
 
     describe "#create" do
       it "creates the stack" do
-        setup_create_stack
-        options = { stack_name: TEST_STACK_NAME, template_body: "foo" }
-        expect(@cfn).to receive(:create_stack).with(options)
+        options = { template_body: '{"foo": "bar"}' }
+        expect_create_stack(options)
         @stack.create(options) { |e| expect(e.resource_status_reason).to eq("just because") }
+      end
+    end
+
+    describe "#recreate" do
+      it "behaves the same as create" do
+        options = { template_body: '{"foo": "bar"}' }
+        expect_create_stack(options)
+        expect(@cfn).to_not receive(:delete_stack)
+        @stack.recreate(options)
       end
     end
 
     describe "#create_or_update" do
       it "calls create" do
-        setup_create_stack
-        allow(@cfn).to receive(:describe_stack_events).and_return(empty_describe_stack_events_result, describe_stack_events_result(reason: "just because"))
-        expect(@cfn).to receive(:create_stack)
-        @stack.create_or_update({})
+        options = { template_body: '{"foo": "bar"}' }
+        expect_create_stack(options)
+        @stack.create_or_update(options)
       end
     end
 
@@ -81,8 +86,7 @@ describe Bora::Stack do
   context "when the stack exists" do
     before :each do
       allow(@cfn).to receive(:describe_stacks).and_return(describe_stacks_result)
-      allow(@cfn).to receive(:describe_stack_events).and_return(describe_stack_events_result(timestamp: Time.now - 60), describe_stack_events_result(reason: "just because"))
-      @stack = Bora::Stack.new(TEST_STACK_NAME)
+      allow(@cfn).to receive(:describe_stack_events).and_return(describe_stack_events_result(timestamp: now - 60), describe_stack_events_result(reason: "just because"))
     end
 
     describe "#exists?" do
@@ -96,6 +100,19 @@ describe Bora::Stack do
         options = { stack_name: TEST_STACK_NAME, template_body: "foo" }
         expect(@cfn).to receive(:update_stack).with(options)
         @stack.update(options) { |e| expect(e.resource_status_reason).to eq("just because") }
+      end
+    end
+
+    describe "#recreate" do
+      it "deletes and then creates the stack" do
+        expect(@cfn).to receive(:delete_stack) do
+          allow(@cfn).to receive(:describe_stacks).and_raise(Aws::CloudFormation::Errors::ValidationError.new("Stack does not exist", "Error"))
+          allow(@cfn).to receive(:describe_stack_events).and_return(describe_stack_events_result(timestamp: now-50), describe_stack_events_result)
+        end
+        expect(@cfn).to receive(:create_stack) do
+          allow(@cfn).to receive(:describe_stacks).and_return(describe_stacks_result)
+        end
+        @stack.recreate({template_body: "foo"})
       end
     end
 
@@ -151,7 +168,7 @@ describe Bora::Stack do
     it "treats rollbacks as failures" do
       allow(@cfn).to receive(:describe_stacks).and_return(describe_stacks_result(status: "ROLLBACK_COMPLETE"))
       allow(@cfn).to receive(:describe_stack_events).and_return(
-        describe_stack_events_result(timestamp: Time.now - 60), describe_stack_events_result(status: "ROLLBACK_COMPLETE"))
+        describe_stack_events_result(timestamp: now - 60), describe_stack_events_result(status: "ROLLBACK_COMPLETE"))
       @stack = Bora::Stack.new(TEST_STACK_NAME)
       expect(@cfn).to receive(:update_stack)
       result = @stack.update({template_body: "foo"})

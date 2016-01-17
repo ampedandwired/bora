@@ -89,8 +89,7 @@ module Bora
       within_namespace do
         desc "Recreates (deletes then creates) the #{@stack_name} stack"
         task :recreate do
-          invoke_action("delete")
-          invoke_action("create", stack_options)
+          invoke_action("recreate", stack_options)
         end
       end
     end

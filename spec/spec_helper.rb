@@ -1,4 +1,5 @@
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
+require 'securerandom'
 require 'aws-sdk'
 require 'bora'
 
@@ -8,6 +9,7 @@ Aws.config[:stub_responses] = true
 def stack_event(timestamp: Time.new, status: "CREATE_COMPLETE", reason: nil)
   OpenStruct.new({
     timestamp: timestamp,
+    event_id: SecureRandom.uuid,
     resource_type: "AWS::CloudFormation::Stack",
     logical_resource_id: TEST_STACK_NAME,
     resource_status: status,
