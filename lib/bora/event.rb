@@ -11,11 +11,11 @@ module Bora
     end
 
     def status_success?
-      @event.resource_status.end_with?("_COMPLETE")
+      @event.resource_status.end_with?("_COMPLETE") && !@event.resource_status.include?("ROLLBACK")
     end
 
     def status_failure?
-      @event.resource_status.end_with?("_FAILED")
+      @event.resource_status.end_with?("_FAILED") || @event.resource_status.include?("ROLLBACK")
     end
 
     def status_complete?

@@ -58,6 +58,7 @@ module Bora
     end
 
 
+    # =============================================================================================
     private
 
     def call_cfn_action(action, options = {}, &block)
@@ -71,7 +72,8 @@ module Bora
       rescue Aws::CloudFormation::Errors::ValidationError => e
         raise e unless e.message.include?("No updates are to be performed")
       end
-      (action == :delete && !underlying_stack) || underlying_stack.stack_status.end_with?('_COMPLETE')
+      (action == :delete && !underlying_stack) ||
+        (underlying_stack.stack_status.end_with?("_COMPLETE") && !underlying_stack.stack_status.include?("ROLLBACK"))
     end
 
     def wait_for_completion

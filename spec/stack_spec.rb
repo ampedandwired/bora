@@ -147,4 +147,16 @@ describe Bora::Stack do
     end
   end
 
+  describe "any update action" do
+    it "treats rollbacks as failures" do
+      allow(@cfn).to receive(:describe_stacks).and_return(describe_stacks_result(status: "ROLLBACK_COMPLETE"))
+      allow(@cfn).to receive(:describe_stack_events).and_return(
+        describe_stack_events_result(timestamp: Time.now - 60), describe_stack_events_result(status: "ROLLBACK_COMPLETE"))
+      @stack = Bora::Stack.new(TEST_STACK_NAME)
+      expect(@cfn).to receive(:update_stack)
+      result = @stack.update({template_body: "foo"})
+      expect(result).to be_falsey
+    end
+  end
+
 end
