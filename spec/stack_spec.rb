@@ -81,6 +81,12 @@ describe Bora::Stack do
       end
     end
 
+    describe "#status" do
+      it "return an object representing the current status of the stack" do
+        expect(@stack.status.exists?).to be_falsey
+      end
+    end
+
   end
 
   context "when the stack exists" do
@@ -151,6 +157,12 @@ describe Bora::Stack do
         new_template = "{\n\"foo\": \"barx\"\n}"
         expect(@cfn).to receive(:get_template).and_return(OpenStruct.new(template_body: current_template))
         expect(@stack.diff({template_body: new_template}).to_s).to include "+  \"foo\": \"barx\""
+      end
+    end
+
+    describe "#status" do
+      it "return an object representing the current status of the stack" do
+        expect(@stack.status.exists?).to be_truthy
       end
     end
   end
