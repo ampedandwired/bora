@@ -23,6 +23,7 @@ module Bora
       define_events_task
       define_new_template_task
       define_recreate_task
+      define_status_task
     end
 
     def define_apply_task
@@ -90,6 +91,15 @@ module Bora
         desc "Recreates (deletes then creates) the #{@stack_name} stack"
         task :recreate do
           invoke_action("recreate", stack_options)
+        end
+      end
+    end
+
+    def define_status_task
+      within_namespace do
+        desc "Displays the current status of the #{@stack_name} stack"
+        task :status do
+          puts @stack.status
         end
       end
     end

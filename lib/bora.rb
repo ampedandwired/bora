@@ -1,4 +1,5 @@
 require "bora/version"
+require "bora/status"
 require "bora/event"
 require "bora/stack"
 require "bora/tasks"

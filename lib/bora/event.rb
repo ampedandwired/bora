@@ -1,9 +1,11 @@
 require 'colorize'
+require 'bora/status'
 
 module Bora
   class Event
     def initialize(event)
       @event = event
+      @status = Status.new(@event.resource_status)
     end
 
     def method_missing(sym, *args, &block)
@@ -11,11 +13,11 @@ module Bora
     end
 
     def status_success?
-      @event.resource_status.end_with?("_COMPLETE") && !@event.resource_status.include?("ROLLBACK")
+      @status.success?
     end
 
     def status_failure?
-      @event.resource_status.end_with?("_FAILED") || @event.resource_status.include?("ROLLBACK")
+      @status.failure?
     end
 
     def status_complete?
@@ -23,14 +25,8 @@ module Bora
     end
 
     def to_s(colorize = true)
-      color = case
-        when status_success?; :green
-        when status_failure?; :red
-        else; :yellow;
-      end
-      status = colorize ? @event.resource_status.colorize(color) : @event.resource_status
       status_reason = @event.resource_status_reason ? " - #{@event.resource_status_reason}" : ""
-      "#{@event.timestamp} - #{@event.resource_type} - #{@event.logical_resource_id} - #{status}#{status_reason}"
+      "#{@event.timestamp} - #{@event.resource_type} - #{@event.logical_resource_id} - #{@status.to_s(colorize)}#{status_reason}"
     end
   end
 end

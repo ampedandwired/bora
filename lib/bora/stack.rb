@@ -1,6 +1,8 @@
 require 'set'
 require 'aws-sdk'
 require 'diffy'
+require 'bora/stack_status'
+require 'bora/event'
 
 module Bora
   class Stack
@@ -58,13 +60,21 @@ module Bora
       Diffy::Diff.new(template, new_template(options))
     end
 
+    def status
+      StackStatus.new(underlying_stack)
+    end
+
     def exists?
-      underlying_stack && underlying_stack.stack_status != 'DELETE_COMPLETE'
+      status.exists?
     end
 
 
     # =============================================================================================
     private
+
+    def method_missing(sym, *args, &block)
+      underlying_stack ? underlying_stack.send(sym, *args, &block) : nil
+    end
 
     def call_cfn_action(action, options = {}, &block)
       underlying_stack(refresh: true)
@@ -77,8 +87,7 @@ module Bora
       rescue Aws::CloudFormation::Errors::ValidationError => e
         raise e unless e.message.include?("No updates are to be performed")
       end
-      (action == :delete && !underlying_stack) ||
-        (underlying_stack.stack_status.end_with?("_COMPLETE") && !underlying_stack.stack_status.include?("ROLLBACK"))
+      (action == :delete && !underlying_stack) || status.success?
     end
 
     def wait_for_completion
