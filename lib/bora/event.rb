@@ -26,7 +26,7 @@ module Bora
 
     def to_s(colorize = true)
       status_reason = @event.resource_status_reason ? " - #{@event.resource_status_reason}" : ""
-      "#{@event.timestamp} - #{@event.resource_type} - #{@event.logical_resource_id} - #{@status.to_s(colorize)}#{status_reason}"
+      "#{@event.timestamp.getlocal} - #{@event.resource_type} - #{@event.logical_resource_id} - #{@status.to_s(colorize)}#{status_reason}"
     end
   end
 end
