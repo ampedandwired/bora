@@ -24,6 +24,7 @@ module Bora
       define_new_template_task
       define_recreate_task
       define_status_task
+      define_validate_task
     end
 
     def define_apply_task
@@ -100,6 +101,15 @@ module Bora
         desc "Displays the current status of the #{@stack_name} stack"
         task :status do
           puts @stack.status
+        end
+      end
+    end
+
+    def define_validate_task
+      within_namespace do
+        desc "Checks the #{@stack_name} stack's template for validity"
+        task :validate do
+          puts "Template for stack '#{@stack_name}' is valid" if @stack.validate(stack_options)
         end
       end
     end

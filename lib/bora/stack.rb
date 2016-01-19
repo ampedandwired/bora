@@ -60,6 +60,10 @@ module Bora
       Diffy::Diff.new(template, new_template(options))
     end
 
+    def validate(options)
+      @cfn.validate_template(options.select { |k| [:template_body, :template_url].include?(k) })
+    end
+
     def status
       StackStatus.new(underlying_stack)
     end

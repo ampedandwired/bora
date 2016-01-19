@@ -169,10 +169,16 @@ describe Bora::Stack do
 
   describe "#new_template" do
     it "returns the template body" do
-      @stack = Bora::Stack.new(TEST_STACK_NAME)
       template = '{"foo": "bar"}'
       expect(@stack.new_template({template_body: template}, false)).to eq(template)
       expect(@stack.new_template({template_body: template}).include?("\n")).to be true
+    end
+  end
+
+  describe "#validate" do
+    it "calls aws to validate the template" do
+      expect(@cfn).to receive(:validate_template).with({template_body: "foo"})
+      @stack.validate({template_body: "foo", this: "should not get passed"})
     end
   end
 
