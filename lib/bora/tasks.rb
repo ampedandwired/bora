@@ -70,10 +70,15 @@ module Bora
         desc "Outputs the latest events from the '#{@stack_name}' stack"
         task :events do
           events = @stack.events
-          if events.length > 0
-            @stack.events.each { |e| puts e }
+          if events
+            if events.length > 0
+              puts "Events for stack '#{@stack_name}'"
+              @stack.events.each { |e| puts e }
+            else
+              puts "Stack '#{@stack_name}' has no events"
+            end
           else
-            puts "No events for stack '#{@stack_name}'"
+            puts "Stack '#{@stack_name}' does not exist"
           end
         end
       end

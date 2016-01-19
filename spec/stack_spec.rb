@@ -64,8 +64,8 @@ describe Bora::Stack do
     end
 
     describe "#events" do
-      it "returns and empty list" do
-        expect(@stack.events.length).to eq(0)
+      it "returns nil" do
+        expect(@stack.events).to be_nil
       end
     end
 
