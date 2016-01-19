@@ -35,13 +35,13 @@ module Bora
     end
 
     def events
-      return if !underlying_stack
+      return if !exists?
       events = @cfn.describe_stack_events({stack_name: underlying_stack.stack_id}).stack_events
       events.reverse.map { |e| Event.new(e) }
     end
 
     def outputs
-      return if !underlying_stack
+      return if !exists?
       underlying_stack.outputs.map { |output| Output.new(output) }
     end
 
