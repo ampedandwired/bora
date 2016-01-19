@@ -29,12 +29,19 @@ def empty_describe_stack_events_result
   OpenStruct.new({ stack_events: [] })
 end
 
-def describe_stacks_result(status: "CREATE_COMPLETE")
+def describe_stacks_result(status: "CREATE_COMPLETE", outputs: [])
   OpenStruct.new({
     stacks: [
       OpenStruct.new({
-        stack_status: status
+        stack_status: status,
+        outputs: outputs.map { |o| OpenStruct.new(o) }
       })
     ]
+  })
+end
+
+def stack_outputs_result(output_key: "URL", output_value: "http://foo.com", description: "some output")
+  OpenStruct.new({
+
   })
 end

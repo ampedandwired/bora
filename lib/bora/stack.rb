@@ -3,6 +3,7 @@ require 'aws-sdk'
 require 'diffy'
 require 'bora/stack_status'
 require 'bora/event'
+require 'bora/output'
 
 module Bora
   class Stack
@@ -37,6 +38,11 @@ module Bora
       return [] if !underlying_stack
       events = @cfn.describe_stack_events({stack_name: underlying_stack.stack_id}).stack_events
       events.reverse.map { |e| Event.new(e) }
+    end
+
+    def outputs
+      return if !underlying_stack
+      underlying_stack.outputs.map { |output| Output.new(output) }
     end
 
     def template(pretty = true)

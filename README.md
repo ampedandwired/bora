@@ -39,15 +39,16 @@ end
 This will give you the following rake tasks
 
 ```shell
-rake stack:example:apply             # Creates (or updates) the example stack
-rake stack:example:current_template  # Shows the current template for example stack
-rake stack:example:delete            # Deletes the example stack
-rake stack:example:diff              # Diffs the new template with the example stack's current template
-rake stack:example:events            # Outputs the latest events from the example stack
-rake stack:example:new_template      # Shows the new template for example stack
-rake stack:example:recreate          # Recreates (deletes then creates) the example stack
-rake stack:example:status            # Displays the current status of the example stack
-rake stack:example:validate          # Checks the example stack's template for validity
+rake stack:example:apply             # Creates (or updates) the 'example' stack
+rake stack:example:current_template  # Shows the current template for 'example' stack
+rake stack:example:delete            # Deletes the 'example' stack
+rake stack:example:diff              # Diffs the new template with the 'example' stack's current template
+rake stack:example:events            # Outputs the latest events from the 'example' stack
+rake stack:example:new_template      # Shows the new template for 'example' stack
+rake stack:test:outputs              # Shows the outputs from the 'example' stack
+rake stack:example:recreate          # Recreates (deletes then creates) the 'example' stack
+rake stack:example:status            # Displays the current status of the 'example' stack
+rake stack:example:validate          # Checks the 'example' stack's template for validity
 ```
 
 You can add as many templates as you like into your Rakefile, simply define an instance of `Bora::Tasks` for each one.

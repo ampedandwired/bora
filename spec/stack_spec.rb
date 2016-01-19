@@ -69,6 +69,12 @@ describe Bora::Stack do
       end
     end
 
+    describe "#outputs" do
+      it "returns nil" do
+        expect(@stack.outputs).to be_nil
+      end
+    end
+
     describe "#template" do
       it "returns nil" do
         expect(@stack.template).to be_nil
@@ -140,6 +146,19 @@ describe Bora::Stack do
       it "returns all events" do
         expect(@cfn).to receive(:describe_stack_events).and_return(describe_stack_events_result(count: 2))
         expect(@stack.events.length).to eq(2)
+      end
+    end
+
+    describe "#outputs" do
+      it "returns all the stack outputs" do
+        outputs = [
+          {output_key: "a", output_value: "b", description: "foo"},
+          {output_key: "d", output_value: "e", description: "bar"}
+        ]
+        allow(@cfn).to receive(:describe_stacks).and_return(describe_stacks_result(outputs: outputs))
+        actual_outputs = @stack.outputs
+        expect(actual_outputs.length).to eq(2)
+        expect(actual_outputs[0].to_s).to include("foo")
       end
     end
 
