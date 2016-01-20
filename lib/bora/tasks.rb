@@ -33,6 +33,11 @@ module Bora
         desc "Creates (or updates) the '#{@stack_name}' stack"
         task :apply do
           invoke_action(@stack.exists? ? "update" : "create", stack_options)
+          outputs = @stack.outputs
+          if outputs && outputs.length > 0
+            puts "Stack outputs"
+            outputs.each { |output| puts output }
+          end
         end
       end
     end
