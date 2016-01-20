@@ -38,11 +38,13 @@ module Bora
       within_namespace do
         desc "Creates (or updates) the '#{@stack_name}' stack"
         task :apply do
-          invoke_action(@stack.exists? ? "update" : "create", @stack_options)
-          outputs = @stack.outputs
-          if outputs && outputs.length > 0
-            puts "Stack outputs"
-            outputs.each { |output| puts output }
+          success = invoke_action(@stack.exists? ? "update" : "create", @stack_options)
+          if success
+            outputs = @stack.outputs
+            if outputs && outputs.length > 0
+              puts "Stack outputs"
+              outputs.each { |output| puts output }
+            end
           end
         end
       end
@@ -156,8 +158,13 @@ module Bora
       if success
         puts "#{action.capitalize} stack '#{@stack_name}' completed successfully"
       else
-        fail("#{action.capitalize} stack '#{@stack_name}' failed")
+        if success == nil
+          puts "#{action.capitalize} stack '#{@stack_name}' skipped as template has not changed"
+        else
+          fail("#{action.capitalize} stack '#{@stack_name}' failed")
+        end
       end
+      success
     end
 
     def within_namespace

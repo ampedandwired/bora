@@ -7,6 +7,8 @@ require 'bora/output'
 
 module Bora
   class Stack
+    NO_UPDATE_MESSAGE = "No updates are to be performed"
+
     def initialize(stack_name)
       @stack_name = stack_name
       @cfn = Aws::CloudFormation::Client.new
@@ -95,7 +97,8 @@ module Bora
         @cfn.method("#{action.to_s.downcase}_stack").call(options)
         wait_for_completion(&block)
       rescue Aws::CloudFormation::Errors::ValidationError => e
-        raise e unless e.message.include?("No updates are to be performed")
+        raise e unless e.message.include?(NO_UPDATE_MESSAGE)
+        return nil
       end
       (action == :delete && !underlying_stack) || status.success?
     end

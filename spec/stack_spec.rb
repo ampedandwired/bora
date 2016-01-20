@@ -113,6 +113,11 @@ describe Bora::Stack do
         expect(@cfn).to receive(:update_stack).with(options)
         @stack.update(options) { |e| expect(e.resource_status_reason).to eq("just because") }
       end
+
+      it "returns nil if the template has not changed" do
+        expect(@cfn).to receive(:update_stack).and_raise(Aws::CloudFormation::Errors::ValidationError.new("", Bora::Stack::NO_UPDATE_MESSAGE))
+        expect(@stack.update({})).to be_nil
+      end
     end
 
     describe "#recreate" do
