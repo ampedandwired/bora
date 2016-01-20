@@ -17,10 +17,10 @@ module Bora
       @status && @status.success?
     end
 
-    def to_s(colorize = true)
+    def to_s
       if @stack
         status_reason = @stack.stack_status_reason ? " - #{@stack.stack_status_reason}" : ""
-        "#{@stack.stack_name} - #{@status.to_s(colorize)}#{status_reason}"
+        "#{@stack.stack_name} - #{@status}#{status_reason}"
       else
         "Stack does not exist"
       end

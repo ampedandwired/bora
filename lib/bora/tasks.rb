@@ -1,3 +1,4 @@
+require 'colorize'
 require 'rake/tasklib'
 require 'bora/stack'
 
@@ -11,7 +12,12 @@ module Bora
       define_tasks
     end
 
-    attr_accessor :stack_options, :colorize
+    attr_writer :stack_options
+
+    def colorize=(value)
+      @colorize = value
+      String.disable_colorization = !@colorize
+    end
 
     private
 
@@ -32,7 +38,7 @@ module Bora
       within_namespace do
         desc "Creates (or updates) the '#{@stack_name}' stack"
         task :apply do
-          invoke_action(@stack.exists? ? "update" : "create", stack_options)
+          invoke_action(@stack.exists? ? "update" : "create", @stack_options)
           outputs = @stack.outputs
           if outputs && outputs.length > 0
             puts "Stack outputs"
@@ -121,7 +127,7 @@ module Bora
       within_namespace do
         desc "Recreates (deletes then creates) the '#{@stack_name}' stack"
         task :recreate do
-          invoke_action("recreate", stack_options)
+          invoke_action("recreate", @stack_options)
         end
       end
     end
@@ -139,14 +145,14 @@ module Bora
       within_namespace do
         desc "Checks the '#{@stack_name}' stack's template for validity"
         task :validate do
-          puts "Template for stack '#{@stack_name}' is valid" if @stack.validate(stack_options)
+          puts "Template for stack '#{@stack_name}' is valid" if @stack.validate(@stack_options)
         end
       end
     end
 
     def invoke_action(action, *args)
       puts "#{action.capitalize} stack '#{@stack_name}'"
-      success = @stack.send(action, *args) { |event| puts event.to_s(colorize) }
+      success = @stack.send(action, *args) { |event| puts event }
       if success
         puts "#{action.capitalize} stack '#{@stack_name}' completed successfully"
       else

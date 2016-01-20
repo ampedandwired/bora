@@ -22,8 +22,8 @@ module Bora
       success? || failure?
     end
 
-    def to_s(colorize = true)
-      colorize ? @status.colorize(color) : @status
+    def to_s
+      @status.colorize(color)
     end
 
 

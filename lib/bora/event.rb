@@ -1,4 +1,3 @@
-require 'colorize'
 require 'bora/status'
 
 module Bora
@@ -24,9 +23,9 @@ module Bora
       status_success? || status_failure?
     end
 
-    def to_s(colorize = true)
+    def to_s
       status_reason = @event.resource_status_reason ? " - #{@event.resource_status_reason}" : ""
-      "#{@event.timestamp.getlocal} - #{@event.resource_type} - #{@event.logical_resource_id} - #{@status.to_s(colorize)}#{status_reason}"
+      "#{@event.timestamp.getlocal} - #{@event.resource_type} - #{@event.logical_resource_id} - #{@status}#{status_reason}"
     end
   end
 end
