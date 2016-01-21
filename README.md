@@ -70,6 +70,22 @@ end
   You must at a minimum specify either the `template_body` or `template_url` option.
 
 
+### Dynamically Generated Templates
+If you are generating your templates dynamically using a DSL such as [cfndsl](https://github.com/stevenjack/cfndsl) you can easily hook this into the Bora tasks by defining a `generate` task within the Bora::Tasks constructor.
+
+```ruby
+Bora::Tasks.new("example") do |t|
+  desc "Generates the template"
+  task :generate do
+    # Generate your template and write it into "example.json" here
+  end
+
+  t.stack_options = {
+    template_body: File.read("example.json")
+  }
+end
+```
+
 ### API
 
 You can use this gem without using Rake. Most of the logic is implemented in [stack.rb](https://github.com/ampedandwired/bora/blob/master/lib/bora/stack.rb) and is fairly self-explanatory.

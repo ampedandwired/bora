@@ -8,7 +8,11 @@ module Bora
       @stack_name = stack_name
       @stack = Stack.new(stack_name)
       @colorize = true
-      yield self if block_given?
+      if block_given?
+        within_namespace do
+          yield self
+        end
+      end
       define_tasks
     end
 
@@ -27,6 +31,7 @@ module Bora
       define_delete_task
       define_diff_task
       define_events_task
+      define_generate_task
       define_new_template_task
       define_outputs_task
       define_recreate_task
@@ -37,7 +42,7 @@ module Bora
     def define_apply_task
       within_namespace do
         desc "Creates (or updates) the '#{@stack_name}' stack"
-        task :apply do
+        task :apply => :generate do
           success = invoke_action(@stack.exists? ? "update" : "create", @stack_options)
           if success
             outputs = @stack.outputs
@@ -72,7 +77,7 @@ module Bora
     def define_diff_task
       within_namespace do
         desc "Diffs the new template with the '#{@stack_name}' stack's current template"
-        task :diff do
+        task :diff => :generate do
           puts @stack.diff(@stack_options).to_s(@colorize ? :color : :text)
         end
       end
@@ -97,10 +102,16 @@ module Bora
       end
     end
 
+    def define_generate_task
+      within_namespace do
+        task :generate
+      end
+    end
+
     def define_new_template_task
       within_namespace do
         desc "Shows the new template for '#{@stack_name}' stack"
-        task :new_template do
+        task :new_template => :generate do
           puts @stack.new_template(@stack_options)
         end
       end
@@ -128,7 +139,7 @@ module Bora
     def define_recreate_task
       within_namespace do
         desc "Recreates (deletes then creates) the '#{@stack_name}' stack"
-        task :recreate do
+        task :recreate => :generate do
           invoke_action("recreate", @stack_options)
         end
       end
@@ -146,7 +157,7 @@ module Bora
     def define_validate_task
       within_namespace do
         desc "Checks the '#{@stack_name}' stack's template for validity"
-        task :validate do
+        task :validate => :generate do
           puts "Template for stack '#{@stack_name}' is valid" if @stack.validate(@stack_options)
         end
       end
