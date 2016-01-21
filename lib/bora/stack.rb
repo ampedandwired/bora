@@ -1,4 +1,5 @@
 require 'set'
+require 'open-uri'
 require 'aws-sdk'
 require 'diffy'
 require 'bora/stack_status'
@@ -55,12 +56,13 @@ module Bora
     end
 
     def new_template(options, pretty = true)
-      if options[:template_body]
-        template = options[:template_body]
+      options = resolve_options(options, true)
+      template = options[:template_body]
+      if template
         template = JSON.pretty_generate(JSON.parse(template)) if pretty
         template
       else
-        raise Exception("new_template not yet implemented for template_url stack option")
+        raise "new_template not yet implemented for URL #{options[:template_url]}"
       end
     end
 
@@ -69,7 +71,7 @@ module Bora
     end
 
     def validate(options)
-      @cfn.validate_template(options.select { |k| [:template_body, :template_url].include?(k) })
+      @cfn.validate_template(resolve_options(options).select { |k| [:template_body, :template_url].include?(k) })
     end
 
     def status
@@ -92,15 +94,28 @@ module Bora
       underlying_stack(refresh: true)
       return true if action == :delete && !exists?
       @previous_event_time = last_event_time
-      options[:stack_name] = @stack_name
       begin
-        @cfn.method("#{action.to_s.downcase}_stack").call(options)
+        action_options = {stack_name: @stack_name}.merge(resolve_options(options))
+        @cfn.method("#{action.to_s.downcase}_stack").call(action_options)
         wait_for_completion(&block)
       rescue Aws::CloudFormation::Errors::ValidationError => e
         raise e unless e.message.include?(NO_UPDATE_MESSAGE)
         return nil
       end
       (action == :delete && !underlying_stack) || status.success?
+    end
+
+    def resolve_options(options, load_all = false)
+      return options if options[:template_body] || !options[:template_url]
+      uri = URI(options[:template_url])
+      if uri.scheme != "s3" || load_all
+        resolved_options = options.clone
+        resolved_options[:template_body] = open(options[:template_url]).read
+        resolved_options.delete(:template_url)
+        resolved_options
+      else
+        options
+      end
     end
 
     def wait_for_completion

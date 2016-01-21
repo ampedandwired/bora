@@ -29,11 +29,7 @@ Add this to your `Rakefile`
 ```ruby
 require 'bora'
 
-Bora::Tasks.new("example") do |t|
-  t.stack_options = {
-    template_body: File.read("example.json")
-  }
-end
+Bora::Tasks.new("example", "example.json")
 ```
 
 This will give you the following rake tasks
@@ -59,30 +55,25 @@ When you define the Bora tasks, you can pass in a number of options that control
 The available options are shown below with their default values.
 
 ```ruby
-Bora::Tasks.new("example") do |t|
-  t.colorize = true
+Bora::Tasks.new("example", "example.json") do |t|
   t.stack_options = {}
+  t.colorize = true
 end
 ```
-
+* `example.json` - this is a URL to your template. It can be anything openable by Ruby's [`open-uri`](http://ruby-doc.org/stdlib-2.3.0/libdoc/open-uri/rdoc/OpenURI.html) library (eg: a local file or http/https URL), or an `s3://` URL. This parameter is optional - if you don't supply it, you *must* specify either `template_body` or `template_url` in the `stack_options` (see below).
+* `stack_options` - A hash of options that are passed directly to the CloudFormation [`create_stack`](http://docs.aws.amazon.com/sdkforruby/api/Aws/CloudFormation/Client.html#create_stack-instance_method) and [`update_stack`](http://docs.aws.amazon.com/sdkforruby/api/Aws/CloudFormation/Client.html#update_stack-instance_method) APIs. If you specified a template URL in the constructor you don't need to supply `template_body` or `template_url here (you will get an error if you do).
 * `colorize` - A boolean that controls whether console output is colored or not
-* `stack_options` - A hash of options that are passed directly to the CloudFormation [create_stack](http://docs.aws.amazon.com/sdkforruby/api/Aws/CloudFormation/Client.html#create_stack-instance_method) and [update_stack](http://docs.aws.amazon.com/sdkforruby/api/Aws/CloudFormation/Client.html#update_stack-instance_method) APIs.
-  You must at a minimum specify either the `template_body` or `template_url` option.
 
 
 ### Dynamically Generated Templates
 If you are generating your templates dynamically using a DSL such as [cfndsl](https://github.com/stevenjack/cfndsl) you can easily hook this into the Bora tasks by defining a `generate` task within the Bora::Tasks constructor.
 
 ```ruby
-Bora::Tasks.new("example") do |t|
+Bora::Tasks.new("example", "example.json") do |t|
   desc "Generates the template"
   task :generate do
     # Generate your template and write it into "example.json" here
   end
-
-  t.stack_options = {
-    template_body: File.read("example.json")
-  }
 end
 ```
 
@@ -90,15 +81,11 @@ If you need to pass parameters from the rake command line through to your genera
 you can do so by using Rake's [`args.extras`](http://ruby-doc.org/stdlib-2.2.2/libdoc/rake/rdoc/Rake/TaskArguments.html#method-i-extras) functionality:
 
 ```ruby
-Bora::Tasks.new("example") do |t|
+Bora::Tasks.new("example", "example.json") do |t|
   task :generate do |t, args|
     arg1, arg2 = args.extras
-    # Generate template here
+    # Generate your template and write it into "example.json" here
   end
-
-  t.stack_options = {
-    template_body: File.read("example.json")
-  }
 end
 ```
 ```shell

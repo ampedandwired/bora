@@ -33,7 +33,7 @@ describe Bora::Stack do
 
     describe "#create" do
       it "creates the stack" do
-        options = { template_body: '{"foo": "bar"}' }
+        options = { stack_name: TEST_STACK_NAME, template_body: '{"foo": "bar"}' }
         expect_create_stack(options)
         @stack.create(options) { |e| expect(e.resource_status_reason).to eq("just because") }
       end
@@ -41,7 +41,7 @@ describe Bora::Stack do
 
     describe "#recreate" do
       it "behaves the same as create" do
-        options = { template_body: '{"foo": "bar"}' }
+        options = { stack_name: TEST_STACK_NAME, template_body: '{"foo": "bar"}' }
         expect_create_stack(options)
         expect(@cfn).to_not receive(:delete_stack)
         @stack.recreate(options)
@@ -50,7 +50,7 @@ describe Bora::Stack do
 
     describe "#create_or_update" do
       it "calls create" do
-        options = { template_body: '{"foo": "bar"}' }
+        options = { stack_name: TEST_STACK_NAME, template_body: '{"foo": "bar"}' }
         expect_create_stack(options)
         @stack.create_or_update(options)
       end
@@ -116,7 +116,7 @@ describe Bora::Stack do
 
       it "returns nil if the template has not changed" do
         expect(@cfn).to receive(:update_stack).and_raise(Aws::CloudFormation::Errors::ValidationError.new("", Bora::Stack::NO_UPDATE_MESSAGE))
-        expect(@stack.update({})).to be_nil
+        expect(@stack.update({template_body: "foo"})).to be_nil
       end
     end
 
@@ -136,7 +136,7 @@ describe Bora::Stack do
     describe "#create_or_update" do
       it "calls update" do
         expect(@cfn).to receive(:update_stack)
-        @stack.create_or_update({})
+        @stack.create_or_update({template_body: "foo"})
       end
     end
 

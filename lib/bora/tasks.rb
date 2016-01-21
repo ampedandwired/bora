@@ -4,15 +4,21 @@ require 'bora/stack'
 
 module Bora
   class Tasks < Rake::TaskLib
-    def initialize(stack_name)
+    def initialize(stack_name, template_uri = nil)
       @stack_name = stack_name
       @stack = Stack.new(stack_name)
       @colorize = true
-      if block_given?
-        within_namespace do
-          yield self
+      @stack_options = {}
+      within_namespace { yield self } if block_given?
+
+      if template_uri
+        if @stack_options[:template_body] || @stack_options[:template_url]
+          raise "You cannot specify a template in the constructor as well as in the stack_options"
+        else
+          @stack_options[:template_url] = template_uri
         end
       end
+
       define_tasks
     end
 
@@ -22,6 +28,7 @@ module Bora
       @colorize = value
       String.disable_colorization = !@colorize
     end
+
 
     private
 
