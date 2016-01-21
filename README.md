@@ -86,6 +86,26 @@ Bora::Tasks.new("example") do |t|
 end
 ```
 
+If you need to pass parameters from the rake command line through to your generate method,
+you can do so by using Rake's [`args.extras`](http://ruby-doc.org/stdlib-2.2.2/libdoc/rake/rdoc/Rake/TaskArguments.html#method-i-extras) functionality:
+
+```ruby
+Bora::Tasks.new("example") do |t|
+  task :generate do |t, args|
+    arg1, arg2 = args.extras
+    # Generate template here
+  end
+
+  t.stack_options = {
+    template_body: File.read("example.json")
+  }
+end
+```
+```shell
+$ rake stack:example:apply[arg1_value, arg2_value]
+```
+
+
 ### API
 
 You can use this gem without using Rake. Most of the logic is implemented in [stack.rb](https://github.com/ampedandwired/bora/blob/master/lib/bora/stack.rb) and is fairly self-explanatory.
