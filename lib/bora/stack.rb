@@ -12,7 +12,6 @@ module Bora
 
     def initialize(stack_name)
       @stack_name = stack_name
-      @cfn = Aws::CloudFormation::Client.new
       @processed_events = Set.new
     end
 
@@ -39,7 +38,7 @@ module Bora
 
     def events
       return if !exists?
-      events = @cfn.describe_stack_events({stack_name: underlying_stack.stack_id}).stack_events
+      events = cloudformation.describe_stack_events({stack_name: underlying_stack.stack_id}).stack_events
       events.reverse.map { |e| Event.new(e) }
     end
 
@@ -50,7 +49,7 @@ module Bora
 
     def template(pretty = true)
       return if !exists?
-      template = @cfn.get_template({stack_name: @stack_name}).template_body
+      template = cloudformation.get_template({stack_name: @stack_name}).template_body
       template = JSON.pretty_generate(JSON.parse(template)) if pretty
       template
     end
@@ -71,7 +70,7 @@ module Bora
     end
 
     def validate(options)
-      @cfn.validate_template(resolve_options(options).select { |k| [:template_body, :template_url].include?(k) })
+      cloudformation.validate_template(resolve_options(options).select { |k| [:template_body, :template_url].include?(k) })
     end
 
     def status
@@ -86,6 +85,10 @@ module Bora
     # =============================================================================================
     private
 
+    def cloudformation
+      @cfn ||= Aws::CloudFormation::Client.new
+    end
+
     def method_missing(sym, *args, &block)
       underlying_stack ? underlying_stack.send(sym, *args, &block) : nil
     end
@@ -96,7 +99,7 @@ module Bora
       @previous_event_time = last_event_time
       begin
         action_options = {stack_name: @stack_name}.merge(resolve_options(options))
-        @cfn.method("#{action.to_s.downcase}_stack").call(action_options)
+        cloudformation.method("#{action.to_s.downcase}_stack").call(action_options)
         wait_for_completion(&block)
       rescue Aws::CloudFormation::Errors::ValidationError => e
         raise e unless e.message.include?(NO_UPDATE_MESSAGE)
@@ -133,7 +136,7 @@ module Bora
     def underlying_stack(refresh: false)
       if !@_stack || refresh
         begin
-          response = @cfn.describe_stacks({stack_name: @stack_name})
+          response = cloudformation.describe_stacks({stack_name: @stack_name})
           @_stack = response.stacks[0]
         rescue Aws::CloudFormation::Errors::ValidationError
           @_stack = nil
@@ -144,7 +147,7 @@ module Bora
 
     def unprocessed_events
       return [] if !underlying_stack
-      events = @cfn.describe_stack_events({stack_name: underlying_stack.stack_id}).stack_events
+      events = cloudformation.describe_stack_events({stack_name: underlying_stack.stack_id}).stack_events
       unprocessed_events = events.select do |event|
         !@processed_events.include?(event.event_id) && @previous_event_time < event.timestamp
       end
@@ -154,7 +157,7 @@ module Bora
 
     def last_event_time
       return Time.at(0) if !underlying_stack
-      events = @cfn.describe_stack_events({stack_name: @stack_name}).stack_events
+      events = cloudformation.describe_stack_events({stack_name: @stack_name}).stack_events
       events.length > 0 ? events[0].timestamp : Time.at(0)
     end
 
