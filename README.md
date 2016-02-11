@@ -77,6 +77,24 @@ Bora::Tasks.new("example", "example.json") do |t|
 end
 ```
 
+`cfndsl` comes with a rake task that you can use by embedding it inside the Bora task definition:
+
+```ruby
+require 'bora'
+require 'cfndsl/rake_task'
+
+Bora::Tasks.new("example", "example.json") do |t|
+  CfnDsl::RakeTask.new do |cfndsl_task|
+    cfndsl_task.cfndsl_opts = {
+      files: [{
+        filename: "example.rb",
+        output: "example.json"
+      }]
+    }
+  end
+end
+```
+
 If you need to pass parameters from the rake command line through to your generate method,
 you can do so by using Rake's [`args.extras`](http://ruby-doc.org/stdlib-2.2.2/libdoc/rake/rdoc/Rake/TaskArguments.html#method-i-extras) functionality:
 
