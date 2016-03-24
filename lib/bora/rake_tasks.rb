@@ -32,7 +32,11 @@ module Bora
     def define_tasks(template_file, stack_name, stack_config, stack_options)
       Bora::Tasks.new(stack_name) do |t|
         if File.extname(template_file) == ".rb"
-          stack_options[:template_body] = run_cfndsl(template_file, stack_config['params'])
+          task :generate do |_, args|
+            params = stack_config['params']
+            params.merge!(extract_params_from_args(args.extras))
+            stack_options[:template_body] = run_cfndsl(template_file, params)
+          end
         else
           stack_options[:template_url] = template_file
         end
@@ -52,6 +56,10 @@ module Bora
     def extract_stack_options(config)
       valid_options = ["capabilities"]
       config.select { |k| valid_options.include?(k) }
+    end
+
+    def extract_params_from_args(args)
+      args ? Hash[args.map { |arg| arg.split("=", 2) }] : {}
     end
 
     def load_config(config)
