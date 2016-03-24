@@ -18,6 +18,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "aws-sdk", "~> 2.0"
+  spec.add_dependency "cfndsl", "~> 0.4"
   spec.add_dependency "colorize", "~> 0.7"
   spec.add_dependency "diffy", "~> 3.0"
   spec.add_dependency "rake", "~> 10.0"
