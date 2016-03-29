@@ -126,6 +126,45 @@ end
 puts "Update #{result ? "succeeded" : "failed"}"
 ```
 
+### YAML Configuration - Experimental
+You can define and configure your stacks through YAML too.
+This interface is currently experimental,
+but longer term is likely to become the primary way to use this gem.
+Sample usage is shown below (subject to change).
+
+Rakefile:
+```ruby
+require "bora"
+Bora::RakeTasks.new('templates.yml')
+```
+
+templates.yml:
+```yaml
+templates:
+  app:
+    template_file: templates/test.json
+    stacks:
+      dev: {}
+      uat: {}
+
+  web:
+    # Templates ending in ".rb" are treated as cfndsl templates
+    template_file: templates/test.rb
+    capabilities: [CAPABILITY_IAM]
+    stacks:
+      dev:
+        # Set stack name explicitly (otherwise would default to "web-dev")
+        stack_name: foo-dev
+        params:
+          # Look up a value from the outputs of the "app-dev"stack
+          app_sg: http://${app-dev/outputs/AppSecurityGroup}/bar
+      uat:
+        params:
+          app_sg: foouatdev
+
+```
+
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
