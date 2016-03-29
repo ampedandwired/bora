@@ -36,20 +36,25 @@ module Bora
 
         task :generate do |_, args|
           params = extract_params(stack_config, args)
-          t.stack_options[:parameters] = params.map do |k,v|
-            { parameter_key: k, parameter_value: v }
-          end
 
           if File.extname(template_file) == ".rb"
             template_body = run_cfndsl(template_file, params)
             template_json = JSON.parse(template_body)
             if template_json["Parameters"]
-              cfn_params = template_json["Parameters"].keys
-              t.stack_options[:parameters].keep_if {|cfn_param| cfn_params.include?(cfn_param[:parameter_key]) }
+              cfn_param_keys = template_json["Parameters"].keys
+              cfn_params = params.select { |k, v| cfn_param_keys.include?(k) }.map do |k, v|
+                { parameter_key: k, parameter_value: v }
+              end
+              t.stack_options[:parameters] = cfn_params if !cfn_params.empty?
             end
             t.stack_options[:template_body] = template_body
           else
             t.stack_options[:template_url] = template_file
+            if !params.empty?
+              t.stack_options[:parameters] = params.map do |k, v|
+                { parameter_key: k, parameter_value: v }
+              end
+            end
           end
         end
       end
