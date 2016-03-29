@@ -157,7 +157,7 @@ templates:
         stack_name: foo-dev
         params:
           # Look up a value from the outputs of the "app-dev"stack
-          app_sg: http://${app-dev/outputs/AppSecurityGroup}/bar
+          app_sg: ${app-dev/outputs/AppSecurityGroup}
       uat:
         params:
           app_sg: foouatdev

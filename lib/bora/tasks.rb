@@ -22,7 +22,7 @@ module Bora
       define_tasks
     end
 
-    attr_writer :stack_options
+    attr_accessor :stack_options
 
     def colorize=(value)
       @colorize = value

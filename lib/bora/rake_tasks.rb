@@ -32,15 +32,26 @@ module Bora
 
     def define_tasks(template_file, stack_name, stack_config, stack_options)
       Bora::Tasks.new(stack_name) do |t|
-        if File.extname(template_file) == ".rb"
-          task :generate do |_, args|
-            params = extract_params(stack_config, args)
-            stack_options[:template_body] = run_cfndsl(template_file, params)
-          end
-        else
-          stack_options[:template_url] = template_file
-        end
         t.stack_options = stack_options
+
+        task :generate do |_, args|
+          params = extract_params(stack_config, args)
+          t.stack_options[:parameters] = params.map do |k,v|
+            { parameter_key: k, parameter_value: v }
+          end
+
+          if File.extname(template_file) == ".rb"
+            template_body = run_cfndsl(template_file, params)
+            template_json = JSON.parse(template_body)
+            if template_json["Parameters"]
+              cfn_params = template_json["Parameters"].keys
+              t.stack_options[:parameters].keep_if {|cfn_param| cfn_params.include?(cfn_param[:parameter_key]) }
+            end
+            t.stack_options[:template_body] = template_body
+          else
+            t.stack_options[:template_url] = template_file
+          end
+        end
       end
     end
 
@@ -61,10 +72,10 @@ module Bora
     def extract_params(stack_config, args)
       params = stack_config['params'] || {}
       params.merge!(extract_params_from_args(args.extras))
-      params.map { |k, v| [k, process_param_value(v)] }.to_h
+      params.map { |k, v| [k, process_param_substitutions(v)] }.to_h
     end
 
-    def process_param_value(val)
+    def process_param_substitutions(val)
       old_val = nil
       while old_val != val
         old_val = val
