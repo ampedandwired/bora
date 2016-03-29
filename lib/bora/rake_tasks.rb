@@ -4,6 +4,7 @@ require 'colorize'
 require 'rake/tasklib'
 require 'cfndsl'
 require 'bora/tasks'
+require 'bora/cfn_param_resolver'
 
 module Bora
   class RakeTasks < Rake::TaskLib
@@ -33,8 +34,7 @@ module Bora
       Bora::Tasks.new(stack_name) do |t|
         if File.extname(template_file) == ".rb"
           task :generate do |_, args|
-            params = stack_config['params']
-            params.merge!(extract_params_from_args(args.extras))
+            params = extract_params(stack_config, args)
             stack_options[:template_body] = run_cfndsl(template_file, params)
           end
         else
@@ -56,6 +56,24 @@ module Bora
     def extract_stack_options(config)
       valid_options = ["capabilities"]
       config.select { |k| valid_options.include?(k) }
+    end
+
+    def extract_params(stack_config, args)
+      params = stack_config['params'] || {}
+      params.merge!(extract_params_from_args(args.extras))
+      params.map { |k, v| [k, process_param_value(v)] }.to_h
+    end
+
+    def process_param_value(val)
+      old_val = nil
+      while old_val != val
+        old_val = val
+        val = val.sub(/\${[^}]+}/) do |m|
+          token = m[2..-2]
+          CfnParamResolver.new(token).resolve
+        end
+      end
+      val
     end
 
     def extract_params_from_args(args)
