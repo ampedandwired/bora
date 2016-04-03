@@ -1,39 +1,41 @@
 require 'colorize'
 
 module Bora
-  class Status
-    def initialize(status)
-      @status = status
-    end
+  module Cfn
+    class Status
+      def initialize(status)
+        @status = status
+      end
 
-    def success?
-      @status.end_with?("_COMPLETE") && !@status.include?("ROLLBACK")
-    end
+      def success?
+        @status.end_with?("_COMPLETE") && !@status.include?("ROLLBACK")
+      end
 
-    def failure?
-      @status.end_with?("_FAILED") || @status.include?("ROLLBACK")
-    end
+      def failure?
+        @status.end_with?("_FAILED") || @status.include?("ROLLBACK")
+      end
 
-    def deleted?
-      @status == "DELETE_COMPLETE"
-    end
+      def deleted?
+        @status == "DELETE_COMPLETE"
+      end
 
-    def complete?
-      success? || failure?
-    end
+      def complete?
+        success? || failure?
+      end
 
-    def to_s
-      @status.colorize(color)
-    end
+      def to_s
+        @status.colorize(color)
+      end
 
 
-    private
+      private
 
-    def color
-      case
-        when success?; :green
-        when failure?; :red
-        else; :yellow;
+      def color
+        case
+          when success?; :green
+          when failure?; :red
+          else; :yellow;
+        end
       end
     end
 

@@ -118,7 +118,7 @@ You can use this gem without using Rake. Most of the logic is implemented in [st
 ```ruby
 require 'bora'
 
-stack = Bora::Stack.new("my-stack")
+stack = Bora::Cfn::Stack.new("my-stack")
 result = stack.update({template_body: File.read("example.json")}) do |event|
   puts event
 end

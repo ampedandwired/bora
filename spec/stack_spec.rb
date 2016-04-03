@@ -6,11 +6,11 @@ TEST_STACK_NAME = "test-stack"
 
 now = Time.now
 
-describe Bora::Stack do
+describe Bora::Cfn::Stack do
   before :each do
     @cfn = double(Aws::CloudFormation::Client)
     allow(Aws::CloudFormation::Client).to receive(:new).and_return(@cfn)
-    @stack = Bora::Stack.new(TEST_STACK_NAME)
+    @stack = Bora::Cfn::Stack.new(TEST_STACK_NAME)
   end
 
   context "when the stack does not exist" do
@@ -115,7 +115,7 @@ describe Bora::Stack do
       end
 
       it "returns nil if the template has not changed" do
-        expect(@cfn).to receive(:update_stack).and_raise(Aws::CloudFormation::Errors::ValidationError.new("", Bora::Stack::NO_UPDATE_MESSAGE))
+        expect(@cfn).to receive(:update_stack).and_raise(Aws::CloudFormation::Errors::ValidationError.new("", Bora::Cfn::Stack::NO_UPDATE_MESSAGE))
         expect(@stack.update({template_body: "foo"})).to be_nil
       end
     end
@@ -211,7 +211,7 @@ describe Bora::Stack do
       allow(@cfn).to receive(:describe_stacks).and_return(describe_stacks_result(status: "ROLLBACK_COMPLETE"))
       allow(@cfn).to receive(:describe_stack_events).and_return(
         describe_stack_events_result(timestamp: now - 60), describe_stack_events_result(status: "ROLLBACK_COMPLETE"))
-      @stack = Bora::Stack.new(TEST_STACK_NAME)
+      @stack = Bora::Cfn::Stack.new(TEST_STACK_NAME)
       expect(@cfn).to receive(:update_stack)
       result = @stack.update({template_body: "foo"})
       expect(result).to be_falsey
