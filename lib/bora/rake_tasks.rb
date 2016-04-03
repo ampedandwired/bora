@@ -8,7 +8,7 @@ require 'bora/cfn_param_resolver'
 
 module Bora
   class RakeTasks < Rake::TaskLib
-    def initialize(config_file_or_hash)
+    def initialize(config_file_or_hash = "bora.yml")
       define_templates(load_config(config_file_or_hash))
     end
 
