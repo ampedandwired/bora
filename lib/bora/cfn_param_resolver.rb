@@ -1,4 +1,4 @@
-require 'bora/stack'
+require 'bora/cfn/stack'
 
 module Bora
   class CfnParamResolver

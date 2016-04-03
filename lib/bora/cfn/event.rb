@@ -1,4 +1,4 @@
-require 'bora/status'
+require 'bora/cfn/status'
 
 module Bora
   class Event

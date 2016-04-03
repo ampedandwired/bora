@@ -1,6 +1,6 @@
 require 'colorize'
 require 'rake/tasklib'
-require 'bora/stack'
+require 'bora/cfn/stack'
 
 module Bora
   class Tasks < Rake::TaskLib

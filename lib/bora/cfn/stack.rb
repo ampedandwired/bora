@@ -2,9 +2,9 @@ require 'set'
 require 'open-uri'
 require 'aws-sdk'
 require 'diffy'
-require 'bora/stack_status'
-require 'bora/event'
-require 'bora/output'
+require 'bora/cfn/stack_status'
+require 'bora/cfn/event'
+require 'bora/cfn/output'
 
 module Bora
   class Stack
