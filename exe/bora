@@ -1,40 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'thor'
-require 'bora'
+require 'bora/cli'
 
-class BoraCli < Thor
-  desc "apply STACK_NAME", "Creates or updates the stack"
-  option :file, type: :string, aliases: :f, default: Bora::DEFAULT_CONFIG_FILE
-  def apply(stack_name)
-    stack(options[:file], stack_name).apply
-  end
-
-  desc "status STACK_NAME", "Displays the current status of the stack"
-  option :file, type: :string, aliases: :f, default: Bora::DEFAULT_CONFIG_FILE
-  def status(stack_name)
-    stack(options[:file], stack_name).status
-  end
-
-  desc "delete STACK_NAME", "Deletes the stack"
-  option :file, type: :string, aliases: :f, default: Bora::DEFAULT_CONFIG_FILE
-  def delete(stack_name)
-    stack(options[:file], stack_name).delete
-  end
-
-
-  private
-
-  def stack(config_file, stack_name)
-    bora = Bora.new(config_file)
-    stack = bora.stack(stack_name)
-    if !stack
-      STDERR.puts "Could not find stack #{stack_name}"
-      exit(1)
-    end
-    stack
-  end
-
-end
-
-BoraCli.start(ARGV)
+Bora::Cli.start(ARGV)
