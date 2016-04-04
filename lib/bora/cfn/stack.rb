@@ -6,7 +6,7 @@ require 'bora/cfn/stack_status'
 require 'bora/cfn/event'
 require 'bora/cfn/output'
 
-module Bora
+class Bora
   module Cfn
 
     class Stack

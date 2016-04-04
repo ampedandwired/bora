@@ -1,6 +1,6 @@
 require 'colorize'
 
-module Bora
+class Bora
   module Cfn
     class Status
       def initialize(status)

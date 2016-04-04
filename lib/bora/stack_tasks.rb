@@ -1,6 +1,6 @@
 require 'rake/tasklib'
 
-module Bora
+class Bora
   class StackTasks < Rake::TaskLib
     def initialize(stack)
       @stack = stack

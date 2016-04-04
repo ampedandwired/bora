@@ -5,7 +5,7 @@ require 'bora/cfn/stack'
 require 'bora/cfn_param_resolver'
 require 'bora/stack_tasks'
 
-module Bora
+class Bora
   class Stack
     def initialize(stack_name, template_file, stack_config)
       @stack_name = stack_name

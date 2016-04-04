@@ -1,4 +1,4 @@
-module Bora
+class Bora
   module Cfn
 
     class Output

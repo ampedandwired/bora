@@ -1,6 +1,6 @@
 require 'bora/cfn/status'
 
-module Bora
+class Bora
   module Cfn
 
     class Event

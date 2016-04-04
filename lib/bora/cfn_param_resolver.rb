@@ -1,6 +1,6 @@
 require 'bora/cfn/stack'
 
-module Bora
+class Bora
   class CfnParamResolver
     def initialize(param)
       @param = param

@@ -1,6 +1,6 @@
 require 'bora/stack'
 
-module Bora
+class Bora
   class Template
     def initialize(template_name, template_config)
       @template_name = template_name

@@ -1,6 +1,6 @@
 require 'bora/cfn/status'
 
-module Bora
+class Bora
   module Cfn
 
     class StackStatus
@@ -28,6 +28,6 @@ module Bora
         end
       end
     end
-    
+
   end
 end

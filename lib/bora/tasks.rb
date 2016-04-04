@@ -2,7 +2,7 @@ require 'colorize'
 require 'rake/tasklib'
 require 'bora/cfn/stack'
 
-module Bora
+class Bora
   class Tasks < Rake::TaskLib
     def initialize(stack_name, template_uri = nil)
       puts "--------------------------------------------------------------------------------"
