@@ -1,16 +1,15 @@
 # Bora
 
-This gem contains a command line utility and Ruby [rake](https://github.com/ruby/rake) tasks
+This Ruby gem contains a command line utility and [rake](https://github.com/ruby/rake) tasks
 that help you define and work with [CloudFormation](https://aws.amazon.com/cloudformation/) stacks.
 
 In a single YAML file you define your templates,
 the stack instances built from those templates (eg: dev, uat, staging, prod, etc),
 and the parameters for those stacks. Parameters can even refer to outputs of other stacks.
-
-Templates can be defined in plain JSON or using
+Templates can be written with plain CloudFormation JSON or
 [cfndsl](https://github.com/stevenjack/cfndsl).
 
-Bora then provides commands (or Rake tasks) to work with those stacks
+Given this config, Bora then provides commands (or Rake tasks) to work with those stacks
 (create, update, delete, diff, etc).
 
 
@@ -46,6 +45,8 @@ templates:
 ```
 
 Now run `bora apply example-uat` to create your "uat" stack.
+Bora will wait until the stack is complete (or failed),
+and return stack events to you as they happen.
 To get a full list of available commands, run `bora help`.
 
 Alternatively if you prefer using Rake, add this to your `Rakefile`:
@@ -140,7 +141,7 @@ for example AMI IDs.
 
 The format is as follows:
 
-${<stack_name>/outputs/<output_name>}
+`${<stack_name>/outputs/<output_name>}`
 
 For example:
 ```yaml
