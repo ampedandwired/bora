@@ -34,7 +34,7 @@ class Bora
       end
     end
 
-    def current_template
+    def show_current
       template = @cfn_stack.template
       puts template ? template : "Stack '#{@cfn_stack_name}' does not exist"
     end
@@ -85,7 +85,7 @@ class Bora
       end
     end
 
-    def new_template(override_params = {})
+    def show(override_params = {})
       generate(override_params)
       puts @cfn_stack.new_template(@cfn_options)
     end

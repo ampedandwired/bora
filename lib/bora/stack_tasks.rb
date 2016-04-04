@@ -12,13 +12,13 @@ class Bora
 
     def define_tasks
       define_apply_task
-      define_current_template_task
       define_delete_task
       define_diff_task
       define_events_task
-      define_new_template_task
       define_outputs_task
       define_recreate_task
+      define_show_task
+      define_show_current_task
       define_status_task
       define_validate_task
     end
@@ -28,15 +28,6 @@ class Bora
         desc "Creates (or updates) the '#{@stack.stack_name}' stack"
         task :apply do |_, args|
           @stack.apply(extract_params_from_args(args.extras))
-        end
-      end
-    end
-
-    def define_current_template_task
-      within_namespace do
-        desc "Shows the current template for '#{@stack.stack_name}' stack"
-        task :current_template do
-          @stack.current_template
         end
       end
     end
@@ -68,15 +59,6 @@ class Bora
       end
     end
 
-    def define_new_template_task
-      within_namespace do
-        desc "Shows the new template for '#{@stack.stack_name}' stack"
-        task :new_template do |_, args|
-          @stack.new_template(self.extract_params_from_args(args.extras))
-        end
-      end
-    end
-
     def define_outputs_task
       within_namespace do
         desc "Shows the outputs from the '#{@stack.stack_name}' stack"
@@ -91,6 +73,24 @@ class Bora
         desc "Recreates (deletes then creates) the '#{@stack.stack_name}' stack"
         task :recreate do |_, args|
           @stack.recreate(extract_params_from_args(args.extras))
+        end
+      end
+    end
+
+    def define_show_task
+      within_namespace do
+        desc "Shows the new template for '#{@stack.stack_name}' stack"
+        task :show do |_, args|
+          @stack.show(self.extract_params_from_args(args.extras))
+        end
+      end
+    end
+
+    def define_show_current_task
+      within_namespace do
+        desc "Shows the current template for '#{@stack.stack_name}' stack"
+        task :show_current do
+          @stack.show_current
         end
       end
     end
