@@ -28,7 +28,7 @@ Alternatively, install directly with `gem install bora`.
 
 ## Quick Start
 
-Create a file `bora.yml` in your home directory, something like this:
+Create a file `bora.yml` in your project directory, something like this:
 ```yaml
 templates:
   example:
