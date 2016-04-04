@@ -26,9 +26,7 @@ And then run `bundle install`.
 Alternatively, install directly with `gem install bora`.
 
 
-## Usage
-
-### Quick Start
+## Quick Start
 
 Create a file `bora.yml` in your home directory, something like this:
 ```yaml
