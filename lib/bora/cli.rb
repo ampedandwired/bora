@@ -64,7 +64,7 @@ class Bora
     private
 
     def stack(config_file, stack_name)
-      bora = Bora.new(config_file)
+      bora = Bora.new(config_file_or_hash: config_file)
       stack = bora.stack(stack_name)
       if !stack
         STDERR.puts "Could not find stack #{stack_name}"

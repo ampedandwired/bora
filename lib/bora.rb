@@ -7,7 +7,7 @@ require "bora/tasks"
 class Bora
   DEFAULT_CONFIG_FILE = "bora.yml"
 
-  def initialize(config_file_or_hash = DEFAULT_CONFIG_FILE, colorize: true)
+  def initialize(config_file_or_hash: DEFAULT_CONFIG_FILE, colorize: true)
     @templates = {}
     config = load_config(config_file_or_hash)
     String.disable_colorization = !colorize
