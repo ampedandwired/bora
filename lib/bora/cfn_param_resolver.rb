@@ -12,7 +12,7 @@ module Bora
         raise "Invalid parameter substitution: #{@param}"
       end
 
-      stack = Stack.new(stack_name)
+      stack = Bora::Cfn::Stack.new(stack_name)
       if !stack.exists?
         raise "Output #{name} not found in stack #{stack_name} as the stack does not exist"
       end
