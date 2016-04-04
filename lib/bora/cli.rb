@@ -3,11 +3,12 @@ require "bora"
 
 class Bora
   class Cli < Thor
-    class_option :file, type: :string, aliases: :f, default: Bora::DEFAULT_CONFIG_FILE
+    class_option :file, type: :string, aliases: :f, default: Bora::DEFAULT_CONFIG_FILE, desc: "The Bora config file to use"
 
     desc "apply STACK_NAME", "Creates or updates the stack"
+    option :params, type: :array, aliases: :p, desc: "Parameters to be passed to the template, eg: --params 'instance_type=t2.micro'"
     def apply(stack_name)
-      stack(options.file, stack_name).apply
+      stack(options.file, stack_name).apply(params)
     end
 
     desc "delete STACK_NAME", "Deletes the stack"
@@ -16,8 +17,9 @@ class Bora
     end
 
     desc "diff STACK_NAME", "Diffs the new template with the stack's current template"
+    option :params, type: :array, aliases: :p, desc: "Parameters to be passed to the template, eg: --params 'instance_type=t2.micro'"
     def diff(stack_name)
-      stack(options.file, stack_name).diff
+      stack(options.file, stack_name).diff(params)
     end
 
     desc "events STACK_NAME", "Outputs the latest events from the stack"
@@ -31,13 +33,15 @@ class Bora
     end
 
     desc "recreate STACK_NAME", "Recreates (deletes then creates) the stack"
+    option :params, type: :array, aliases: :p, desc: "Parameters to be passed to the template, eg: --params 'instance_type=t2.micro'"
     def recreate(stack_name)
-      stack(options.file, stack_name).recreate
+      stack(options.file, stack_name).recreate(params)
     end
 
     desc "show STACK_NAME", "Shows the new template for stack"
+    option :params, type: :array, aliases: :p, desc: "Parameters to be passed to the template, eg: --params 'instance_type=t2.micro'"
     def show(stack_name)
-      stack(options.file, stack_name).show
+      stack(options.file, stack_name).show(params)
     end
 
     desc "show_current STACK_NAME", "Shows the current template for the stack"
@@ -51,8 +55,9 @@ class Bora
     end
 
     desc "validate STACK_NAME", "Checks the stack's template for validity"
+    option :params, type: :array, aliases: :p, desc: "Parameters to be passed to the template, eg: --params 'instance_type=t2.micro'"
     def validate(stack_name)
-      stack(options.file, stack_name).validate
+      stack(options.file, stack_name).validate(params)
     end
 
 
@@ -66,6 +71,10 @@ class Bora
         exit(1)
       end
       stack
+    end
+
+    def params
+      options.params ? Hash[options.params.map { |param| param.split("=", 2) }] : {}
     end
 
   end

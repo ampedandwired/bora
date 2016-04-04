@@ -34,11 +34,6 @@ class Bora
       end
     end
 
-    def show_current
-      template = @cfn_stack.template
-      puts template ? template : "Stack '#{@cfn_stack_name}' does not exist"
-    end
-
     def delete
       invoke_action("delete")
     end
@@ -85,11 +80,6 @@ class Bora
       end
     end
 
-    def show(override_params = {})
-      generate(override_params)
-      puts @cfn_stack.new_template(@cfn_options)
-    end
-
     def outputs
       outputs = @cfn_stack.outputs
       if outputs
@@ -107,6 +97,16 @@ class Bora
     def recreate(override_params = {})
       generate(override_params)
       invoke_action("recreate", @cfn_options)
+    end
+
+    def show(override_params = {})
+      generate(override_params)
+      puts @cfn_stack.new_template(@cfn_options)
+    end
+
+    def show_current
+      template = @cfn_stack.template
+      puts template ? template : "Stack '#{@cfn_stack_name}' does not exist"
     end
 
     def status
@@ -147,7 +147,7 @@ class Bora
 
     def process_params(override_params)
       params = @stack_config['params'] || {}
-      params.merge!(override_params)
+      params.merge!(override_params) if override_params
       params.map { |k, v| [k, process_param_substitutions(v)] }.to_h
     end
 
