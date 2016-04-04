@@ -150,6 +150,22 @@ params:
 This will look up the `Domain` output from the stack named `api-stack` and substitute it into the `api_url` parameter.
 
 
+## Command Reference
+
+The following commands are available through the command line and rake tasks.
+
+* **apply** - Creates the stack if it doesn't exist, or updates it otherwise
+* **delete** - Deletes the stack
+* **diff** - Provides a visual diff between the local template and the currently applied template in AWS
+* **events** - Outputs the latest events from the stack
+* **outputs** - Shows the outputs from the stack
+* **recreate** - Recreates (deletes then creates) the stack
+* **show** - Shows the local template in JSON, generating it if necessary
+* **show_current** - Shows the currently applied template in AWS
+* **status** - Displays the current status of the stack
+* **validate** - Validates the template using the AWS CloudFormation "validate" API call
+
+
 ## Command Line
 
 Run `bora help` to see all available commands.
