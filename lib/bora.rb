@@ -5,7 +5,9 @@ require "bora/template"
 require "bora/tasks"
 
 class Bora
-  def initialize(config_file_or_hash = "bora.yml", colorize: true)
+  DEFAULT_CONFIG_FILE = "bora.yml"
+
+  def initialize(config_file_or_hash = DEFAULT_CONFIG_FILE, colorize: true)
     @templates = {}
     config = load_config(config_file_or_hash)
     String.disable_colorization = !colorize
@@ -16,6 +18,11 @@ class Bora
 
   def template(name)
     @templates[name]
+  end
+
+  def stack(stack_name)
+    t = @templates.find { |_, template| template.stack(stack_name) != nil }
+    t ? t[1].stack(stack_name) : nil
   end
 
   def rake_tasks
