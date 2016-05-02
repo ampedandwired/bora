@@ -152,6 +152,7 @@ class Bora
     end
 
     def process_param_substitutions(val)
+      return val unless val.is_a? String
       old_val = nil
       while old_val != val
         old_val = val
