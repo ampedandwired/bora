@@ -114,10 +114,8 @@ class Bora
     end
 
     def within_namespace
-      namespace :stack do
-        namespace @stack.stack_name do
-          yield
-        end
+      namespace @stack.stack_name do
+        yield
       end
     end
 
