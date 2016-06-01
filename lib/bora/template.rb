@@ -17,6 +17,10 @@ class Bora
       @stacks[name]
     end
 
+    def stacks
+      @stacks.values
+    end
+
     def rake_tasks
       @stacks.each { |_, s| s.rake_tasks }
     end

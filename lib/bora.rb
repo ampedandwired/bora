@@ -20,6 +20,10 @@ class Bora
     @templates[name]
   end
 
+  def templates
+    @templates.values
+  end
+
   def stack(stack_name)
     t = @templates.find { |_, template| template.stack(stack_name) != nil }
     t ? t[1].stack(stack_name) : nil

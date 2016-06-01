@@ -5,6 +5,14 @@ class Bora
   class Cli < Thor
     class_option :file, type: :string, aliases: :f, default: Bora::DEFAULT_CONFIG_FILE, desc: "The Bora config file to use"
 
+    desc "list", "Lists the available stacks"
+    def list
+      templates = bora(options.file).templates
+      stacks = templates.collect { |t| t.stacks }.flatten
+      stack_names = stacks.collect { |s| s.stack_name }
+      puts stack_names.join("\n")
+    end
+
     desc "apply STACK_NAME", "Creates or updates the stack"
     option :params, type: :array, aliases: :p, desc: "Parameters to be passed to the template, eg: --params 'instance_type=t2.micro'"
     def apply(stack_name)
@@ -64,13 +72,17 @@ class Bora
     private
 
     def stack(config_file, stack_name)
-      bora = Bora.new(config_file_or_hash: config_file)
+      bora = bora(config_file)
       stack = bora.stack(stack_name)
       if !stack
         STDERR.puts "Could not find stack #{stack_name}"
         exit(1)
       end
       stack
+    end
+
+    def bora(config_file)
+      Bora.new(config_file_or_hash: config_file)
     end
 
     def params
