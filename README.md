@@ -54,7 +54,7 @@ require 'bora'
 Bora.new.rake_tasks
 ```
 
-Then run `rake stack:example-uat:apply`.
+Then run `rake example-uat:apply`.
 To get a full list of available tasks run `rake -T`.
 
 
@@ -198,7 +198,7 @@ $ bora apply web-uat --params 'instance_type=t2.micro' 'ami=ami-11032472'
 
 For rake, he equivalent is:
 ```bash
-$ rake stack:web-uat:apply[instance_type=t2.micro,ami=ami-11032472]
+$ rake web-uat:apply[instance_type=t2.micro,ami=ami-11032472]
 ```
 
 
