@@ -137,7 +137,7 @@ class Bora
     end
 
     def run_cfndsl(template_file, params)
-      temp_extras = Tempfile.new("bora")
+      temp_extras = Tempfile.new(["bora", ".yaml"])
       temp_extras.write(params.to_yaml)
       temp_extras.close
       template_body = CfnDsl.eval_file_with_extras(template_file, [[:yaml, temp_extras.path]]).to_json
