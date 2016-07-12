@@ -4,6 +4,8 @@ class Bora
   module Cfn
 
     class StackStatus
+      DOES_NOT_EXIST_MESSAGE = "Stack does not exist"
+
       def initialize(underlying_stack)
         @stack = underlying_stack
         if @stack
@@ -24,7 +26,7 @@ class Bora
           status_reason = @stack.stack_status_reason ? " - #{@stack.stack_status_reason}" : ""
           "#{@stack.stack_name} - #{@status}#{status_reason}"
         else
-          "Stack does not exist"
+          DOES_NOT_EXIST_MESSAGE
         end
       end
     end

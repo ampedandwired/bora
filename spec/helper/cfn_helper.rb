@@ -1,25 +1,20 @@
-$LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'securerandom'
 require 'aws-sdk'
-require 'bora'
 
-# Make sure we don't accidentally make calls to AWS during tests
-Aws.config[:stub_responses] = true
-
-def stack_event(timestamp: Time.new, status: "CREATE_COMPLETE", reason: nil)
+def stack_event(stack_name, timestamp: Time.new, status: "CREATE_COMPLETE", reason: nil)
   OpenStruct.new({
     timestamp: timestamp,
     event_id: SecureRandom.uuid,
     resource_type: "AWS::CloudFormation::Stack",
-    logical_resource_id: TEST_STACK_NAME,
+    logical_resource_id: stack_name,
     resource_status: status,
     resource_status_reason: reason
   })
 end
 
-def describe_stack_events_result(timestamp: Time.new, status: "CREATE_COMPLETE", reason: nil, count: 1)
+def describe_stack_events_result(stack_name, timestamp: Time.new, status: "CREATE_COMPLETE", reason: nil, count: 1)
   events = []
-  count.times { events << stack_event(timestamp: timestamp, status: status, reason: reason) }
+  count.times { events << stack_event(stack_name, timestamp: timestamp, status: status, reason: reason) }
   OpenStruct.new({
     stack_events: events
   })
@@ -37,11 +32,5 @@ def describe_stacks_result(status: "CREATE_COMPLETE", outputs: [])
         outputs: outputs.map { |o| OpenStruct.new(o) }
       })
     ]
-  })
-end
-
-def stack_outputs_result(output_key: "URL", output_value: "http://foo.com", description: "some output")
-  OpenStruct.new({
-
   })
 end

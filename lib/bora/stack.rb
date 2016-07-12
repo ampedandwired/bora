@@ -7,6 +7,15 @@ require 'bora/stack_tasks'
 
 class Bora
   class Stack
+    STACK_ACTION_SUCCESS_MESSAGE = "%s stack '%s' completed successfully"
+    STACK_ACTION_FAILURE_MESSAGE = "%s stack '%s' failed"
+    STACK_ACTION_NOT_CHANGED_MESSAGE = "%s stack '%s' skipped as template has not changed"
+    STACK_DOES_NOT_EXIST_MESSAGE = "Stack '%s' does not exist"
+    STACK_EVENTS_DO_NOT_EXIST_MESSAGE = "Stack '%s' has no events"
+    STACK_EVENTS_MESSAGE = "Events for stack '%s'"
+    STACK_OUTPUTS_DO_NOT_EXIST_MESSAGE = "Stack '%s' has no outputs"
+    STACK_VALIDATE_SUCCESS_MESSAGE = "Template for stack '%s' is valid"
+
     def initialize(stack_name, template_file, stack_config)
       @stack_name = stack_name
       @cfn_stack_name = stack_config['stack_name'] || @stack_name
@@ -47,13 +56,13 @@ class Bora
       events = @cfn_stack.events
       if events
         if events.length > 0
-          puts "Events for stack '#{@cfn_stack_name}'"
-          @cfn_stack.events.each { |e| puts e }
+          puts STACK_EVENTS_MESSAGE % @cfn_stack_name
+          events.each { |e| puts e }
         else
-          puts "Stack '#{@cfn_stack_name}' has no events"
+          puts STACK_EVENTS_DO_NOT_EXIST_MESSAGE % @cfn_stack_name
         end
       else
-        puts "Stack '#{@cfn_stack_name}' does not exist"
+        puts STACK_DOES_NOT_EXIST_MESSAGE % @cfn_stack_name
       end
     end
 
@@ -87,10 +96,10 @@ class Bora
           puts "Outputs for stack '#{@cfn_stack_name}'"
           outputs.each { |output| puts output }
         else
-          puts "Stack '#{@cfn_stack_name}' has no outputs"
+          puts STACK_OUTPUTS_DO_NOT_EXIST_MESSAGE % @cfn_stack_name
         end
       else
-        puts "Stack '#{@cfn_stack_name}' does not exist"
+        puts STACK_DOES_NOT_EXIST_MESSAGE % @cfn_stack_name
       end
     end
 
@@ -106,7 +115,7 @@ class Bora
 
     def show_current
       template = @cfn_stack.template
-      puts template ? template : "Stack '#{@cfn_stack_name}' does not exist"
+      puts template ? template : (STACK_DOES_NOT_EXIST_MESSAGE % @cfn_stack_name)
     end
 
     def status
@@ -115,7 +124,7 @@ class Bora
 
     def validate(override_params = {})
       generate(override_params)
-      puts "Template for stack '#{@cfn_stack_name}' is valid" if @cfn_stack.validate(@cfn_options)
+      puts STACK_VALIDATE_SUCCESS_MESSAGE % @cfn_stack_name if @cfn_stack.validate(@cfn_options)
     end
 
 
@@ -125,12 +134,12 @@ class Bora
       puts "#{action.capitalize} stack '#{@cfn_stack_name}'"
       success = @cfn_stack.send(action, *args) { |event| puts event }
       if success
-        puts "#{action.capitalize} stack '#{@cfn_stack_name}' completed successfully"
+        puts STACK_ACTION_SUCCESS_MESSAGE % [action.capitalize, @cfn_stack_name]
       else
         if success == nil
-          puts "#{action.capitalize} stack '#{@cfn_stack_name}' skipped as template has not changed"
+          puts STACK_ACTION_NOT_CHANGED_MESSAGE % [action.capitalize, @cfn_stack_name]
         else
-          raise("#{action.capitalize} stack '#{@cfn_stack_name}' failed")
+          raise(STACK_ACTION_FAILURE_MESSAGE % [action.capitalize, @cfn_stack_name])
         end
       end
       success
