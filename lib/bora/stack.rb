@@ -66,29 +66,6 @@ class Bora
       end
     end
 
-    def generate(override_params = {})
-      params = process_params(override_params)
-      if File.extname(@template_file) == ".rb"
-        template_body = run_cfndsl(@template_file, params)
-        template_json = JSON.parse(template_body)
-        if template_json["Parameters"]
-          cfn_param_keys = template_json["Parameters"].keys
-          cfn_params = params.select { |k, v| cfn_param_keys.include?(k) }.map do |k, v|
-            { parameter_key: k, parameter_value: v }
-          end
-          @cfn_options[:parameters] = cfn_params if !cfn_params.empty?
-        end
-        @cfn_options[:template_body] = template_body
-      else
-        @cfn_options[:template_url] = @template_file
-        if !params.empty?
-          @cfn_options[:parameters] = params.map do |k, v|
-            { parameter_key: k, parameter_value: v }
-          end
-        end
-      end
-    end
-
     def outputs
       outputs = @cfn_stack.outputs
       if outputs
@@ -129,6 +106,29 @@ class Bora
 
 
     protected
+
+    def generate(override_params = {})
+      params = process_params(override_params)
+      if File.extname(@template_file) == ".rb"
+        template_body = run_cfndsl(@template_file, params)
+        template_json = JSON.parse(template_body)
+        if template_json["Parameters"]
+          cfn_param_keys = template_json["Parameters"].keys
+          cfn_params = params.select { |k, v| cfn_param_keys.include?(k) }.map do |k, v|
+            { parameter_key: k, parameter_value: v }
+          end
+          @cfn_options[:parameters] = cfn_params if !cfn_params.empty?
+        end
+        @cfn_options[:template_body] = template_body
+      else
+        @cfn_options[:template_url] = @template_file
+        if !params.empty?
+          @cfn_options[:parameters] = params.map do |k, v|
+            { parameter_key: k, parameter_value: v }
+          end
+        end
+      end
+    end
 
     def invoke_action(action, *args)
       puts "#{action.capitalize} stack '#{@cfn_stack_name}'"
