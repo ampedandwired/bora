@@ -13,21 +13,21 @@ describe Bora::Resolver::Hostedzone do
       hosted_zones: [
         OpenStruct.new(
           id: "1",
-          name: "example.com",
+          name: "example.com.",
           config: OpenStruct.new(
             private_zone: false
           )
         ),
         OpenStruct.new(
           id: "2",
-          name: "example.com",
+          name: "example.com.",
           config: OpenStruct.new(
             private_zone: true
           )
         ),
         OpenStruct.new(
           id: "3",
-          name: "unique.com",
+          name: "unique.com.",
           config: OpenStruct.new(
             private_zone: true
           )

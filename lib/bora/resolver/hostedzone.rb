@@ -11,6 +11,7 @@ class Bora
       def resolve(uri)
         zone_name, zone_type = uri.path[1..-1].split("/")
         raise InvalidParameterError, "Invalid hostedzone parameter #{uri}" if !zone_name
+        zone_name += "."
         route53 = route53_client(uri)
         res = route53.list_hosted_zones
         zones = res.hosted_zones.select do |hz|
@@ -18,7 +19,7 @@ class Bora
         end
         raise NotFoundError, "Could not find hosted zone #{uri}" if !zones || zones.empty?
         raise MultipleMatchesError, "Multiple candidates for hosted zone #{uri}. Use public/private discrimiator." if zones.size > 1
-        zones[0].id
+        zones[0].id.split("/")[-1]
       end
 
       private
