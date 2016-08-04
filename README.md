@@ -131,23 +131,52 @@ templates:
 
 ## Parameter Substitution
 
-Bora supports looking up parameter values from other stacks and interpolating them into input parameters.
-At present you can only look up the outputs of other stacks,
-however in the future it may support looking up stack parameters or resources.
-Other future possibilities include looking up values from other services,
-for example AMI IDs.
+Bora supports looking up parameter values from various locations and interpolating them into stack parameters.
+This is useful so that you don't have to hard-code values into your stack parameters that may change across regions or over time.
+For example, you might have a VPC template that creates a subnet and returns the subnet ID as a stack output.
+You could then have an application template that creates an EC2 instance in that subnet,
+with the subnet ID parameter looked up dynamically from the VPC stack.
 
-The format is as follows:
-
-`${cfn://<stack_name>/outputs/<output_name>}`
+These lookup parameters are specified using `${}` syntax within the parameter value,
+and the lookup target is a URI.
 
 For example:
+
 ```yaml
 params:
   api_url: http://${cfn://api-stack/outputs/Domain}/api
 ```
 
 This will look up the `Domain` output from the stack named `api-stack` and substitute it into the `api_url` parameter.
+The URI "scheme" (`cfn` in the above example) controls which resolver will handle the lookup.
+The format of the rest of the URI is dependent on the resolver.
+
+There are a number of resolvers that come with Bora (documented below),
+or you can write your own.
+
+### Stack Output Lookup
+
+You can look up outputs from stacks in the same region.
+
+For example:
+```bash
+${cfn://<stack_name>/outputs/<output_name>}
+```
+
+### CredStash Key Lookup
+[CredStash](https://github.com/fugue/credstash) is a utility for storing secrets using AWS KMS.
+You can pass these secrets as parameters to your stack.
+If you do so, you should use a CloudFormation parameter with the ["NoEcho" flag](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html) to true,
+so as to not expose the secret in the template.
+
+For example:
+```bash
+# Simple key lookup. Note 3 slashes. Will run `credstash get myke`.
+${credstash:///mykey}
+
+# Lookup with a key context. Will run `credstash get mykey app=webapp`.
+${credstash:///mykey?app=webapp}
+```
 
 
 ## Command Reference
