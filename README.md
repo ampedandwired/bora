@@ -120,7 +120,7 @@ templates:
 
           # You can refer to outputs of other stacks using "${}" notation too.
           # See below for further details.
-          app_url: http://${app-uat/outputs/Domain}/api
+          app_url: http://${cfn://app-uat/outputs/Domain}/api
 
           # Traditional CloudFormation parameters
           InstanceType: t2.micro
