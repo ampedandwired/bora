@@ -2,8 +2,8 @@ require 'tempfile'
 require 'colorize'
 require 'cfndsl'
 require 'bora/cfn/stack'
-require 'bora/cfn_param_resolver'
 require 'bora/stack_tasks'
+require 'bora/parameter_resolver'
 
 class Bora
   class Stack
@@ -23,6 +23,7 @@ class Bora
       @stack_config = stack_config
       @cfn_options = extract_cfn_options(stack_config)
       @cfn_stack = Cfn::Stack.new(@cfn_stack_name)
+      @resolver = ParameterResolver.new
     end
 
     attr_reader :stack_name
@@ -157,20 +158,7 @@ class Bora
     def process_params(override_params)
       params = @stack_config['params'] || {}
       params.merge!(override_params) if override_params
-      params.map { |k, v| [k, process_param_substitutions(v)] }.to_h
-    end
-
-    def process_param_substitutions(val)
-      return val unless val.is_a? String
-      old_val = nil
-      while old_val != val
-        old_val = val
-        val = val.sub(/\${[^}]+}/) do |m|
-          token = m[2..-2]
-          CfnParamResolver.new(token).resolve
-        end
-      end
-      val
+      @resolver.resolve(params)
     end
 
     def extract_cfn_options(config)

@@ -139,12 +139,12 @@ for example AMI IDs.
 
 The format is as follows:
 
-`${<stack_name>/outputs/<output_name>}`
+`${cfn://<stack_name>/outputs/<output_name>}`
 
 For example:
 ```yaml
 params:
-  api_url: http://${api-stack/outputs/Domain}/api
+  api_url: http://${cfn://api-stack/outputs/Domain}/api
 ```
 
 This will look up the `Domain` output from the stack named `api-stack` and substitute it into the `api_url` parameter.
