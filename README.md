@@ -171,7 +171,7 @@ so as to not expose the secret in the template.
 
 For example:
 ```bash
-# Simple key lookup. Note 3 slashes. Will run `credstash get myke`.
+# Simple key lookup. Note 3 slashes. Will run `credstash get mykey`.
 ${credstash:///mykey}
 
 # Lookup with a key context. Will run `credstash get mykey app=webapp`.
