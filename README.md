@@ -178,6 +178,17 @@ ${credstash:///mykey}
 ${credstash:///mykey?app=webapp}
 ```
 
+### Route53 Hosted Zone ID Lookup
+Looks up the Route53 hosted zone ID given a hosted zone name (eg: example.com).
+Also allows you to specify if you want the private or public hosted zone for a given name,
+which can be useful if you have set up split-view DNS with both public and private zones for the same name.
+
+```bash
+${hostedzone://example.com}
+${hostedzone://example.com/public}
+${hostedzone://example.com/private}
+```
+
 
 ## Command Reference
 
@@ -234,6 +245,7 @@ $ rake web-uat:apply[instance_type=t2.micro,ami=ami-11032472]
 ## Related Projects
 The following projects provided inspiration for Bora:
 * [CfnDsl](https://github.com/stevenjack/cfndsl) - A Ruby DSL for CloudFormation templates
+* [StackMaster](https://github.com/envato/stack_master) - Very similar in goals to Bora
 * [CloudFormer](https://github.com/kunday/cloudformer) - Rake tasks for CloudFormation
 * [Cumulus](https://github.com/cotdsa/cumulus) - A Python YAML based tool for working with CloudFormation
 

@@ -40,25 +40,21 @@ describe Bora::Resolver::Hostedzone do
   end
 
   it "returns a single matching public hosted zone" do
-    expect(resolver.resolve(URI("hostedzone:///unique.com"))).to eq("3")
+    expect(resolver.resolve(URI("hostedzone://unique.com"))).to eq("3")
+    expect(resolver.resolve(URI("hostedzone://unique.com/"))).to eq("3")
   end
 
   it "matches on public/private zone types" do
-    expect(resolver.resolve(URI("hostedzone:///example.com/public"))).to eq("1")
-    expect(resolver.resolve(URI("hostedzone:///example.com/private"))).to eq("2")
-  end
-
-  it "allows the region to be provided" do
-    expect(Aws::Route53::Client).to receive(:new).with({region: "ap-southeast-2"}).and_return(@route53)
-    resolver.resolve(URI("hostedzone://ap-southeast-2/unique.com"))
+    expect(resolver.resolve(URI("hostedzone://example.com/public"))).to eq("1")
+    expect(resolver.resolve(URI("hostedzone://example.com/private"))).to eq("2")
   end
 
   it "raises an exception if there were multiple matching zones" do
-    expect{resolver.resolve(URI("hostedzone:///example.com"))}.to raise_exception(Bora::Resolver::Hostedzone::MultipleMatchesError)
+    expect{resolver.resolve(URI("hostedzone://example.com"))}.to raise_exception(Bora::Resolver::Hostedzone::MultipleMatchesError)
   end
 
   it "raises an exception if there was no zone found" do
-    expect{resolver.resolve(URI("hostedzone:///notthere.com"))}.to raise_exception(Bora::Resolver::Hostedzone::NotFoundError)
+    expect{resolver.resolve(URI("hostedzone://notthere.com"))}.to raise_exception(Bora::Resolver::Hostedzone::NotFoundError)
   end
 
   it "raises an exception if the parameter is invalid" do
