@@ -5,7 +5,7 @@ require 'helper/spec_helper'
 require 'bora/resolver/hostedzone'
 
 describe Bora::Resolver::Hostedzone do
-  let(:resolver) { described_class.new }
+  let(:resolver) { described_class.new(double) }
 
   before do
     @route53 = double

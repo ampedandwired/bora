@@ -2,7 +2,7 @@ require 'uri'
 require 'helper/spec_helper'
 
 describe Bora::ParameterResolver do
-  let(:parameter_resolver) { described_class.new }
+  let(:parameter_resolver) { described_class.new(double) }
 
   before do
     @loader = double(Bora::ParameterResolverLoader)

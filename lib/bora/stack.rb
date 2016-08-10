@@ -21,12 +21,13 @@ class Bora
       @cfn_stack_name = stack_config['stack_name'] || @stack_name
       @template_file = template_file
       @stack_config = stack_config
+      @region = @stack_config['default_region']
       @cfn_options = extract_cfn_options(stack_config)
-      @cfn_stack = Cfn::Stack.new(@cfn_stack_name)
-      @resolver = ParameterResolver.new
+      @cfn_stack = Cfn::Stack.new(@cfn_stack_name, @region)
+      @resolver = ParameterResolver.new(self)
     end
 
-    attr_reader :stack_name
+    attr_reader :stack_name, :stack_config, :region
 
     def rake_tasks
       StackTasks.new(self)

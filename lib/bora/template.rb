@@ -2,6 +2,8 @@ require 'bora/stack'
 
 class Bora
   class Template
+    INHERITABLE_PROPERTIES = ["capabilities", "default_region"]
+
     def initialize(template_name, template_config)
       @template_name = template_name
       @template_config = template_config
@@ -29,12 +31,11 @@ class Bora
     private
 
     def resolve_stack_config(template_config, stack_config)
-      extract_cfn_options(template_config).merge(stack_config)
+      inheritable_properties(template_config).merge(stack_config)
     end
 
-    def extract_cfn_options(config)
-      valid_options = ["capabilities"]
-      config.select { |k| valid_options.include?(k) }
+    def inheritable_properties(config)
+      config.select { |k| INHERITABLE_PROPERTIES.include?(k) }
     end
 
   end

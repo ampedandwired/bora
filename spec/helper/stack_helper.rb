@@ -3,7 +3,7 @@ require 'bora/cli'
 
 def setup_stack(stack_name, status: :not_created)
   stack = double(Bora::Cfn::Stack)
-  allow(Bora::Cfn::Stack).to receive(:new).with(stack_name).and_return(stack)
+  allow(Bora::Cfn::Stack).to receive(:new).with(stack_name, nil).and_return(stack)
 
   if status == :not_created
     allow(stack).to receive(:status).and_return(Bora::Cfn::StackStatus.new(nil))
@@ -37,6 +37,8 @@ class BoraRunner
     ensure
       eval("$#{stream} = #{stream.upcase}")
     end
+
+    puts result
 
     result
   end

@@ -12,8 +12,9 @@ class Bora
     class Stack
       NO_UPDATE_MESSAGE = "No updates are to be performed"
 
-      def initialize(stack_name)
+      def initialize(stack_name, region = nil)
         @stack_name = stack_name
+        @region = region
         @processed_events = Set.new
       end
 
@@ -88,7 +89,9 @@ class Bora
       private
 
       def cloudformation
-        @cfn ||= Aws::CloudFormation::Client.new
+        @cfn ||= begin
+          @region ? Aws::CloudFormation::Client.new(region: @region) : Aws::CloudFormation::Client.new
+        end
       end
 
       def method_missing(sym, *args, &block)

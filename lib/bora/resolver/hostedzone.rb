@@ -8,6 +8,9 @@ class Bora
       NotFoundError = Class.new(StandardError)
       MultipleMatchesError = Class.new(StandardError)
 
+      def initialize(stack)
+      end
+
       def resolve(uri)
         zone_name = uri.host
         zone_type = uri.path[1..-1]

@@ -3,7 +3,8 @@ require 'bora/parameter_resolver_loader'
 
 class Bora
   class ParameterResolver
-    def initialize
+    def initialize(stack)
+      @stack = stack
       @loader = ParameterResolverLoader.new
       @resolver_cache = {}
     end
@@ -24,7 +25,7 @@ class Bora
           token = m[2..-2]
           uri = parse_uri(token)
           resolver_name = uri.scheme
-          resolver = @resolver_cache[resolver_name] || @loader.load_resolver(resolver_name).new
+          resolver = @resolver_cache[resolver_name] || @loader.load_resolver(resolver_name).new(@stack)
           resolver.resolve(uri)
         end
       end

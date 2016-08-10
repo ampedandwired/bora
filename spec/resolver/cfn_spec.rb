@@ -3,7 +3,13 @@ require 'helper/spec_helper'
 require 'bora/resolver/cfn'
 
 describe Bora::Resolver::Cfn do
-  let(:resolver) { described_class.new }
+  let(:bora_stack) do
+    s = double(Bora::Stack)
+    allow(s).to receive(:region).and_return(nil)
+    s
+  end
+
+  let(:resolver) { described_class.new(bora_stack) }
 
   context "when the stack exists" do
     before do
@@ -16,6 +22,18 @@ describe Bora::Resolver::Cfn do
 
     it "retrieves the given output from the stack" do
       expect(resolver.resolve(URI("cfn://web-prod/outputs/UserId"))).to eq("joe")
+    end
+
+    it "uses the region from the stack when specified" do
+      expect(bora_stack).to receive(:region).and_return("xx-yyyy-1")
+      expect(Bora::Cfn::Stack).to receive(:new).with("web-prod", "xx-yyyy-1").and_return(@stack)
+      expect(resolver.resolve(URI("cfn://web-prod/outputs/UserId"))).to eq("joe")
+    end
+
+    it "uses the region from the uri when specified, which overrides the region of the stack" do
+      expect(bora_stack).to_not receive(:region)
+      expect(Bora::Cfn::Stack).to receive(:new).with("web-prod", "aa-bbbb-1").and_return(@stack)
+      expect(resolver.resolve(URI("cfn://web-prod.aa-bbbb-1/outputs/UserId"))).to eq("joe")
     end
 
     it "raises an exception if the value does not exist" do

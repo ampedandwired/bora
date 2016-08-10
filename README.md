@@ -63,6 +63,10 @@ To get a full list of available tasks run `rake -T`.
 The example below is a `bora.yml` file showing all available options:
 
 ```yaml
+# Optional. The default region for all stacks in the file.
+# See below for further information.
+default_region: us-east-1
+
 # A map defining all the CloudFormation templates available.
 # A "template" is effectively a single CloudFormation JSON (or cfndsl template).
 templates:
@@ -74,6 +78,11 @@ templates:
     # Optional. An array of "capabilities" to be passed to the CloudFormation API
     # (see CloudFormation docs for more details)
     capabilities: [CAPABILITY_IAM]
+
+    # Optional. The default region for all stacks in this template.
+    # Overrides "default_region" at the global level.
+    # See below for further information.
+    default_region: us-west-2
 
     # A map defining all the "stacks" associated with this template
     # for example, "uat" and "prod"
@@ -92,6 +101,12 @@ templates:
         # name concatenated with the stack name as defined in this file,
         # eg: "app-prod".
         stack_name: prod-application-stack
+
+        # Optional. Default region for this stack.
+        # Overrides "default_region" at the template level.
+        # See below for further information.
+        default_region: ap-southeast-2
+
         params:
           InstanceType: m4.xlarge
           AMI: ami-11032472
@@ -129,6 +144,53 @@ templates:
       prod: {}
 ```
 
+## Command Reference
+
+The following commands are available through the command line and rake tasks.
+
+* **apply** - Creates the stack if it doesn't exist, or updates it otherwise
+* **delete** - Deletes the stack
+* **diff** - Provides a visual diff between the local template and the currently applied template in AWS
+* **events** - Outputs the latest events from the stack
+* **list** - Outputs a list of all stacks defined in the config file
+* **outputs** - Shows the outputs from the stack
+* **recreate** - Recreates (deletes then creates) the stack
+* **show** - Shows the local template in JSON, generating it if necessary
+* **show_current** - Shows the currently applied template in AWS
+* **status** - Displays the current status of the stack
+* **validate** - Validates the template using the AWS CloudFormation "validate" API call
+
+
+### Command Line
+
+Run `bora help` to see all available commands.
+
+`bora help [command]` will show you help for a particular command,
+eg: `bora help apply`.
+
+
+### Rake Tasks
+
+To use the rake tasks, simply put this in your `Rakefile`:
+```ruby
+require 'bora'
+Bora.new.rake_tasks
+```
+
+To get a full list of available tasks run `rake -T`.
+
+
+## Specifying Regions
+You can specify the region in which to create a stack in a few ways.
+The order of precedence is as follows (first non-empty value found wins):
+
+- The `--region` parameter on the command line
+- The `default_region` setting within the stack section in `bora.yml`
+- The `default_region` setting within the template section in `bora.yml`
+- The `default_region` setting at the top level of `bora.yml`
+- The [default region as determined by the AWS Ruby SDK](https://docs.aws.amazon.com/sdkforruby/api/index.html).
+
+
 ## Parameter Substitution
 
 Bora supports looking up parameter values from various locations and interpolating them into stack parameters.
@@ -154,14 +216,20 @@ The format of the rest of the URI is dependent on the resolver.
 There are a number of resolvers that come with Bora (documented below),
 or you can write your own.
 
+
 ### Stack Output Lookup
 
 You can look up outputs from stacks in the same region.
 
 For example:
 ```bash
-${cfn://<stack_name>/outputs/<output_name>}
+# Look up output "MyOutput" from stack "my-stack" in the same region as the current stack.
+${cfn://my-stack/outputs/MyOutput}
+
+# Look up an output from a stack in another region
+${cfn://my-stack.ap-southeast-2/outputs/MyOutput}
 ```
+
 
 ### CredStash Key Lookup
 [CredStash](https://github.com/fugue/credstash) is a utility for storing secrets using AWS KMS.
@@ -171,12 +239,16 @@ so as to not expose the secret in the template.
 
 For example:
 ```bash
-# Simple key lookup. Note 3 slashes. Will run `credstash get mykey`.
+# Simple key lookup in same region as the stack. Note 3 slashes. Will run `credstash get mykey`.
 ${credstash:///mykey}
 
 # Lookup with a key context. Will run `credstash get mykey app=webapp`.
 ${credstash:///mykey?app=webapp}
+
+# Lookup a credstash in another region.
+${credstash://ap-southeast-2/mykey?app=webapp}
 ```
+
 
 ### Route53 Hosted Zone ID Lookup
 Looks up the Route53 hosted zone ID given a hosted zone name (eg: example.com).
@@ -188,42 +260,6 @@ ${hostedzone://example.com}
 ${hostedzone://example.com/public}
 ${hostedzone://example.com/private}
 ```
-
-
-## Command Reference
-
-The following commands are available through the command line and rake tasks.
-
-* **apply** - Creates the stack if it doesn't exist, or updates it otherwise
-* **delete** - Deletes the stack
-* **diff** - Provides a visual diff between the local template and the currently applied template in AWS
-* **events** - Outputs the latest events from the stack
-* **list** - Outputs a list of all stacks defined in the config file
-* **outputs** - Shows the outputs from the stack
-* **recreate** - Recreates (deletes then creates) the stack
-* **show** - Shows the local template in JSON, generating it if necessary
-* **show_current** - Shows the currently applied template in AWS
-* **status** - Displays the current status of the stack
-* **validate** - Validates the template using the AWS CloudFormation "validate" API call
-
-
-## Command Line
-
-Run `bora help` to see all available commands.
-
-`bora help [command]` will show you help for a particular command,
-eg: `bora help apply`.
-
-
-## Rake Tasks
-
-To use the rake tasks, simply put this in your `Rakefile`:
-```ruby
-require 'bora'
-Bora.new.rake_tasks
-```
-
-To get a full list of available tasks run `rake -T`.
 
 
 ## Overriding Stack Parameters from the Command Line

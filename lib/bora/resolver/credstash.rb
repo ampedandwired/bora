@@ -6,12 +6,16 @@ class Bora
     class Credstash
       InvalidParameter = Class.new(StandardError)
 
+      def initialize(stack)
+        @stack = stack
+      end
+
       def resolve(uri)
-        raise InvalidParameter, "Invalid credstash parameter #{uri}" if !uri.path
+        raise InvalidParameter, "Invalid credstash parameter #{uri}: no credstash key" if !uri.path
         key = uri.path[1..-1]
-        raise InvalidParameter, "Invalid credstash parameter #{uri}" if !key || key.empty?
+        raise InvalidParameter, "Invalid credstash parameter #{uri}: no credstash key" if !key || key.empty?
+        region = resolve_region(uri, @stack)
         context = parse_key_context(uri)
-        region = resolve_region
         output = `credstash --region #{region} get #{key}#{context}`
         exit_code = $?
         raise NotFound, output if exit_code.exitstatus != 0
@@ -21,9 +25,8 @@ class Bora
 
       private
 
-      def resolve_region
-        # Get default region from AWS SDK. There's probably a better way to do this.
-        Aws::CloudFormation::Client.new.config[:region]
+      def resolve_region(uri, stack)
+        region = uri.host || stack.region || Aws::CloudFormation::Client.new.config[:region]
       end
 
       def parse_key_context(uri)

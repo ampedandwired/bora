@@ -6,6 +6,7 @@ require "bora/tasks"
 
 class Bora
   DEFAULT_CONFIG_FILE = "bora.yml"
+  INHERITABLE_PROPERTIES = ["default_region"]
 
   def initialize(config_file_or_hash: DEFAULT_CONFIG_FILE, colorize: true)
     @templates = {}
@@ -13,7 +14,8 @@ class Bora
     String.disable_colorization = !colorize
     raise "No templates defined" if !config['templates']
     config['templates'].each do |template_name, template_config|
-      @templates[template_name] = Template.new(template_name, template_config)
+      resolved_config = resolve_template_config(config, template_config)
+      @templates[template_name] = Template.new(template_name, resolved_config)
     end
   end
 
@@ -43,6 +45,17 @@ class Bora
     elsif config.class == Hash
       return config
     end
+  end
+
+
+  private
+
+  def resolve_template_config(bora_config, template_config)
+    inheritable_properties(bora_config).merge(template_config)
+  end
+
+  def inheritable_properties(config)
+    config.select { |k| INHERITABLE_PROPERTIES.include?(k) }
   end
 
 end
