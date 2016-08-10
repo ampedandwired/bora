@@ -8,14 +8,14 @@ class Bora
   DEFAULT_CONFIG_FILE = "bora.yml"
   INHERITABLE_PROPERTIES = ["default_region"]
 
-  def initialize(config_file_or_hash: DEFAULT_CONFIG_FILE, colorize: true)
+  def initialize(config_file_or_hash: DEFAULT_CONFIG_FILE, override_config: {}, colorize: true)
     @templates = {}
     config = load_config(config_file_or_hash)
     String.disable_colorization = !colorize
     raise "No templates defined" if !config['templates']
     config['templates'].each do |template_name, template_config|
-      resolved_config = resolve_template_config(config, template_config)
-      @templates[template_name] = Template.new(template_name, resolved_config)
+      resolved_config = resolve_template_config(config, template_config, override_config)
+      @templates[template_name] = Template.new(template_name, resolved_config, override_config)
     end
   end
 
@@ -50,8 +50,8 @@ class Bora
 
   private
 
-  def resolve_template_config(bora_config, template_config)
-    inheritable_properties(bora_config).merge(template_config)
+  def resolve_template_config(bora_config, template_config, override_config)
+    inheritable_properties(bora_config).merge(template_config).merge(inheritable_properties(override_config))
   end
 
   def inheritable_properties(config)

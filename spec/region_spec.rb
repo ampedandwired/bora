@@ -8,24 +8,36 @@ describe BoraCli do
   end
 
   it "uses the region specified in the global config" do
-    expect(Bora::Cfn::Stack).to receive(:new).with("web-prod", "xx-yyyy-2").and_return(@stack)
+    expect(Bora::Cfn::Stack).to receive(:new).with("web-prod", "xx-yyyy-1").and_return(@stack)
     config = bora_config
-    config['default_region'] = "xx-yyyy-2"
+    config['default_region'] = "xx-yyyy-1"
     output = bora.run(config, "apply", "web-prod")
   end
 
-  it "uses the region specified in the template config" do
+  it "uses the region specified in the template config, which overrides global config" do
     expect(Bora::Cfn::Stack).to receive(:new).with("web-prod", "xx-yyyy-2").and_return(@stack)
     config = bora_config
+    config['default_region'] = "xx-yyyy-1"
     config['templates']['web']['default_region'] = "xx-yyyy-2"
     output = bora.run(config, "apply", "web-prod")
   end
 
-  it "uses the region specified in the stack config" do
-    expect(Bora::Cfn::Stack).to receive(:new).with("web-prod", "xx-yyyy-2").and_return(@stack)
+  it "uses the region specified in the stack config, which overrides template and global config" do
+    expect(Bora::Cfn::Stack).to receive(:new).with("web-prod", "xx-yyyy-3").and_return(@stack)
     config = bora_config
-    config['templates']['web']['stacks']['prod']['default_region'] = "xx-yyyy-2"
+    config['default_region'] = "xx-yyyy-1"
+    config['templates']['web']['default_region'] = "xx-yyyy-2"
+    config['templates']['web']['stacks']['prod']['default_region'] = "xx-yyyy-3"
     output = bora.run(config, "apply", "web-prod")
+  end
+
+  it "uses the region specified on the command line, which overrides all other config" do
+    expect(Bora::Cfn::Stack).to receive(:new).with("web-prod", "xx-yyyy-4").and_return(@stack)
+    config = bora_config
+    config['default_region'] = "xx-yyyy-1"
+    config['templates']['web']['default_region'] = "xx-yyyy-2"
+    config['templates']['web']['stacks']['prod']['default_region'] = "xx-yyyy-3"
+    output = bora.run(config, "apply", "web-prod", global_params: {"region" => "xx-yyyy-4"})
   end
 
   def bora_config

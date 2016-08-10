@@ -26,7 +26,7 @@ describe BoraCli do
 
   it "lists all available stacks" do
     output = bora.run(@config, "list")
-    expect(output).to include("web-dev")
+    expect(output).to include("web-dev", "web-prod", "app-dev", "app-prod")
   end
 
 end

@@ -4,13 +4,13 @@ class Bora
   class Template
     INHERITABLE_PROPERTIES = ["capabilities", "default_region"]
 
-    def initialize(template_name, template_config)
+    def initialize(template_name, template_config, override_config = {})
       @template_name = template_name
       @template_config = template_config
       @stacks = {}
       template_config['stacks'].each do |stack_name, stack_config|
         stack_name = "#{template_name}-#{stack_name}"
-        stack_config = resolve_stack_config(template_config, stack_config)
+        stack_config = resolve_stack_config(template_config, stack_config, override_config)
         @stacks[stack_name] = Stack.new(stack_name, template_config['template_file'], stack_config)
       end
     end
@@ -30,8 +30,8 @@ class Bora
 
     private
 
-    def resolve_stack_config(template_config, stack_config)
-      inheritable_properties(template_config).merge(stack_config)
+    def resolve_stack_config(template_config, stack_config, override_config)
+      inheritable_properties(template_config).merge(stack_config).merge(inheritable_properties(override_config))
     end
 
     def inheritable_properties(config)

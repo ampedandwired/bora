@@ -3,7 +3,17 @@ require "bora"
 
 class Bora
   class Cli < Thor
-    class_option :file, type: :string, aliases: :f, default: Bora::DEFAULT_CONFIG_FILE, desc: "The Bora config file to use"
+    class_option :file,
+      type: :string,
+      aliases: :f,
+      default: Bora::DEFAULT_CONFIG_FILE,
+      desc: "The Bora config file to use"
+
+    class_option :region,
+      type: :string,
+      aliases: :r,
+      default: nil,
+      desc: "The region to use for the stack operation. Overrides any regions specified in the Bora config file."
 
     desc "list", "Lists the available stacks"
     def list
@@ -72,7 +82,9 @@ class Bora
     private
 
     def stack(config_file, stack_name)
-      bora = bora(config_file)
+      region = options.region
+      override_config = region ? {"default_region" => region} : {}
+      bora = bora(config_file, override_config)
       stack = bora.stack(stack_name)
       if !stack
         STDERR.puts "Could not find stack #{stack_name}"
@@ -81,8 +93,8 @@ class Bora
       stack
     end
 
-    def bora(config_file)
-      Bora.new(config_file_or_hash: config_file)
+    def bora(config_file, override_config = {})
+      Bora.new(config_file_or_hash: config_file, override_config: override_config)
     end
 
     def params

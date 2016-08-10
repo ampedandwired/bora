@@ -184,7 +184,7 @@ To get a full list of available tasks run `rake -T`.
 You can specify the region in which to create a stack in a few ways.
 The order of precedence is as follows (first non-empty value found wins):
 
-- The `--region` parameter on the command line
+- The `--region` parameter on the command line (only available in the CLI, not in the Rake tasks)
 - The `default_region` setting within the stack section in `bora.yml`
 - The `default_region` setting within the template section in `bora.yml`
 - The `default_region` setting at the top level of `bora.yml`

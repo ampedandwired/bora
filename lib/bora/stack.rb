@@ -133,7 +133,8 @@ class Bora
     end
 
     def invoke_action(action, *args)
-      puts "#{action.capitalize} stack '#{@cfn_stack_name}'"
+      region_text = @region ? "in region #{@region}" : "in default region"
+      puts "#{action.capitalize} stack '#{@cfn_stack_name}' #{region_text}"
       success = @cfn_stack.send(action, *args) { |event| puts event }
       if success
         puts STACK_ACTION_SUCCESS_MESSAGE % [action.capitalize, @cfn_stack_name]
