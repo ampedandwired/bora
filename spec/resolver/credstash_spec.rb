@@ -18,8 +18,8 @@ describe Bora::Resolver::Credstash do
   end
 
   it "returns the value from credstash" do
-    expect(resolver).to receive(:`).with("credstash --region ap-southeast-2 get foo").and_return("bar")
-    expect(resolver.resolve(URI("credstash:///foo"))).to eq("bar")
+    expect(resolver).to receive(:`).with("credstash --region ap-southeast-2 get foo").and_return(" bar \n")
+    expect(resolver.resolve(URI("credstash:///foo"))).to eq(" bar")
   end
 
   it "passes key context from query params" do

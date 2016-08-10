@@ -19,7 +19,7 @@ class Bora
         output = `credstash --region #{region} get #{key}#{context}`
         exit_code = $?
         raise NotFound, output if exit_code.exitstatus != 0
-        output
+        output.rstrip
       end
 
 
