@@ -43,6 +43,7 @@ class Bora
           outputs.each { |output| puts output }
         end
       end
+      success
     end
 
     def delete
@@ -66,6 +67,7 @@ class Bora
       else
         puts STACK_DOES_NOT_EXIST_MESSAGE % @cfn_stack_name
       end
+      events
     end
 
     def outputs
@@ -80,6 +82,7 @@ class Bora
       else
         puts STACK_DOES_NOT_EXIST_MESSAGE % @cfn_stack_name
       end
+      outputs
     end
 
     def recreate(override_params = {})
@@ -103,7 +106,9 @@ class Bora
 
     def validate(override_params = {})
       generate(override_params)
-      puts STACK_VALIDATE_SUCCESS_MESSAGE % @cfn_stack_name if @cfn_stack.validate(@cfn_options)
+      is_valid = @cfn_stack.validate(@cfn_options)
+      puts STACK_VALIDATE_SUCCESS_MESSAGE % @cfn_stack_name if is_valid
+      is_valid
     end
 
 
