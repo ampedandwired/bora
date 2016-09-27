@@ -66,12 +66,26 @@ describe BoraCli do
     output = bora.run(config, "apply", "web-prod")
   end
 
+  it "passes declared CloudFormation parameters through from the config when using cfndsl" do
+    cfn_params = {"DbUsername" => "user_cloudformation_param"}
+    bora_params = cfn_params.merge({"default_db_username" => "user_cfndsl_param"})
+    expect(@stack).to receive(:create)
+      .with({
+        template_body: '{"AWSTemplateFormatVersion":"2010-09-09","Parameters":{"DbUsername":{"Type":"String","Default":"user_cfndsl_param"}}}',
+        parameters: cfn_params(cfn_params)
+      })
+      .and_return(true)
 
-  def bora_config(template_config: {}, stack_config: {}, params: {})
+    config = bora_config(template_file: File.join(__dir__, "fixtures/params_spec_template.rb"), params: bora_params)
+    output = bora.run(config, "apply", "web-prod")
+  end
+
+
+  def bora_config(template_file: "web_template.json", template_config: {}, stack_config: {}, params: {})
     config = {
       "templates" => {
         "web" => {
-          "template_file" => "web_template.json",
+          "template_file" => template_file,
           "stacks" => {
             "prod" => {}
           }
