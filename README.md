@@ -15,6 +15,8 @@ Given this config, Bora then provides commands (or Rake tasks) to work with thos
 
 ## Installation
 
+This gem requires Ruby 2.1 or greater.
+
 If you're using Bundler, add this line to your application's `Gemfile`:
 
 ```ruby
