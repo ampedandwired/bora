@@ -44,17 +44,15 @@ class BoraRunner
 end
 
 class BoraCli < BoraRunner
-  def run(config, cmd, *params, global_params: nil)
+  def run(config, *params)
     bora_cfg = Tempfile.new(["bora", ".yaml"])
     bora_cfg.write(config.to_yaml)
     bora_cfg.close
     bora_cfg_path = bora_cfg.path
-    globals = {file: bora_cfg_path}
-    globals.merge!(global_params) if global_params
-    cli = Bora::Cli.new([], globals)
+    thor_args = params + ["--file", bora_cfg_path]
     capture do
       begin
-        cli.invoke(cmd, params)
+        Bora::Cli.start(thor_args)
       rescue Exception => e
         puts e
       end

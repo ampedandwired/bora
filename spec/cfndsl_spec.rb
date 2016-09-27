@@ -14,6 +14,16 @@ describe BoraCli do
     output = bora.run(bora_config, "apply", "web-prod")
   end
 
+  it "generates pretty json if specified" do
+    expect(@stack).to receive(:create)
+      .with({
+        template_body: JSON.pretty_generate(JSON.parse('{"AWSTemplateFormatVersion":"2010-09-09","Resources":{"EBApp":{"Properties":{"ApplicationName":"MyApp"},"Type":"AWS::ElasticBeanstalk::Application"}}}'))
+      })
+      .and_return(true)
+
+    output = bora.run(bora_config, "apply", "web-prod", "--pretty")
+  end
+
   def bora_config
     {
       "templates" => {

@@ -23,14 +23,15 @@ describe BoraCli do
 
   it "overrides parameters in the config with parameters passed on the command line" do
     params = { "foo" => "bar" }
+    expected_params = { "foo" => "overridden" }
     expect(@stack).to receive(:create)
       .with({
         template_url: "web_template.json",
-        parameters: cfn_params(params)
+        parameters: cfn_params(expected_params)
       })
       .and_return(true)
 
-    output = bora.run(bora_config(params: params), "apply", "web-prod", "--params", "foo=overridde")
+    output = bora.run(bora_config(params: params), "apply", "web-prod", "--params", "foo=overridden")
   end
 
   it "passes no params to CloudFormation if params are empty" do

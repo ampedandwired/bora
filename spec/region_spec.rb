@@ -37,7 +37,7 @@ describe BoraCli do
     config['default_region'] = "xx-yyyy-1"
     config['templates']['web']['default_region'] = "xx-yyyy-2"
     config['templates']['web']['stacks']['prod']['default_region'] = "xx-yyyy-3"
-    output = bora.run(config, "apply", "web-prod", global_params: {"region" => "xx-yyyy-4"})
+    output = bora.run(config, "apply", "web-prod", "--region", "xx-yyyy-4")
   end
 
   def bora_config

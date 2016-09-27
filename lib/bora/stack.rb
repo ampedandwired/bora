@@ -33,8 +33,8 @@ class Bora
       StackTasks.new(self)
     end
 
-    def apply(override_params = {})
-      generate(override_params)
+    def apply(override_params = {}, pretty_json = false)
+      generate(override_params, pretty_json)
       success = invoke_action(@cfn_stack.exists? ? "update" : "create", @cfn_options)
       if success
         outputs = @cfn_stack.outputs
@@ -114,10 +114,10 @@ class Bora
 
     protected
 
-    def generate(override_params = {})
+    def generate(override_params = {}, pretty_json = false)
       params = process_params(override_params)
       if File.extname(@template_file) == ".rb"
-        template_body = run_cfndsl(@template_file, params)
+        template_body = run_cfndsl(@template_file, params, pretty_json)
         template_json = JSON.parse(template_body)
         if template_json["Parameters"]
           cfn_param_keys = template_json["Parameters"].keys
@@ -153,11 +153,12 @@ class Bora
       success
     end
 
-    def run_cfndsl(template_file, params)
+    def run_cfndsl(template_file, params, pretty_json)
       temp_extras = Tempfile.new(["bora", ".yaml"])
       temp_extras.write(params.to_yaml)
       temp_extras.close
-      template_body = CfnDsl.eval_file_with_extras(template_file, [[:yaml, temp_extras.path]]).to_json
+      cfndsl_model = CfnDsl.eval_file_with_extras(template_file, [[:yaml, temp_extras.path]])
+      template_body = pretty_json ? JSON.pretty_generate(cfndsl_model) : cfndsl_model.to_json
       temp_extras.unlink
       template_body
     end

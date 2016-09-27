@@ -25,8 +25,9 @@ class Bora
 
     desc "apply STACK_NAME", "Creates or updates the stack"
     option :params, type: :array, aliases: :p, desc: "Parameters to be passed to the template, eg: --params 'instance_type=t2.micro'"
+    option :pretty, type: :boolean, default: false, desc: "Send pretty (formatted) JSON to AWS (only works for cfndsl templates)"
     def apply(stack_name)
-      stack(options.file, stack_name).apply(params)
+      stack(options.file, stack_name).apply(params, options.pretty)
     end
 
     desc "delete STACK_NAME", "Deletes the stack"
