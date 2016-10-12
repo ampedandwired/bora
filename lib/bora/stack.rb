@@ -27,7 +27,7 @@ class Bora
       @resolver = ParameterResolver.new(self)
     end
 
-    attr_reader :stack_name, :stack_config, :region
+    attr_reader :stack_name, :stack_config, :region, :template_file
 
     def rake_tasks
       StackTasks.new(self)
@@ -111,11 +111,17 @@ class Bora
       is_valid
     end
 
+    def resolved_params(override_params = {})
+      params = @stack_config['params'] || {}
+      params.merge!(override_params)
+      @resolver.resolve(params)
+    end
+
 
     protected
 
     def generate(override_params = {}, pretty_json = false)
-      params = process_params(override_params)
+      params = resolved_params(override_params)
       if File.extname(@template_file) == ".rb"
         template_body = run_cfndsl(@template_file, params, pretty_json)
         template_json = JSON.parse(template_body)
