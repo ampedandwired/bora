@@ -3,7 +3,7 @@ require 'bora/parameter_resolver_loader'
 
 class Bora
   class ParameterResolver
-    CircularReferenceError = Class.new(StandardError)
+    UnresolvedSubstitutionError = Class.new(StandardError)
 
     PLACEHOLDER_REGEX = /\${[^}]+}/
 
@@ -25,7 +25,7 @@ class Bora
           params[k] = resolved_value
         end
         if unresolved_placeholders_still_remain && !placeholders_were_substituted
-          raise CircularReferenceError, "Circular reference detected in parameter substitutions:\n#{unresolved_placeholders_as_string(params)}"
+          raise UnresolvedSubstitutionError, "Parameter substitutions could not be resolved:\n#{unresolved_placeholders_as_string(params)}"
         end
       end
       params
@@ -46,7 +46,7 @@ class Bora
       if !uri.scheme
         # This token refers to another parameter, rather than a resolver
         value_to_substitute = params[uri.path]
-        has_unresolved_placeholder?(value_to_substitute) ? placeholder : value_to_substitute
+        !value_to_substitute || has_unresolved_placeholder?(value_to_substitute) ? placeholder : value_to_substitute
       else
         # This token needs to be resolved by a resolver
         resolver_name = uri.scheme

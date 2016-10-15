@@ -36,7 +36,13 @@ describe Bora::ParameterResolver do
 
   it "raises an error on a circular series of parameter references" do
     params = {"aaa" => "${bbb}_foo", "bbb" => "${ccc}_bar", "ccc" => "${aaa}_baz"}
-    expect{parameter_resolver.resolve(params)}.to raise_exception(Bora::ParameterResolver::CircularReferenceError)
+    expect{parameter_resolver.resolve(params)}.to raise_exception(Bora::ParameterResolver::UnresolvedSubstitutionError)
+  end
+
+  it "raises an error if there are unresolved placeholders" do
+    p "xxxx"
+    params = {"aaa" => "${xxx}_foo_${bbb}", "bbb" => "bar"}
+    expect{parameter_resolver.resolve(params)}.to raise_exception(Bora::ParameterResolver::UnresolvedSubstitutionError)
   end
 
   it "is compatible with legacy cfn output lookups" do
