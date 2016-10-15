@@ -15,12 +15,28 @@ describe Bora::ParameterResolver do
 
   it "resolves tokens in parameters" do
     params = {
-      "key1": "value1",
-      "key2": "${foo://bar.baz/bing}"
+      "key1" => "value1",
+      "key2" => "${foo://bar.baz/bing}"
     }
 
     expect(@resolver).to receive(:resolve).with(URI("foo://bar.baz/bing")).and_return("foo")
-    expect(parameter_resolver.resolve(params)).to eq({"key1": "value1", "key2": "foo"})
+    expect(parameter_resolver.resolve(params)).to eq({"key1" => "value1", "key2" => "foo"})
+  end
+
+  it "allows you to refer to another parameter" do
+    params = {"key1" => "value1", "key2" => "${key1}_foo"}
+    expect(parameter_resolver.resolve(params)).to eq({"key1" => "value1", "key2" => "value1_foo"})
+  end
+
+  it "handles multiple levels of parameer indirection" do
+    params = {"aaa" => "${ccc}_baz", "bbb" => "${ccc}_bing", "ccc" => "${ddd}_foo_${foo://bar}", "ddd" => "dvalue"}
+    expect(@resolver).to receive(:resolve).once.with(URI("foo://bar")).and_return("bar")
+    expect(parameter_resolver.resolve(params)).to eq({"aaa" => "dvalue_foo_bar_baz", "bbb" => "dvalue_foo_bar_bing", "ccc" => "dvalue_foo_bar", "ddd" => "dvalue"})
+  end
+
+  it "raises an error on a circular series of parameter references" do
+    params = {"aaa" => "${bbb}_foo", "bbb" => "${ccc}_bar", "ccc" => "${aaa}_baz"}
+    expect{parameter_resolver.resolve(params)}.to raise_exception(Bora::ParameterResolver::CircularReferenceError)
   end
 
   it "is compatible with legacy cfn output lookups" do

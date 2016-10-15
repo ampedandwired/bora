@@ -219,6 +219,17 @@ There are a number of resolvers that come with Bora (documented below),
 or you can write your own.
 
 
+### Parameter Lookup
+Any substitution that does not specify a "scheme" is treated as a reference to another parameter value.
+For example:
+
+```yaml
+params:
+  domain: example.com
+  url: http://${domain}/foo
+```
+
+
 ### Stack Output Lookup
 
 You can look up outputs from stacks in the same region.
