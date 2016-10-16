@@ -102,7 +102,7 @@ templates:
         # If you don't supply this, the name will be the template
         # name concatenated with the stack name as defined in this file,
         # eg: "app-prod".
-        stack_name: prod-application-stack
+        cfn_stack_name: prod-application-stack
 
         # Optional. Default region for this stack.
         # Overrides "default_region" at the template level.
@@ -289,6 +289,30 @@ For rake, he equivalent is:
 ```bash
 $ rake web-uat:apply[instance_type=t2.micro,ami=ami-11032472]
 ```
+
+
+## Creating Multiple Instances of a Stack
+Sometimes it can be useful to create multiple instances of a single stack.
+For example, you may define a single "qa" stack with all the settings for a testing environment.
+Then you might want to stand up this stack multiple times so you can have multiple testing environments,
+eg "qa1", "qa2", etc.
+
+Bora makes this possible by allowing you to override the name of the stack that gets created in CloudFormation.
+For example:
+
+```bash
+$ bora apply web-qa --cfn-stack-name "web-qa-1"
+$ bora apply web-qa --cfn-stack-name "web-qa-2"
+```
+
+Remember that if you use this functionality you must remember to pass in the stack name to *every* command or you will get unexepected results.
+
+```bash
+$ bora outputs web-qa --cfn-stack-name "web-qa-1"
+```
+
+Work is underway to improve how Bora handles this use case.
+If this is of interest to you, please have a look at the [GitHub issue](https://github.com/ampedandwired/bora/issues/10) for this functionality.
 
 
 ## Related Projects

@@ -15,6 +15,12 @@ class Bora
       default: nil,
       desc: "The region to use for the stack operation. Overrides any regions specified in the Bora config file."
 
+    class_option "cfn-stack-name",
+      type: :string,
+      aliases: :c,
+      default: nil,
+      desc: "The name to give the stack in CloudFormation. Overrides any CFN stack name setting in the Bora config file."
+
     desc "list", "Lists the available stacks"
     def list
       templates = bora(options.file).templates
@@ -84,7 +90,12 @@ class Bora
 
     def stack(config_file, stack_name)
       region = options.region
-      override_config = region ? {"default_region" => region} : {}
+      cfn_stack_name = options["cfn-stack-name"]
+
+      override_config = {}
+      override_config["default_region"] = region if region
+      override_config["cfn_stack_name"] = cfn_stack_name if cfn_stack_name
+
       bora = bora(config_file, override_config)
       stack = bora.stack(stack_name)
       if !stack

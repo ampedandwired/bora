@@ -18,7 +18,10 @@ class Bora
 
     def initialize(stack_name, template_file, stack_config)
       @stack_name = stack_name
-      @cfn_stack_name = stack_config['stack_name'] || @stack_name
+      @cfn_stack_name = stack_config['cfn_stack_name'] || stack_config['stack_name'] || @stack_name
+      if stack_config['stack_name']
+        puts "DEPRECATED: The 'stack_name' setting is deprecated. Please use 'cfn_stack_name' instead."
+      end
       @template_file = template_file
       @stack_config = stack_config
       @region = @stack_config['default_region']
