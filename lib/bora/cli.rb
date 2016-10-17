@@ -17,7 +17,7 @@ class Bora
 
     class_option "cfn-stack-name",
       type: :string,
-      aliases: :c,
+      aliases: :n,
       default: nil,
       desc: "The name to give the stack in CloudFormation. Overrides any CFN stack name setting in the Bora config file."
 
@@ -43,8 +43,9 @@ class Bora
 
     desc "diff STACK_NAME", "Diffs the new template with the stack's current template"
     option :params, type: :array, aliases: :p, desc: "Parameters to be passed to the template, eg: --params 'instance_type=t2.micro'"
+    option :context, type: :numeric, aliases: :c, default: 3, desc: "Number of lines of context to show around the differences"
     def diff(stack_name)
-      stack(options.file, stack_name).diff(params)
+      stack(options.file, stack_name).diff(params, options.context)
     end
 
     desc "events STACK_NAME", "Outputs the latest events from the stack"

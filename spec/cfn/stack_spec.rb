@@ -87,12 +87,6 @@ describe Bora::Cfn::Stack do
       end
     end
 
-    describe "#diff" do
-      it "doesn't fail" do
-        expect(@stack.diff({template_body: '{"foo": "bar"}'})).to_not be_nil
-      end
-    end
-
     describe "#status" do
       it "return an object representing the current status of the stack" do
         expect(@stack.status.exists?).to be_falsey
@@ -194,15 +188,6 @@ describe Bora::Cfn::Stack do
         expect(@cfn).to receive(:get_template).at_least(:once).and_return(OpenStruct.new(template_body: '{"foo": "bar"}'))
         expect(@stack.template(false)).to eq('{"foo": "bar"}')
         expect(@stack.template(true).include?("\n")).to be true
-      end
-    end
-
-    describe "#diff" do
-      it "should return a diff of the current and new templates" do
-        current_template = "{\n\"foo\": \"bar\"\n}"
-        new_template = "{\n\"foo\": \"barx\"\n}"
-        expect(@cfn).to receive(:get_template).and_return(OpenStruct.new(template_body: current_template))
-        expect(@stack.diff({template_body: new_template}).to_s).to include "+  \"foo\": \"barx\""
       end
     end
 

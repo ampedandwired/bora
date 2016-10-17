@@ -1,7 +1,6 @@
 require 'set'
 require 'open-uri'
 require 'aws-sdk'
-require 'diffy'
 require 'bora/cfn/stack_status'
 require 'bora/cfn/event'
 require 'bora/cfn/output'
@@ -72,10 +71,6 @@ class Bora
         else
           raise "new_template not yet implemented for URL #{options[:template_url]}"
         end
-      end
-
-      def diff(options)
-        Diffy::Diff.new(template, new_template(options))
       end
 
       def validate(options)

@@ -1,6 +1,7 @@
 require 'tempfile'
 require 'colorize'
 require 'cfndsl'
+require 'diffy'
 require 'bora/cfn/stack'
 require 'bora/stack_tasks'
 require 'bora/parameter_resolver'
@@ -54,9 +55,25 @@ class Bora
       invoke_action("delete")
     end
 
-    def diff(override_params = {})
+    def diff(override_params = {}, context_lines = 3)
       generate(override_params)
-      puts @cfn_stack.diff(@cfn_options).to_s(String.disable_colorization ? :text : :color)
+      diff = Diffy::Diff.new(@cfn_stack.template, @cfn_stack.new_template(@cfn_options),
+              context: context_lines,
+              include_diff_info: true)
+      diff = diff.reject { |line| line =~ /^(---|\+\+\+|\\\\)/ }
+      diff = diff.map do |line|
+        case line
+        when /^\+/
+          line.chomp.colorize(:green)
+        when /^-/
+          line.chomp.colorize(:red)
+        when /^@@/
+          line.chomp.colorize(:cyan)
+        else
+          line.chomp
+        end
+      end
+      puts diff.join("\n")
     end
 
     def events
