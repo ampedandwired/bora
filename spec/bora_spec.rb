@@ -5,6 +5,7 @@ require 'delete_examples'
 require 'diff_examples'
 require 'events_examples'
 require 'outputs_examples'
+require 'parameters_examples'
 require 'recreate_examples'
 require 'show_examples'
 require 'show_current_examples'
@@ -32,6 +33,7 @@ shared_examples 'bora' do
   include_examples "bora#diff"
   include_examples "bora#events"
   include_examples "bora#outputs"
+  include_examples "bora#parameters"
   include_examples "bora#recreate"
   include_examples "bora#show"
   include_examples "bora#show_current"

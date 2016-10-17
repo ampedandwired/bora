@@ -16,6 +16,7 @@ class Bora
       define_diff_task
       define_events_task
       define_outputs_task
+      define_parameters_task
       define_recreate_task
       define_show_task
       define_show_current_task
@@ -64,6 +65,15 @@ class Bora
         desc "Shows the outputs from the '#{@stack.stack_name}' stack"
         task :outputs do
           @stack.outputs
+        end
+      end
+    end
+
+    def define_parameters_task
+      within_namespace do
+        desc "Shows the parameters from the '#{@stack.stack_name}' stack"
+        task :parameters do
+          @stack.parameters
         end
       end
     end

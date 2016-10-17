@@ -156,6 +156,7 @@ The following commands are available through the command line and rake tasks.
 * **events** - Outputs the latest events from the stack
 * **list** - Outputs a list of all stacks defined in the config file
 * **outputs** - Shows the outputs from the stack
+* **parameters** - Shows the parameters from the stack
 * **recreate** - Recreates (deletes then creates) the stack
 * **show** - Shows the local template in JSON, generating it if necessary
 * **show_current** - Shows the currently applied template in AWS

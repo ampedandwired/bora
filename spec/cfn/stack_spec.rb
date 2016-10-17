@@ -75,6 +75,12 @@ describe Bora::Cfn::Stack do
       end
     end
 
+    describe "#parameters" do
+      it "returns nil" do
+        expect(@stack.parameters).to be_nil
+      end
+    end
+
     describe "#template" do
       it "returns nil" do
         expect(@stack.template).to be_nil
@@ -167,6 +173,19 @@ describe Bora::Cfn::Stack do
         actual_outputs = @stack.outputs
         expect(actual_outputs.length).to eq(2)
         expect(actual_outputs[0].to_s).to include("foo")
+      end
+    end
+
+    describe "#parameters" do
+      it "returns all the stack parameters" do
+        parameters = [
+          {parameter_key: "a", parameter_value: "foo"},
+          {parameter_key: "d", parameter_value: "bar"}
+        ]
+        allow(@cfn).to receive(:describe_stacks).and_return(describe_stacks_result(parameters: parameters))
+        actual_parameters = @stack.parameters
+        expect(actual_parameters.length).to eq(2)
+        expect(actual_parameters[0].to_s).to include("foo")
       end
     end
 

@@ -27,6 +27,12 @@ def setup_outputs(stack, outputs)
   bora_outputs
 end
 
+def setup_parameters(stack, parameters)
+  bora_parameters = parameters.map { |o| Bora::Cfn::Parameter.new(Aws::CloudFormation::Types::Parameter.new(o)) }
+  allow(stack).to receive(:parameters).and_return(bora_parameters)
+  bora_parameters
+end
+
 class BoraRunner
   def capture(stream = :stdout)
     begin

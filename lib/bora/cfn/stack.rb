@@ -5,6 +5,7 @@ require 'diffy'
 require 'bora/cfn/stack_status'
 require 'bora/cfn/event'
 require 'bora/cfn/output'
+require 'bora/cfn/parameter'
 
 class Bora
   module Cfn
@@ -48,6 +49,11 @@ class Bora
       def outputs
         return if !exists?
         underlying_stack.outputs.map { |output| Output.new(output) }
+      end
+
+      def parameters
+        return if !exists?
+        underlying_stack.parameters.map { |parameter| Parameter.new(parameter) }
       end
 
       def template(pretty = true)

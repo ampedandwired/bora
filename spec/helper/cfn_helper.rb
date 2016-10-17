@@ -24,12 +24,13 @@ def empty_describe_stack_events_result
   OpenStruct.new({ stack_events: [] })
 end
 
-def describe_stacks_result(status: "CREATE_COMPLETE", outputs: [])
+def describe_stacks_result(status: "CREATE_COMPLETE", outputs: [], parameters: [])
   OpenStruct.new({
     stacks: [
       OpenStruct.new({
         stack_status: status,
-        outputs: outputs.map { |o| OpenStruct.new(o) }
+        outputs: outputs.map { |o| OpenStruct.new(o) },
+        parameters: parameters.map { |o| OpenStruct.new(o) }
       })
     ]
   })

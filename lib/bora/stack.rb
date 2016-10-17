@@ -14,6 +14,7 @@ class Bora
     STACK_EVENTS_DO_NOT_EXIST_MESSAGE = "Stack '%s' has no events"
     STACK_EVENTS_MESSAGE = "Events for stack '%s'"
     STACK_OUTPUTS_DO_NOT_EXIST_MESSAGE = "Stack '%s' has no outputs"
+    STACK_PARAMETERS_DO_NOT_EXIST_MESSAGE = "Stack '%s' has no parameters"
     STACK_VALIDATE_SUCCESS_MESSAGE = "Template for stack '%s' is valid"
 
     def initialize(stack_name, template_file, stack_config)
@@ -86,6 +87,21 @@ class Bora
         puts STACK_DOES_NOT_EXIST_MESSAGE % @cfn_stack_name
       end
       outputs
+    end
+
+    def parameters
+      parameters = @cfn_stack.parameters
+      if parameters
+        if parameters.length > 0
+          puts "Parameters for stack '#{@cfn_stack_name}'"
+          parameters.each { |parameter| puts parameter }
+        else
+          puts STACK_PARAMETERS_DO_NOT_EXIST_MESSAGE % @cfn_stack_name
+        end
+      else
+        puts STACK_DOES_NOT_EXIST_MESSAGE % @cfn_stack_name
+      end
+      parameters
     end
 
     def recreate(override_params = {})
