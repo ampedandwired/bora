@@ -2,7 +2,10 @@ require "helper/spec_helper"
 
 describe BoraCli do
   let(:bora) { described_class.new }
-  before { @stack = setup_stack("web-prod", status: :create_complete) }
+  before do
+    @stack = setup_stack("web-prod", status: :create_complete)
+    setup_parameters(@stack, [])
+  end
 
   it "shows a configurable number of context lines around each diff" do
     current_template = "line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8\nline9\nlineA\nlineB\nlineC\nlineD\nlineE"

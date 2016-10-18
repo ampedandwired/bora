@@ -17,6 +17,8 @@ class Bora
     STACK_OUTPUTS_DO_NOT_EXIST_MESSAGE = "Stack '%s' has no outputs"
     STACK_PARAMETERS_DO_NOT_EXIST_MESSAGE = "Stack '%s' has no parameters"
     STACK_VALIDATE_SUCCESS_MESSAGE = "Template for stack '%s' is valid"
+    STACK_DIFF_TEMPLATE_UNCHANGED_MESSAGE = "Template has not changed"
+    STACK_DIFF_PARAMETERS_UNCHANGED_MESSAGE = "Parameters have not changed"
 
     def initialize(stack_name, template_file, stack_config)
       @stack_name = stack_name
@@ -57,23 +59,8 @@ class Bora
 
     def diff(override_params = {}, context_lines = 3)
       generate(override_params)
-      diff = Diffy::Diff.new(@cfn_stack.template, @cfn_stack.new_template(@cfn_options),
-              context: context_lines,
-              include_diff_info: true)
-      diff = diff.reject { |line| line =~ /^(---|\+\+\+|\\\\)/ }
-      diff = diff.map do |line|
-        case line
-        when /^\+/
-          line.chomp.colorize(:green)
-        when /^-/
-          line.chomp.colorize(:red)
-        when /^@@/
-          line.chomp.colorize(:cyan)
-        else
-          line.chomp
-        end
-      end
-      puts diff.join("\n")
+      diff_parameters
+      diff_template(override_params, context_lines)
     end
 
     def events
@@ -155,6 +142,52 @@ class Bora
 
 
     protected
+
+    def diff_parameters
+      if @cfn_stack.parameters && !@cfn_stack.parameters.empty?
+        current_params = @cfn_stack.parameters.sort { |a, b| a.key <=> b.key }.map(&:to_s).join("\n") + "\n"
+      end
+      if @cfn_options[:parameters] && !@cfn_options[:parameters].empty?
+        new_params = @cfn_options[:parameters].sort { |a, b|
+          a[:parameter_key] <=> b[:parameter_key]
+        }.map { |p|
+          "#{p[:parameter_key] } - #{p[:parameter_value]}"
+        }.join("\n") + "\n"
+      end
+
+      if current_params || new_params
+        puts "Parameters".colorize(mode: :bold)
+        puts "----------"
+        diff = Diffy::Diff.new(current_params, new_params).to_s(String.disable_colorization ? :text : :color).chomp
+        puts diff && !diff.empty? ? diff : STACK_DIFF_PARAMETERS_UNCHANGED_MESSAGE
+        puts
+      end
+    end
+
+    def diff_template(override_params, context_lines)
+      diff = Diffy::Diff.new(@cfn_stack.template, @cfn_stack.new_template(@cfn_options),
+              context: context_lines,
+              include_diff_info: true)
+      diff = diff.reject { |line| line =~ /^(---|\+\+\+|\\\\)/ }
+      diff = diff.map do |line|
+        case line
+        when /^\+/
+          line.chomp.colorize(:green)
+        when /^-/
+          line.chomp.colorize(:red)
+        when /^@@/
+          line.chomp.colorize(:cyan)
+        else
+          line.chomp
+        end
+      end
+      diff = diff.join("\n")
+
+      puts "Template".colorize(mode: :bold)
+      puts "--------"
+      puts diff && !diff.empty? ? diff : STACK_DIFF_TEMPLATE_UNCHANGED_MESSAGE
+      puts
+    end
 
     def generate(override_params = {}, pretty_json = false)
       params = resolved_params(override_params)
