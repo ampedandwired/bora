@@ -238,12 +238,6 @@ class Bora
       template_body
     end
 
-    def process_params(override_params)
-      params = @stack_config['params'] || {}
-      params.merge!(override_params) if override_params
-      @resolver.resolve(params)
-    end
-
     def extract_cfn_options(config)
       valid_options = ["capabilities"]
       config.select { |k| valid_options.include?(k) }
