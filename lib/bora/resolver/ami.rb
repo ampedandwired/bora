@@ -1,5 +1,4 @@
 require 'bora/cfn/stack'
-require 'pp'
 
 class Bora
   module Resolver
@@ -8,6 +7,7 @@ class Bora
       InvalidParameter = Class.new(StandardError)
 
       def initialize(stack)
+        @stack = stack
       end
 
       def resolve(uri)
@@ -19,7 +19,7 @@ class Bora
           owner = query['owner']
 
         end
-        ec2 = Aws::EC2::Client.new
+        ec2 = Aws::EC2::Client.new(region: @stack.region)
         images = ec2.describe_images(
           owners: [owner],
           filters: [
@@ -34,7 +34,7 @@ class Bora
           ]
         ).images
         raise NoAMI, "No Matching AMI's for prefix #{ami_prefix}" if images.empty?
-        images.sort! { |a, b| a.creation_date <=> b.creation_date }.last
+        images.sort! { |a, b| a.creation_date <=> b.creation_date }.last.image_id
       end
     end
   end
