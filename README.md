@@ -230,6 +230,16 @@ params:
   url: http://${domain}/foo
 ```
 
+This even works within array or hash parameters,
+although you can only look up values from the top level params.
+
+```yaml
+params:
+  domain: example.com
+  site_config:
+    url: http://${domain}/foo
+```
+
 
 ### Stack Output Lookup
 
