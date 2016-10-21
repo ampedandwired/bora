@@ -34,14 +34,58 @@ describe Bora::ParameterResolver do
     expect(parameter_resolver.resolve(params)).to eq({"aaa" => "dvalue_foo_bar_baz", "bbb" => "dvalue_foo_bar_bing", "ccc" => "dvalue_foo_bar", "ddd" => "dvalue"})
   end
 
+  it "handles recursive array and hash substitutions" do
+    params = {
+      "a1" => "v1_${a4}",
+      "a2" => {
+        "b1" => ["${a1}", "${a4}"],
+        "b2" => {
+          "c1" => "${a1}"
+        }
+      },
+      "a3" => {
+        "b1" => "${a4}"
+      },
+      "a4" => "${a5}",
+      "a5" => "v5"
+    }
+
+    resolved_params = {
+      "a1" => "v1_v5",
+      "a2" => {
+        "b1" => ["v1_v5", "v5"],
+        "b2" => {
+          "c1" => "v1_v5"
+        }
+      },
+      "a3" => {
+        "b1" => "v5"
+      },
+      "a4" => "v5",
+      "a5" => "v5"
+    }
+
+    expect(parameter_resolver.resolve(params)).to eq(resolved_params)
+  end
+
   it "raises an error on a circular series of parameter references" do
     params = {"aaa" => "${bbb}_foo", "bbb" => "${ccc}_bar", "ccc" => "${aaa}_baz"}
     expect{parameter_resolver.resolve(params)}.to raise_exception(Bora::ParameterResolver::UnresolvedSubstitutionError)
   end
 
   it "raises an error if there are unresolved placeholders" do
-    p "xxxx"
     params = {"aaa" => "${xxx}_foo_${bbb}", "bbb" => "bar"}
+    expect{parameter_resolver.resolve(params)}.to raise_exception(Bora::ParameterResolver::UnresolvedSubstitutionError)
+  end
+
+  it "raises an error if there are unresolved placeholders in recursive hashes and arrays" do
+    params = {
+      "a1" => {
+        "b1" => "${a2}",
+        "b2" => ["${a2}", "${invalid}"]
+      },
+      "a2" => "bar"
+    }
     expect{parameter_resolver.resolve(params)}.to raise_exception(Bora::ParameterResolver::UnresolvedSubstitutionError)
   end
 

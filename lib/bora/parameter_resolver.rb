@@ -35,10 +35,17 @@ class Bora
     private
 
     def process_param_substitutions(val, params)
-      return val unless val.is_a? String
-      val.gsub(PLACEHOLDER_REGEX) do |placeholder|
-        process_placeholder(placeholder, params)
+      result = val
+      if val.is_a? String
+        result = val.gsub(PLACEHOLDER_REGEX) do |placeholder|
+          process_placeholder(placeholder, params)
+        end
+      elsif val.is_a? Array
+        result = val.map { |i| process_param_substitutions(i, params) }
+      elsif val.is_a? Hash
+        result = val.map { |k, v| [k, process_param_substitutions(v, params)] }.to_h
       end
+      result
     end
 
     def process_placeholder(placeholder, params)
@@ -46,17 +53,25 @@ class Bora
       if !uri.scheme
         # This token refers to another parameter, rather than a resolver
         value_to_substitute = params[uri.path]
-        !value_to_substitute || has_unresolved_placeholder?(value_to_substitute) ? placeholder : value_to_substitute
+        return !value_to_substitute || has_unresolved_placeholder?(value_to_substitute) ? placeholder : value_to_substitute
       else
         # This token needs to be resolved by a resolver
         resolver_name = uri.scheme
         resolver = @resolver_cache[resolver_name] || @loader.load_resolver(resolver_name).new(@stack)
-        resolver.resolve(uri)
+        return resolver.resolve(uri)
       end
     end
 
     def has_unresolved_placeholder?(val)
-      val =~ PLACEHOLDER_REGEX
+      result = false
+      if val.is_a? String
+        result = val =~ PLACEHOLDER_REGEX
+      elsif val.is_a? Array
+        result = val.find { |i| has_unresolved_placeholder?(i) }
+      elsif val.is_a? Hash
+        result = val.find { |_, v| has_unresolved_placeholder?(v) }
+      end
+      result
     end
 
     def parse_uri(s)
