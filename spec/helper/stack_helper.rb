@@ -1,9 +1,11 @@
 require 'rake'
 require 'bora/cli'
 
+DEFAULT_REGION = "us-stubbed-1"
+
 def setup_stack(stack_name, status: :not_created)
   stack = double(Bora::Cfn::Stack)
-  allow(Bora::Cfn::Stack).to receive(:new).with(stack_name, nil).and_return(stack)
+  allow(Bora::Cfn::Stack).to receive(:new).with(stack_name, DEFAULT_REGION).and_return(stack)
 
   if status == :not_created
     allow(stack).to receive(:status).and_return(Bora::Cfn::StackStatus.new(nil))

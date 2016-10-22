@@ -8,20 +8,20 @@ describe BoraCli do
   end
 
   it "uses the cfn stack name specified in the stack config" do
-    expect(Bora::Cfn::Stack).to receive(:new).with("my-web-prod-stack", nil).and_return(@stack)
+    expect(Bora::Cfn::Stack).to receive(:new).with("my-web-prod-stack", DEFAULT_REGION).and_return(@stack)
     config = bora_config
     bora.run(config, "apply", "web-prod")
   end
 
   it "supports the deprecated 'stack_name' parameter" do
-    expect(Bora::Cfn::Stack).to receive(:new).with("my-web-prod-stack", nil).and_return(@stack)
+    expect(Bora::Cfn::Stack).to receive(:new).with("my-web-prod-stack", DEFAULT_REGION).and_return(@stack)
     config = bora_config("stack_name")
     output = bora.run(config, "apply", "web-prod")
     expect(output).to include("deprecated")
   end
 
   it "uses the cfn stack name specified on the command line, which overrides all other config" do
-    expect(Bora::Cfn::Stack).to receive(:new).with("my-web-prod-stack-cli", nil).and_return(@stack)
+    expect(Bora::Cfn::Stack).to receive(:new).with("my-web-prod-stack-cli", DEFAULT_REGION).and_return(@stack)
     config = bora_config
     bora.run(config, "apply", "web-prod", "--cfn-stack-name", "my-web-prod-stack-cli")
   end

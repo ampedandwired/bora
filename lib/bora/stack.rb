@@ -28,7 +28,7 @@ class Bora
       end
       @template_file = template_file
       @stack_config = stack_config
-      @region = @stack_config['default_region']
+      @region = @stack_config['default_region'] || Aws::CloudFormation::Client.new.config[:region]
       @cfn_options = extract_cfn_options(stack_config)
       @cfn_stack = Cfn::Stack.new(@cfn_stack_name, @region)
       @resolver = ParameterResolver.new(self)
@@ -213,8 +213,7 @@ class Bora
     end
 
     def invoke_action(action, *args)
-      region_text = @region ? "in region #{@region}" : "in default region"
-      puts "#{action.capitalize} stack '#{@cfn_stack_name}' #{region_text}"
+      puts "#{action.capitalize} stack '#{@cfn_stack_name}' in region #{@region}"
       success = @cfn_stack.send(action, *args) { |event| puts event }
       if success
         puts STACK_ACTION_SUCCESS_MESSAGE % [action.capitalize, @cfn_stack_name]

@@ -26,7 +26,7 @@ class Bora
       private
 
       def resolve_region(uri, stack)
-        region = uri.host || stack.region || Aws::CloudFormation::Client.new.config[:region]
+        region = uri.host || stack.region
       end
 
       def parse_key_context(uri)

@@ -5,7 +5,7 @@ require 'bora/resolver/cfn'
 describe Bora::Resolver::Cfn do
   let(:bora_stack) do
     s = double(Bora::Stack)
-    allow(s).to receive(:region).and_return(nil)
+    allow(s).to receive(:region).and_return(DEFAULT_REGION)
     s
   end
 

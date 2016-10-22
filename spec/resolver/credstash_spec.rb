@@ -5,7 +5,7 @@ require 'bora/resolver/credstash'
 describe Bora::Resolver::Credstash do
   let(:stack) do
     s = double(Bora::Stack)
-    allow(s).to receive(:region).and_return(nil)
+    allow(s).to receive(:region).and_return(DEFAULT_REGION)
     s
   end
 
@@ -14,16 +14,15 @@ describe Bora::Resolver::Credstash do
   before do
     client = double
     allow(Aws::CloudFormation::Client).to receive(:new).and_return(client)
-    allow(client).to receive(:config).and_return({region: "ap-southeast-2"})
   end
 
   it "returns the value from credstash" do
-    expect(resolver).to receive(:`).with("credstash --region ap-southeast-2 get foo").and_return(" bar \n")
+    expect(resolver).to receive(:`).with("credstash --region #{DEFAULT_REGION} get foo").and_return(" bar \n")
     expect(resolver.resolve(URI("credstash:///foo"))).to eq(" bar")
   end
 
   it "passes key context from query params" do
-    expect(resolver).to receive(:`).with("credstash --region ap-southeast-2 get foo k1=v1 k2=v2").and_return("bar")
+    expect(resolver).to receive(:`).with("credstash --region #{DEFAULT_REGION} get foo k1=v1 k2=v2").and_return("bar")
     expect(resolver.resolve(URI("credstash:///foo?k1=v1&k2=v2"))).to eq("bar")
   end
 

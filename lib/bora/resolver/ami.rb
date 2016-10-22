@@ -17,8 +17,8 @@ class Bora
         if !uri.query.nil? && uri.query.include?('owner')
           query = URI.decode_www_form(uri.query).to_h
           owner = query['owner']
-
         end
+
         ec2 = Aws::EC2::Client.new(region: @stack.region)
         images = ec2.describe_images(
           owners: [owner],
@@ -33,6 +33,7 @@ class Bora
             }
           ]
         ).images
+
         raise NoAMI, "No Matching AMI's for prefix #{ami_prefix}" if images.empty?
         images.sort! { |a, b| a.creation_date <=> b.creation_date }.last.image_id
       end
