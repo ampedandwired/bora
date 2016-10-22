@@ -35,7 +35,7 @@ class Bora
         ).images
 
         raise NoAMI, "No Matching AMI's for prefix #{ami_prefix}" if images.empty?
-        images.sort! { |a, b| a.creation_date <=> b.creation_date }.last.image_id
+        images.sort! { |a, b| DateTime.parse(a.creation_date) <=> DateTime.parse(b.creation_date) }.last.image_id
       end
     end
   end
