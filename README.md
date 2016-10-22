@@ -284,7 +284,14 @@ ${hostedzone://example.com}
 ${hostedzone://example.com/public}
 ${hostedzone://example.com/private}
 ```
+### AMI Lookup
 
+Looks up an AMI given a name prefix which may contain wildcards. If query returns multiple images the latest is used.
+
+```bash
+${ami://amzn-ami-hv*x86_64-gp2?owner=amazon}
+${ami://my-windows-soe}
+```
 
 ## Overriding Stack Parameters from the Command Line
 
