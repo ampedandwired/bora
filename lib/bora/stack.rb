@@ -29,7 +29,6 @@ class Bora
       @template_file = template_file
       @stack_config = stack_config
       @region = @stack_config['default_region'] || Aws::CloudFormation::Client.new.config[:region]
-      @cfn_options = extract_cfn_options(stack_config)
       @cfn_stack = Cfn::Stack.new(@cfn_stack_name, @region)
       @resolver = ParameterResolver.new(self)
     end
@@ -41,8 +40,8 @@ class Bora
     end
 
     def apply(override_params = {}, pretty_json = false)
-      generate(override_params, pretty_json)
-      success = invoke_action(@cfn_stack.exists? ? "update" : "create", @cfn_options)
+      cfn_options = generate(override_params, pretty_json)
+      success = invoke_action(@cfn_stack.exists? ? "update" : "create", cfn_options)
       if success
         outputs = @cfn_stack.outputs
         if outputs && outputs.length > 0
@@ -58,9 +57,9 @@ class Bora
     end
 
     def diff(override_params = {}, context_lines = 3)
-      generate(override_params)
-      diff_parameters
-      diff_template(override_params, context_lines)
+      cfn_options = generate(override_params)
+      diff_parameters(cfn_options[:parameters])
+      diff_template(override_params, context_lines, cfn_options)
     end
 
     def events
@@ -109,13 +108,13 @@ class Bora
     end
 
     def recreate(override_params = {})
-      generate(override_params)
-      invoke_action("recreate", @cfn_options)
+      cfn_options = generate(override_params)
+      invoke_action("recreate", cfn_options)
     end
 
     def show(override_params = {})
-      generate(override_params)
-      puts @cfn_stack.new_template(@cfn_options)
+      cfn_options = generate(override_params)
+      puts @cfn_stack.new_template(cfn_options)
     end
 
     def show_current
@@ -128,8 +127,8 @@ class Bora
     end
 
     def validate(override_params = {})
-      generate(override_params)
-      is_valid = @cfn_stack.validate(@cfn_options)
+      cfn_options = generate(override_params)
+      is_valid = @cfn_stack.validate(cfn_options)
       puts STACK_VALIDATE_SUCCESS_MESSAGE % @cfn_stack_name if is_valid
       is_valid
     end
@@ -143,12 +142,12 @@ class Bora
 
     protected
 
-    def diff_parameters
+    def diff_parameters(cfn_parameters)
       if @cfn_stack.parameters && !@cfn_stack.parameters.empty?
         current_params = @cfn_stack.parameters.sort { |a, b| a.key <=> b.key }.map(&:to_s).join("\n") + "\n"
       end
-      if @cfn_options[:parameters] && !@cfn_options[:parameters].empty?
-        new_params = @cfn_options[:parameters].sort { |a, b|
+      if cfn_parameters && !cfn_parameters.empty?
+        new_params = cfn_parameters.sort { |a, b|
           a[:parameter_key] <=> b[:parameter_key]
         }.map { |p|
           "#{p[:parameter_key] } - #{p[:parameter_value]}"
@@ -164,8 +163,8 @@ class Bora
       end
     end
 
-    def diff_template(override_params, context_lines)
-      diff = Diffy::Diff.new(@cfn_stack.template, @cfn_stack.new_template(@cfn_options),
+    def diff_template(override_params, context_lines, cfn_options)
+      diff = Diffy::Diff.new(@cfn_stack.template, @cfn_stack.new_template(cfn_options),
               context: context_lines,
               include_diff_info: true)
       diff = diff.reject { |line| line =~ /^(---|\+\+\+|\\\\)/ }
@@ -190,25 +189,29 @@ class Bora
     end
 
     def generate(override_params = {}, pretty_json = false)
-      params = resolved_params(override_params)
-      if File.extname(@template_file) == ".rb"
-        template_body = run_cfndsl(@template_file, params, pretty_json)
-        template_json = JSON.parse(template_body)
-        if template_json["Parameters"]
-          cfn_param_keys = template_json["Parameters"].keys
-          cfn_params = params.select { |k, v| cfn_param_keys.include?(k) }.map do |k, v|
-            { parameter_key: k, parameter_value: v }
+      @__cfn_options ||= begin
+        cfn_options = cfn_options_from_stack_config
+        params = resolved_params(override_params)
+        if File.extname(@template_file) == ".rb"
+          template_body = run_cfndsl(@template_file, params, pretty_json)
+          template_json = JSON.parse(template_body)
+          if template_json["Parameters"]
+            cfn_param_keys = template_json["Parameters"].keys
+            cfn_params = params.select { |k, v| cfn_param_keys.include?(k) }.map do |k, v|
+              { parameter_key: k, parameter_value: v }
+            end
+            cfn_options[:parameters] = cfn_params if !cfn_params.empty?
           end
-          @cfn_options[:parameters] = cfn_params if !cfn_params.empty?
-        end
-        @cfn_options[:template_body] = template_body
-      else
-        @cfn_options[:template_url] = @template_file
-        if !params.empty?
-          @cfn_options[:parameters] = params.map do |k, v|
-            { parameter_key: k, parameter_value: v }
+          cfn_options[:template_body] = template_body
+        else
+          cfn_options[:template_url] = @template_file
+          if !params.empty?
+            cfn_options[:parameters] = params.map do |k, v|
+              { parameter_key: k, parameter_value: v }
+            end
           end
         end
+        cfn_options
       end
     end
 
@@ -237,9 +240,9 @@ class Bora
       template_body
     end
 
-    def extract_cfn_options(config)
+    def cfn_options_from_stack_config
       valid_options = ["capabilities"]
-      config.select { |k| valid_options.include?(k) }
+      @stack_config.select { |k| valid_options.include?(k) }
     end
 
   end
