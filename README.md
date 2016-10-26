@@ -285,9 +285,15 @@ ${hostedzone://example.com/public}
 ${hostedzone://example.com/private}
 ```
 ### AMI Lookup
+<<<<<<< HEAD
 
 Looks up an AMI given a name prefix which may contain wildcards. If query returns multiple images the latest is used.
 
+=======
+
+Looks up an AMI given a name prefix which may contain wildcards. If query returns multiple images the latest is used.
+
+>>>>>>> 602b53605d723635b6eab2cd2711685bd46c454e
 ```bash
 ${ami://amzn-ami-hv*x86_64-gp2?owner=amazon}
 ${ami://my-windows-soe}
