@@ -18,21 +18,14 @@ describe Bora::Resolver::Ami do
     ec2
   end
 
-  it "returns the latest image from the 'self' account" do
+  it "returns the latest image available" do
     expect(ec2).to receive(:describe_images)
-      .with(describe_images_request("my_ami_*", "self"))
+      .with(describe_images_request("my_ami_*"))
       .and_return(describe_images_response)
 
     expect(resolver.resolve(URI("ami://my_ami_*"))).to eq("ami-2")
   end
 
-  it "returns the latest image from the specified account" do
-    expect(ec2).to receive(:describe_images)
-      .with(describe_images_request("my_ami_*", "amazon"))
-      .and_return(describe_images_response)
-
-    expect(resolver.resolve(URI("ami://my_ami_*?owner=amazon"))).to eq("ami-2")
-  end
 
   it "raises an exception if no ami is found" do
     expect(ec2).to receive(:describe_images).and_return(OpenStruct.new(images: []))
@@ -44,9 +37,8 @@ describe Bora::Resolver::Ami do
   end
 
 
-  def describe_images_request(ami, owner)
+  def describe_images_request(ami)
     {
-      owners: [owner],
       filters: [
         { name: "name", values: [ami] },
         { name:   'state', values: ['available'] }
