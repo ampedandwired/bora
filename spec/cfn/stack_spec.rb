@@ -186,8 +186,7 @@ describe Bora::Cfn::Stack do
     describe "#template" do
       it "returns the current stack template" do
         expect(@cfn).to receive(:get_template).at_least(:once).and_return(OpenStruct.new(template_body: '{"foo": "bar"}'))
-        expect(@stack.template(false)).to eq('{"foo": "bar"}')
-        expect(@stack.template(true).include?("\n")).to be true
+        expect(@stack.template).to eq('{"foo": "bar"}')
       end
     end
 
@@ -195,14 +194,6 @@ describe Bora::Cfn::Stack do
       it "return an object representing the current status of the stack" do
         expect(@stack.status.exists?).to be_truthy
       end
-    end
-  end
-
-  describe "#new_template" do
-    it "returns the template body" do
-      template = '{"foo": "bar"}'
-      expect(@stack.new_template({template_body: template}, false)).to eq(template)
-      expect(@stack.new_template({template_body: template}).include?("\n")).to be true
     end
   end
 

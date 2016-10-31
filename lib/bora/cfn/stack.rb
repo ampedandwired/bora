@@ -55,22 +55,13 @@ class Bora
         underlying_stack.parameters.map { |parameter| Parameter.new(parameter) }
       end
 
-      def template(pretty = true)
+      def template
         return if !exists?
-        template = cloudformation.get_template({stack_name: @stack_name}).template_body
-        template = JSON.pretty_generate(JSON.parse(template)) if pretty
-        template
-      end
-
-      def new_template(options, pretty = true)
-        options = resolve_options(options, true)
-        template = options[:template_body]
-        template = JSON.pretty_generate(JSON.parse(template)) if pretty
-        template
+        cloudformation.get_template({stack_name: @stack_name}).template_body
       end
 
       def validate(options)
-        cloudformation.validate_template(resolve_options(options).select { |k| [:template_body, :template_url].include?(k) })
+        cloudformation.validate_template(options.select { |k| [:template_body, :template_url].include?(k) })
       end
 
       def status
@@ -100,7 +91,7 @@ class Bora
         return true if action == :delete && !exists?
         @previous_event_time = last_event_time
         begin
-          action_options = {stack_name: @stack_name}.merge(resolve_options(options))
+          action_options = {stack_name: @stack_name}.merge(options)
           cloudformation.method("#{action.to_s.downcase}_stack").call(action_options)
           wait_for_completion(&block)
         rescue Aws::CloudFormation::Errors::ValidationError => e
@@ -108,19 +99,6 @@ class Bora
           return nil
         end
         (action == :delete && !underlying_stack) || status.success?
-      end
-
-      def resolve_options(options, load_all = false)
-        return options if options[:template_body] || !options[:template_url]
-        uri = URI(options[:template_url])
-        if uri.scheme != "s3" || load_all
-          resolved_options = options.clone
-          resolved_options[:template_body] = open(options[:template_url]).read
-          resolved_options.delete(:template_url)
-          resolved_options
-        else
-          options
-        end
       end
 
       def wait_for_completion

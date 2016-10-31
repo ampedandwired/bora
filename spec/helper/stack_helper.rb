@@ -58,6 +58,7 @@ class BoraCli < BoraRunner
     bora_cfg.close
     bora_cfg_path = bora_cfg.path
     thor_args = params + ["--file", bora_cfg_path]
+    String.disable_colorization = true
     capture do
       begin
         Bora::Cli.start(thor_args)
@@ -72,6 +73,7 @@ class BoraRake < BoraRunner
   def run(config, cmd, stack, *params)
     Rake.application = Rake::Application.new
     bora = Bora.new(config_file_or_hash: config)
+    String.disable_colorization = true
     capture do
       Rake.application.instance_eval do
         bora.rake_tasks

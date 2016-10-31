@@ -19,7 +19,7 @@ shared_examples 'bora#show_current' do
         template = '{"template": "body"}'
         expect(@stack).to receive(:template).and_return(template)
         output = bora.run(@config, "show_current", "web-prod")
-        expect(output).to include(template)
+        expect(output).to include('"template": "body"')
       end
     end
   end

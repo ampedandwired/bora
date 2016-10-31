@@ -5,9 +5,9 @@ shared_examples 'bora#show' do
     before { @stack = setup_stack("web-prod", status: :create_complete) }
 
     it "shows the template contents" do
-      expect(@stack).to receive(:new_template).with(hash_including(:template_body)).and_return('{"template": "body"}')
       output = bora.run(@config, "show", "web-prod")
-      expect(output).to include('{"template": "body"}')
+      expected_template = JSON.pretty_generate(JSON.parse(File.read(@config["templates"]["web"]["template_file"])))
+      expect(output).to include(expected_template)
     end
 
   end

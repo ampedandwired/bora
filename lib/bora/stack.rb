@@ -115,11 +115,11 @@ class Bora
 
     def show(override_params = {})
       cfn_options = generate(override_params)
-      puts @cfn_stack.new_template(cfn_options)
+      puts get_new_template(cfn_options)
     end
 
     def show_current
-      template = @cfn_stack.template
+      template = get_current_template
       puts template ? template : (STACK_DOES_NOT_EXIST_MESSAGE % @cfn_stack_name)
     end
 
@@ -165,7 +165,7 @@ class Bora
     end
 
     def diff_template(override_params, context_lines, cfn_options)
-      diff = Diffy::Diff.new(@cfn_stack.template, @cfn_stack.new_template(cfn_options),
+      diff = Diffy::Diff.new(get_current_template, get_new_template(cfn_options),
               context: context_lines,
               include_diff_info: true)
       diff = diff.reject { |line| line =~ /^(---|\+\+\+|\\\\)/ }
@@ -244,6 +244,16 @@ class Bora
     def cfn_options_from_stack_config
       valid_options = ["capabilities"]
       @stack_config.select { |k| valid_options.include?(k) }
+    end
+
+    def get_new_template(cfn_options)
+      template = cfn_options[:template_body]
+      JSON.pretty_generate(JSON.parse(template))
+    end
+
+    def get_current_template
+      template = @cfn_stack.template
+      template ? JSON.pretty_generate(JSON.parse(template)) : nil
     end
 
   end

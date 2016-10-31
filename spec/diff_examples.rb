@@ -10,15 +10,14 @@ shared_examples 'bora#diff' do
       end
 
       it "shows the whole template as being new" do
-        current_template = ""
-        new_template = "aaa\nbbb\nccc"
-        expect(@stack).to receive(:template).and_return(current_template)
-        expect(@stack).to receive(:new_template).and_return(new_template)
+        current_template = nil
+        new_template = %Q({\n"aaa": "1",\n"bbb": "2",\n"ccc": "3"\n})
+        setup_templates(current_template, new_template)
         output = bora.run(@config, "diff", "web-prod")
         expect(output).to include("+Port - 80")
-        expect(output).to include("+aaa")
-        expect(output).to include("+bbb")
-        expect(output).to include("+ccc")
+        expect(output).to match(/\+\s*"aaa": "1"/)
+        expect(output).to match(/\+\s*"bbb": "2"/)
+        expect(output).to match(/\+\s*"ccc": "3"/)
       end
     end
 
@@ -30,18 +29,33 @@ shared_examples 'bora#diff' do
       end
 
       it "shows the difference between the current and new templates" do
-        current_template = "aaa\nccc"
-        new_template = "aaa\nbbb\nccc"
-        expect(@stack).to receive(:template).and_return(current_template)
-        expect(@stack).to receive(:new_template).and_return(new_template)
+        current_template = %Q({"aaa": "1",\n"ccc": "3"})
+        new_template = %Q({"aaa": "1",\n"bbb": "2",\n"ccc": "3"})
+        setup_templates(current_template, new_template)
         output = bora.run(@config, "diff", "web-prod")
         expect(output).to include("Parameters")
         expect(output).to include("-Port - 22")
         expect(output).to include("+Port - 80")
         expect(output).to include("+Timeout - 60")
-        expect(output).not_to include("+aaa")
-        expect(output).to include("+bbb")
-        expect(output).not_to include("+ccc")
+        expect(output).not_to match(/\+\s*"aaa": "1"/)
+        expect(output).to match(/\+\s*"bbb": "2"/)
+        expect(output).not_to match(/\+\s*"ccc": "3"/)
+      end
+
+      it "shows a configurable number of context lines around each diff" do
+        if bora.is_a?(BoraCli)
+          current_template = %Q({"line1": "1",\n"line2": "1",\n"line3": "1",\n"line4": "1",\n"line5": "1",\n"line6": "1",\n"line7": "1",\n"line8": "1",\n"line9": "1",\n"lineA": "1",\n"lineB": "1",\n"lineC": "1",\n"lineD": "1",\n"lineE": "1"})
+          new_template     = %Q({"line1": "1",\n"line2": "1",\n"line3": "1",\n"line4": "1",\n"line5": "1",\n"line6": "1",\n"line7": "1",\n"line88": "1",\n"line9": "1",\n"lineA": "1",\n"lineB": "1",\n"lineC": "1",\n"lineD": "1",\n"lineE": "1"})
+          JSON.parse(current_template)
+          setup_templates(current_template, new_template)
+          output = bora.run(@config, "diff", "web-prod", "--context", "5")
+          expect(output).not_to include("line2")
+          expect(output).to include("line3")
+          expect(output).to match(/-\s*"line8"/)
+          expect(output).to match(/\+\s*"line88"/)
+          expect(output).to include("lineD")
+          expect(output).not_to include("lineE")
+        end
       end
     end
 
@@ -53,10 +67,9 @@ shared_examples 'bora#diff' do
       end
 
       it "Indicates if the template has not changed" do
-        current_template = "aaa\nccc"
-        new_template = "aaa\nccc"
-        expect(@stack).to receive(:template).and_return(current_template)
-        expect(@stack).to receive(:new_template).and_return(new_template)
+        current_template = %Q({"aaa": "1",\n"ccc": "3"})
+        new_template = current_template
+        setup_templates(current_template, new_template)
         output = bora.run(@config, "diff", "web-prod")
         expect(output).to include("Parameters")
         expect(output).to include(Bora::Stack::STACK_DIFF_PARAMETERS_UNCHANGED_MESSAGE)
@@ -71,13 +84,22 @@ shared_examples 'bora#diff' do
       end
 
       it "does not show the parameters section in the diff" do
-        current_template = "aaa\nccc"
-        new_template = "aaa\nccc"
-        expect(@stack).to receive(:template).and_return(current_template)
-        expect(@stack).to receive(:new_template).and_return(new_template)
+        current_template = %Q({"aaa": "1",\n"ccc": "3"})
+        new_template = new_template
+        setup_templates(current_template, new_template)
         output = bora.run(@config, "diff", "web-prod")
         expect(output).not_to include("Parameters")
       end
+    end
+
+    def setup_templates(current_template, new_template)
+      expect(@stack).to receive(:template).and_return(current_template)
+
+      template_file = Tempfile.new(["bora_template", ".yaml"])
+      template_file.write(new_template)
+      template_file.close
+      template_path = template_file.path
+      @config["templates"]["web"]["template_file"] = template_path
     end
   end
 end
