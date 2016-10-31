@@ -65,12 +65,8 @@ class Bora
       def new_template(options, pretty = true)
         options = resolve_options(options, true)
         template = options[:template_body]
-        if template
-          template = JSON.pretty_generate(JSON.parse(template)) if pretty
-          template
-        else
-          raise "new_template not yet implemented for URL #{options[:template_url]}"
-        end
+        template = JSON.pretty_generate(JSON.parse(template)) if pretty
+        template
       end
 
       def validate(options)

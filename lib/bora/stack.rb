@@ -1,3 +1,4 @@
+require 'open-uri'
 require 'tempfile'
 require 'colorize'
 require 'cfndsl'
@@ -189,7 +190,7 @@ class Bora
     end
 
     def generate(override_params = {}, pretty_json = false)
-      @__cfn_options ||= begin
+      @_cfn_options ||= begin
         cfn_options = cfn_options_from_stack_config
         params = resolved_params(override_params)
         if File.extname(@template_file) == ".rb"
@@ -204,7 +205,7 @@ class Bora
           end
           cfn_options[:template_body] = template_body
         else
-          cfn_options[:template_url] = @template_file
+          cfn_options[:template_body] = File.read(@template_file)
           if !params.empty?
             cfn_options[:parameters] = params.map do |k, v|
               { parameter_key: k, parameter_value: v }

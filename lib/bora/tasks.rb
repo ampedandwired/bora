@@ -20,8 +20,11 @@ class Bora
         if @stack_options[:template_body] || @stack_options[:template_url]
           raise "You cannot specify a template in the constructor as well as in the stack_options"
         else
-          @stack_options[:template_url] = template_uri
+          @stack_options[:template_body] = File.read(template_uri)
         end
+      elsif @stack_options[:template_url]
+        @stack_options[:template_body] = File.read(@stack_options[:template_url])
+        @stack_options.delete(:template_url)
       end
 
       define_tasks

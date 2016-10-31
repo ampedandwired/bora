@@ -25,7 +25,7 @@ describe BoraCli do
     {
       "templates" => {
         "web" => {
-          "template_file" => "web_template.json",
+          "template_file" => File.join(__dir__, "fixtures/web_template.json"),
           "stacks" => {
             "prod" => {}
           }

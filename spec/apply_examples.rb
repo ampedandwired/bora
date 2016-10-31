@@ -14,7 +14,7 @@ shared_examples 'bora#apply' do
 
       it "creates the stack" do
         expect(@stack).to receive(:create)
-          .with({template_url: "web_template.json"})
+          .with(hash_including(:template_body))
           .and_return(true)
         output = bora.run(@config, "apply", "web-prod")
         expect(output).to include(Bora::Stack::STACK_ACTION_SUCCESS_MESSAGE % ["Create", "web-prod"])
@@ -29,7 +29,7 @@ shared_examples 'bora#apply' do
 
       it "updates the stack if the template has changed" do
         expect(@stack).to receive(:update)
-          .with({template_url: "web_template.json"})
+          .with(hash_including(:template_body))
           .and_return(true)
         output = bora.run(@config, "apply", "web-prod")
         expect(output).to include(Bora::Stack::STACK_ACTION_SUCCESS_MESSAGE % ["Update", "web-prod"])
@@ -37,7 +37,7 @@ shared_examples 'bora#apply' do
 
       it "indicates that there are no changes if the template is the same" do
         expect(@stack).to receive(:update)
-          .with({template_url: "web_template.json"})
+          .with(hash_including(:template_body))
           .and_return(nil)
         output = bora.run(@config, "apply", "web-prod")
         expect(output).to include(Bora::Stack::STACK_ACTION_NOT_CHANGED_MESSAGE % ["Update", "web-prod"])
@@ -45,7 +45,7 @@ shared_examples 'bora#apply' do
 
       it "indicates there was an error if the update fails" do
         expect(@stack).to receive(:update)
-          .with({template_url: "web_template.json"})
+          .with(hash_including(:template_body))
           .and_return(false)
         output = bora.run(@config, "apply", "web-prod")
         expect(output).to include(Bora::Stack::STACK_ACTION_FAILURE_MESSAGE % ["Update", "web-prod"])

@@ -9,7 +9,7 @@ shared_examples 'bora#recreate' do
 
       it "creates the stack" do
         expect(@stack).to receive(:recreate)
-          .with({template_url: "web_template.json"})
+          .with(hash_including(:template_body))
           .and_return(true)
         output = bora.run(@config, "recreate", "web-prod")
         expect(output).to include(Bora::Stack::STACK_ACTION_SUCCESS_MESSAGE % ["Recreate", "web-prod"])
@@ -21,7 +21,7 @@ shared_examples 'bora#recreate' do
 
       it "recreates the stack" do
         expect(@stack).to receive(:recreate)
-          .with({template_url: "web_template.json"})
+          .with(hash_including(:template_body))
           .and_return(true)
         output = bora.run(@config, "recreate", "web-prod")
         expect(output).to include(Bora::Stack::STACK_ACTION_SUCCESS_MESSAGE % ["Recreate", "web-prod"])
@@ -29,7 +29,7 @@ shared_examples 'bora#recreate' do
 
       it "indicates that there are no changes if the template is the same" do
         expect(@stack).to receive(:recreate)
-          .with({template_url: "web_template.json"})
+          .with(hash_including(:template_body))
           .and_return(nil)
         output = bora.run(@config, "recreate", "web-prod")
         expect(output).to include(Bora::Stack::STACK_ACTION_NOT_CHANGED_MESSAGE % ["Recreate", "web-prod"])
@@ -37,7 +37,7 @@ shared_examples 'bora#recreate' do
 
       it "indicates there was an error if the recreation fails" do
         expect(@stack).to receive(:recreate)
-          .with({template_url: "web_template.json"})
+          .with(hash_including(:template_body))
           .and_return(false)
         output = bora.run(@config, "recreate", "web-prod")
         expect(output).to include(Bora::Stack::STACK_ACTION_FAILURE_MESSAGE % ["Recreate", "web-prod"])

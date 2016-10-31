@@ -19,7 +19,7 @@ shared_examples 'bora' do
     @config = {
       "templates" => {
         "web" => {
-          "template_file" => "web_template.json",
+          "template_file" => File.join(__dir__, "fixtures/web_template.json"),
           "stacks" => {
             "prod" => {}
           }

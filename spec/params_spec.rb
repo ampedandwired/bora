@@ -12,10 +12,10 @@ describe BoraCli do
     }
 
     expect(@stack).to receive(:create)
-      .with({
-        template_url: "web_template.json",
+      .with(hash_including(
+        :template_body,
         parameters: cfn_params(params)
-      })
+      ))
       .and_return(true)
 
     output = bora.run(bora_config(params: params), "apply", "web-prod")
@@ -25,10 +25,10 @@ describe BoraCli do
     params = { "foo" => "bar" }
     expected_params = { "foo" => "overridden" }
     expect(@stack).to receive(:create)
-      .with({
-        template_url: "web_template.json",
+      .with(hash_including(
+        :template_body,
         parameters: cfn_params(expected_params)
-      })
+      ))
       .and_return(true)
 
     output = bora.run(bora_config(params: params), "apply", "web-prod", "--params", "foo=overridden")
@@ -36,7 +36,7 @@ describe BoraCli do
 
   it "passes no params to CloudFormation if params are empty" do
     expect(@stack).to receive(:create)
-      .with({ template_url: "web_template.json" })
+      .with(hash_including(:template_body))
       .and_return(true)
 
     output = bora.run(bora_config, "apply", "web-prod")
@@ -45,10 +45,10 @@ describe BoraCli do
   it "passes through cloudformation parameters from the stack config" do
     config = bora_config(stack_config: {"capabilities" => ["CAPABILITY_IAM"]})
     expect(@stack).to receive(:create)
-      .with({
-        template_url: "web_template.json",
+      .with(hash_including(
+        :template_body,
         "capabilities" => ["CAPABILITY_IAM"]
-      })
+      ))
       .and_return(true)
 
     output = bora.run(config, "apply", "web-prod")
@@ -57,10 +57,10 @@ describe BoraCli do
   it "passes through cloudformation parameters from the template config" do
     config = bora_config(template_config: {"capabilities" => ["CAPABILITY_IAM"]})
     expect(@stack).to receive(:create)
-      .with({
-        template_url: "web_template.json",
+      .with(hash_including(
+        :template_body,
         "capabilities" => ["CAPABILITY_IAM"]
-      })
+      ))
       .and_return(true)
 
     output = bora.run(config, "apply", "web-prod")
@@ -81,7 +81,7 @@ describe BoraCli do
   end
 
 
-  def bora_config(template_file: "web_template.json", template_config: {}, stack_config: {}, params: {})
+  def bora_config(template_file: File.join(__dir__, "fixtures/web_template.json"), template_config: {}, stack_config: {}, params: {})
     config = {
       "templates" => {
         "web" => {
