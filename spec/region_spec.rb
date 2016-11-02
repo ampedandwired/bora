@@ -41,7 +41,7 @@ describe BoraCli do
   end
 
   def bora_config
-    {
+    config = {
       "templates" => {
         "web" => {
           "template_file" => "web_template.json",
@@ -51,5 +51,7 @@ describe BoraCli do
         }
       }
     }
+    setup_template(config, "web", {})
+    config
   end
 end

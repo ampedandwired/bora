@@ -35,15 +35,28 @@ def setup_parameters(stack, parameters)
   bora_parameters
 end
 
+def setup_template(bora_config, template_name, template)
+  # Use a class variable to ensure ruby doesn't GC and delete the temp file until the spec is complete
+  @_temp_template_file = Tempfile.new(["bora_template", ".yaml"])
+  template = template.to_json if template.is_a?(Hash) || template.is_a?(Array)
+  @_temp_template_file.write(template)
+  @_temp_template_file.close
+  template_path = @_temp_template_file.path
+  bora_config["templates"][template_name]["template_file"] = template_path
+  template_path
+end
+
 class BoraRunner
-  def capture(stream = :stdout)
+  def capture
     begin
-      stream = stream.to_s
-      eval "$#{stream} = StringIO.new"
+      stream = StringIO.new
+      $stdout = stream
+      $stderr = stream
       yield
-      result = eval("$#{stream}").string
+      result = stream.string
     ensure
-      eval("$#{stream} = #{stream.upcase}")
+      $stdout = STDOUT
+      $stderr = STDERR
     end
 
     puts result
@@ -64,6 +77,7 @@ class BoraCli < BoraRunner
         Bora::Cli.start(thor_args)
       rescue Exception => e
         puts e
+        puts e.backtrace
       end
     end
   end
@@ -81,6 +95,7 @@ class BoraRake < BoraRunner
           Rake.application["#{stack}:#{cmd}"].invoke(*params)
         rescue Exception => e
           puts e
+          puts e.backtrace
         end
       end
     end

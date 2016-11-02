@@ -27,7 +27,7 @@ describe BoraCli do
   end
 
   def bora_config(cfn_stack_name_param = "cfn_stack_name")
-    {
+    config = {
       "templates" => {
         "web" => {
           "template_file" => "web_template.json",
@@ -39,5 +39,7 @@ describe BoraCli do
         }
       }
     }
+    setup_template(config, "web", {})
+    config
   end
 end

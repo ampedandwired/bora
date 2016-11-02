@@ -46,7 +46,6 @@ shared_examples 'bora#diff' do
         if bora.is_a?(BoraCli)
           current_template = %Q({"line1": "1",\n"line2": "1",\n"line3": "1",\n"line4": "1",\n"line5": "1",\n"line6": "1",\n"line7": "1",\n"line8": "1",\n"line9": "1",\n"lineA": "1",\n"lineB": "1",\n"lineC": "1",\n"lineD": "1",\n"lineE": "1"})
           new_template     = %Q({"line1": "1",\n"line2": "1",\n"line3": "1",\n"line4": "1",\n"line5": "1",\n"line6": "1",\n"line7": "1",\n"line88": "1",\n"line9": "1",\n"lineA": "1",\n"lineB": "1",\n"lineC": "1",\n"lineD": "1",\n"lineE": "1"})
-          JSON.parse(current_template)
           setup_templates(current_template, new_template)
           output = bora.run(@config, "diff", "web-prod", "--context", "5")
           expect(output).not_to include("line2")
@@ -85,21 +84,39 @@ shared_examples 'bora#diff' do
 
       it "does not show the parameters section in the diff" do
         current_template = %Q({"aaa": "1",\n"ccc": "3"})
-        new_template = new_template
+        new_template = current_template
         setup_templates(current_template, new_template)
         output = bora.run(@config, "diff", "web-prod")
         expect(output).not_to include("Parameters")
       end
     end
 
+    context "stack with default parameters" do
+      before do
+        @stack = setup_stack("web-prod", status: :create_complete)
+        setup_parameters(@stack, [{parameter_key: "Port", parameter_value: "22"}])
+      end
+
+      it "recognises parameters with defaults as not being changed" do
+        current_template = {
+          "Parameters" => {
+            "Port" => {
+              "Type" => "String",
+              "Default" => "22"
+            }
+          }
+        }.to_json
+        new_template = current_template
+        setup_templates(current_template, new_template)
+        output = bora.run(@config, "diff", "web-prod")
+        expect(output).to include(Bora::Stack::STACK_DIFF_PARAMETERS_UNCHANGED_MESSAGE)
+        expect(output).to include(Bora::Stack::STACK_DIFF_TEMPLATE_UNCHANGED_MESSAGE)
+      end
+    end
+
     def setup_templates(current_template, new_template)
       expect(@stack).to receive(:template).and_return(current_template)
-
-      template_file = Tempfile.new(["bora_template", ".yaml"])
-      template_file.write(new_template)
-      template_file.close
-      template_path = template_file.path
-      @config["templates"]["web"]["template_file"] = template_path
+      setup_template(@config, "web", new_template)
     end
   end
 end

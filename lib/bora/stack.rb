@@ -59,7 +59,7 @@ class Bora
 
     def diff(override_params = {}, context_lines = 3)
       cfn_options = generate(override_params)
-      diff_parameters(cfn_options[:parameters])
+      diff_parameters(cfn_options)
       diff_template(override_params, context_lines, cfn_options)
     end
 
@@ -143,25 +143,54 @@ class Bora
 
     protected
 
-    def diff_parameters(cfn_parameters)
-      if @cfn_stack.parameters && !@cfn_stack.parameters.empty?
-        current_params = @cfn_stack.parameters.sort { |a, b| a.key <=> b.key }.map(&:to_s).join("\n") + "\n"
-      end
-      if cfn_parameters && !cfn_parameters.empty?
-        new_params = cfn_parameters.sort { |a, b|
-          a[:parameter_key] <=> b[:parameter_key]
-        }.map { |p|
-          "#{p[:parameter_key] } - #{p[:parameter_value]}"
-        }.join("\n") + "\n"
-      end
+    def diff_parameters(cfn_options)
+      current_params = current_cfn_parameters
+      new_params = new_bora_parameters(cfn_options)
+      default_params = template_default_parameters(cfn_options)
+      new_params = default_params.merge(new_params || {}) if default_params
 
-      if current_params || new_params
+      current_params_str = params_as_string(current_params)
+      new_params_str = params_as_string(new_params)
+      if current_params_str || new_params_str
         puts "Parameters".colorize(mode: :bold)
         puts "----------"
-        diff = Diffy::Diff.new(current_params, new_params).to_s(String.disable_colorization ? :text : :color).chomp
+        diff = Diffy::Diff.new(current_params_str, new_params_str).to_s(String.disable_colorization ? :text : :color).chomp
         puts diff && !diff.empty? ? diff : STACK_DIFF_PARAMETERS_UNCHANGED_MESSAGE
         puts
       end
+    end
+
+    def params_as_string(params)
+      params ? params.sort.map {|k, v| "#{k} - #{v}" }.join("\n") + "\n" : nil
+    end
+
+    def template_default_parameters(cfn_options)
+      params = nil
+      template = JSON.parse(cfn_options[:template_body])
+      if template["Parameters"]
+        params_with_defaults = template["Parameters"].select { |_, v| v["Default"] }
+        if !params_with_defaults.empty?
+          params = params_with_defaults.map { |k, v| [k, v["Default"]] }.to_h
+        end
+      end
+      params
+    end
+
+    def current_cfn_parameters
+      params = nil
+      if @cfn_stack.parameters && !@cfn_stack.parameters.empty?
+        params = @cfn_stack.parameters.map { |p| [p.key, p.value] }.to_h
+      end
+      params
+    end
+
+    def new_bora_parameters(cfn_options)
+      params = nil
+      cfn_parameters = cfn_options[:parameters]
+      if cfn_parameters && !cfn_parameters.empty?
+        params = cfn_parameters.map { |p| [p[:parameter_key], p[:parameter_value]] }.to_h
+      end
+      params
     end
 
     def diff_template(override_params, context_lines, cfn_options)
@@ -190,30 +219,28 @@ class Bora
     end
 
     def generate(override_params = {}, pretty_json = false)
-      @_cfn_options ||= begin
-        cfn_options = cfn_options_from_stack_config
-        params = resolved_params(override_params)
-        if File.extname(@template_file) == ".rb"
-          template_body = run_cfndsl(@template_file, params, pretty_json)
-          template_json = JSON.parse(template_body)
-          if template_json["Parameters"]
-            cfn_param_keys = template_json["Parameters"].keys
-            cfn_params = params.select { |k, v| cfn_param_keys.include?(k) }.map do |k, v|
-              { parameter_key: k, parameter_value: v }
-            end
-            cfn_options[:parameters] = cfn_params if !cfn_params.empty?
+      cfn_options = cfn_options_from_stack_config
+      params = resolved_params(override_params)
+      if File.extname(@template_file) == ".rb"
+        template_body = run_cfndsl(@template_file, params, pretty_json)
+        template_json = JSON.parse(template_body)
+        if template_json["Parameters"]
+          cfn_param_keys = template_json["Parameters"].keys
+          cfn_params = params.select { |k, v| cfn_param_keys.include?(k) }.map do |k, v|
+            { parameter_key: k, parameter_value: v }
           end
-          cfn_options[:template_body] = template_body
-        else
-          cfn_options[:template_body] = File.read(@template_file)
-          if !params.empty?
-            cfn_options[:parameters] = params.map do |k, v|
-              { parameter_key: k, parameter_value: v }
-            end
+          cfn_options[:parameters] = cfn_params if !cfn_params.empty?
+        end
+        cfn_options[:template_body] = template_body
+      else
+        cfn_options[:template_body] = File.read(@template_file)
+        if !params.empty?
+          cfn_options[:parameters] = params.map do |k, v|
+            { parameter_key: k, parameter_value: v }
           end
         end
-        cfn_options
       end
+      cfn_options
     end
 
     def invoke_action(action, *args)
