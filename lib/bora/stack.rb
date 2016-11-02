@@ -1,4 +1,3 @@
-require 'open-uri'
 require 'tempfile'
 require 'colorize'
 require 'cfndsl'
