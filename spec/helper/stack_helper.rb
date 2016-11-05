@@ -1,3 +1,4 @@
+require "hashie"
 require 'rake'
 require 'bora/cli'
 
@@ -33,6 +34,13 @@ def setup_parameters(stack, parameters)
   bora_parameters = parameters.map { |o| Bora::Cfn::Parameter.new(Aws::CloudFormation::Types::Parameter.new(o)) }
   allow(stack).to receive(:parameters).and_return(bora_parameters)
   bora_parameters
+end
+
+def setup_create_change_set(stack, change_set_name, change_set)
+  cfn_change_set_result = Hashie::Mash.new(change_set.merge({change_set_name: change_set_name}))
+  bora_change_set = Bora::Cfn::ChangeSet.new(cfn_change_set_result)
+  allow(stack).to receive(:create_change_set).with(change_set_name, anything).and_return(bora_change_set)
+  bora_change_set
 end
 
 def setup_template(bora_config, template_name, template)

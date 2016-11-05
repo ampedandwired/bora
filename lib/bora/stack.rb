@@ -133,6 +133,15 @@ class Bora
       is_valid
     end
 
+    def create_change_set(change_set_name, description = nil, override_params = {}, pretty_json = false)
+      puts "Creating change set '#{change_set_name}' for stack '#{@cfn_stack_name}' in region #{@region}"
+      cfn_options = generate(override_params, pretty_json)
+      cfn_options[:description] = description if description
+      change_set = @cfn_stack.create_change_set(change_set_name, cfn_options)
+      puts change_set
+      change_set
+    end
+
     def resolved_params(override_params = {})
       params = @stack_config['params'] || {}
       params.merge!(override_params)

@@ -2,6 +2,7 @@ require 'set'
 require 'open-uri'
 require 'aws-sdk'
 require 'bora/cfn/stack_status'
+require 'bora/cfn/change_set'
 require 'bora/cfn/event'
 require 'bora/cfn/output'
 require 'bora/cfn/parameter'
@@ -72,6 +73,10 @@ class Bora
         status.exists?
       end
 
+      def create_change_set(change_set_name, options)
+        cfn_create_change_set(change_set_name, options)
+      end
+
 
       # =============================================================================================
       private
@@ -80,10 +85,6 @@ class Bora
         @cfn ||= begin
           @region ? Aws::CloudFormation::Client.new(region: @region) : Aws::CloudFormation::Client.new
         end
-      end
-
-      def method_missing(sym, *args, &block)
-        underlying_stack ? underlying_stack.send(sym, *args, &block) : nil
       end
 
       def call_cfn_action(action, options = {}, &block)
@@ -140,7 +141,21 @@ class Bora
         events = cloudformation.describe_stack_events({stack_name: @stack_name}).stack_events
         events.length > 0 ? events[0].timestamp : Time.at(0)
       end
+
+      def cfn_create_change_set(change_set_name, options = {})
+        change_set_options = {
+          stack_name: @stack_name,
+          change_set_name: change_set_name
+        }
+        cloudformation.create_change_set(change_set_options.merge(options))
+        begin
+          change_set = ChangeSet.new(cloudformation.describe_change_set(change_set_options))
+          sleep 5 unless change_set.status_complete?
+        end until change_set.status_complete?
+        change_set
+      end
     end
+
 
   end
 end

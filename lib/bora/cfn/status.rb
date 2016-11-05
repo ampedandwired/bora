@@ -12,7 +12,7 @@ class Bora
       end
 
       def failure?
-        @status.end_with?("_FAILED") || @status.include?("ROLLBACK")
+        @status.end_with?("FAILED") || @status.include?("ROLLBACK")
       end
 
       def deleted?
