@@ -43,6 +43,12 @@ def setup_create_change_set(stack, change_set_name, change_set)
   bora_change_set
 end
 
+def setup_change_sets(stack, change_sets)
+  bora_change_sets = change_sets.map { |cs| Bora::Cfn::ChangeSet.new(Hashie::Mash.new(cs), true) }
+  allow(stack).to receive(:list_change_sets).and_return(bora_change_sets)
+  bora_change_sets
+end
+
 def setup_template(bora_config, template_name, template)
   # Use a class variable to ensure ruby doesn't GC and delete the temp file until the spec is complete
   @_temp_template_file = Tempfile.new(["bora_template", ".yaml"])

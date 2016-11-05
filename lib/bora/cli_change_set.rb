@@ -16,5 +16,10 @@ class Bora
       stack(options.file, stack_name).create_change_set(change_set_name, options.description, params, options.pretty)
     end
 
+    desc "list STACK_NAME", "Lists all change sets for stack STACK_NAME"
+    def list(stack_name)
+      stack(options.file, stack_name).list_change_sets
+    end
+
   end
 end

@@ -77,6 +77,11 @@ class Bora
         cfn_create_change_set(change_set_name, options)
       end
 
+      def list_change_sets
+        cfn_change_sets = cloudformation.list_change_sets(stack_name: @stack_name)
+        cfn_change_sets.summaries.map { |cs| ChangeSet.new(cs, true) }
+      end
+
 
       # =============================================================================================
       private
