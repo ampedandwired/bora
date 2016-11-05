@@ -11,21 +11,15 @@ class Bora
       end
 
       def resolve(uri)
-        owner = 'self' # Default to account owner
-        ami_prefix = uri.host
-        raise InvalidParameter, "Invalid ami parameter #{uri}" unless ami_prefix
-        if !uri.query.nil? && uri.query.include?('owner')
-          query = URI.decode_www_form(uri.query).to_h
-          owner = query['owner']
-        end
+        ami_pattern = uri.host
+        raise InvalidParameter, "Invalid ami parameter #{uri}" unless ami_pattern
 
         ec2 = Aws::EC2::Client.new(region: @stack.region)
         images = ec2.describe_images(
-          owners: [owner],
           filters: [
             {
               name:   'name',
-              values: [ami_prefix]
+              values: [ami_pattern]
             },
             {
               name:   'state',
@@ -34,7 +28,7 @@ class Bora
           ]
         ).images
 
-        raise NoAMI, "No Matching AMI's for prefix #{ami_prefix}" if images.empty?
+        raise NoAMI, "No Matching AMI's for #{ami_pattern}" if images.empty?
         images.sort! { |a, b| DateTime.parse(a.creation_date) <=> DateTime.parse(b.creation_date) }.last.image_id
       end
     end
