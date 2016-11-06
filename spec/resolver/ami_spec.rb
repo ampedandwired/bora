@@ -56,7 +56,6 @@ describe Bora::Resolver::Ami do
 
   def describe_images_request(ami, owner)
     {
-      # owners: [owner],
       owners: owner,
       filters: [
         { name: "name", values: [ami] },
