@@ -45,10 +45,10 @@ describe Bora::Resolver::Ami do
 
   it "raises an exception if the Owner parameter in URI is invalid" do
     expect(ec2).to receive(:describe_images)
-      .with(describe_images_request("amzn-ami-hv*x86_64-gp2", ['amazon']))
+      .with(describe_images_request("amzn-ami-hv*x86_64-gp2", ['111']))
       .and_raise(Aws::EC2::Errors::InvalidUserIDMalformed.new(nil,nil))
 
-    expect{resolver.resolve(URI("ami://amzn-ami-hv*x86_64-gp2?owner=amazon"))}
+    expect{resolver.resolve(URI("ami://amzn-ami-hv*x86_64-gp2?owner=111"))}
     .to raise_exception(Bora::Resolver::Ami::InvalidUserId)
 
   end
