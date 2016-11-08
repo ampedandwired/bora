@@ -20,11 +20,11 @@ class Bora
       end
 
       def create(options, &block)
-        call_cfn_action(:create, options, &block)
+        call_cfn_action(:create_stack, options, &block)
       end
 
       def update(options, &block)
-        call_cfn_action(:update, options, &block)
+        call_cfn_action(:update_stack, options, &block)
       end
 
       def create_or_update(options, &block)
@@ -37,7 +37,7 @@ class Bora
       end
 
       def delete(&block)
-        call_cfn_action(:delete, &block)
+        call_cfn_action(:delete_stack, &block)
       end
 
       def events
@@ -82,8 +82,16 @@ class Bora
         cfn_change_sets.summaries.map { |cs| ChangeSet.new(cs, true) }
       end
 
+      def describe_change_set(change_set_name)
+        ChangeSet.new(cloudformation.describe_change_set(stack_name: @stack_name, change_set_name: change_set_name))
+      end
+
       def delete_change_set(change_set_name)
         cloudformation.delete_change_set(stack_name: @stack_name, change_set_name: change_set_name)
+      end
+
+      def execute_change_set(change_set_name, &block)
+        call_cfn_action(:execute_change_set, {change_set_name: change_set_name}, &block)
       end
 
 
@@ -98,17 +106,17 @@ class Bora
 
       def call_cfn_action(action, options = {}, &block)
         underlying_stack(refresh: true)
-        return true if action == :delete && !exists?
+        return true if action == :delete_stack && !exists?
         @previous_event_time = last_event_time
         begin
           action_options = {stack_name: @stack_name}.merge(options)
-          cloudformation.method("#{action.to_s.downcase}_stack").call(action_options)
+          cloudformation.method(action.to_s.downcase).call(action_options)
           wait_for_completion(&block)
         rescue Aws::CloudFormation::Errors::ValidationError => e
           raise e unless e.message.include?(NO_UPDATE_MESSAGE)
           return nil
         end
-        (action == :delete && !underlying_stack) || status.success?
+        (action == :delete_stack && !underlying_stack) || status.success?
       end
 
       def wait_for_completion

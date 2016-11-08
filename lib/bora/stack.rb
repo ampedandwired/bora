@@ -41,7 +41,8 @@ class Bora
 
     def apply(override_params = {}, pretty_json = false)
       cfn_options = generate(override_params, pretty_json)
-      success = invoke_action(@cfn_stack.exists? ? "update" : "create", cfn_options)
+      action = @cfn_stack.exists? ? "update" : "create"
+      success = invoke_action(action.capitalize, action, cfn_options)
       if success
         outputs = @cfn_stack.outputs
         if outputs && outputs.length > 0
@@ -53,7 +54,7 @@ class Bora
     end
 
     def delete
-      invoke_action("delete")
+      invoke_action("Delete", "delete")
     end
 
     def diff(override_params = {}, context_lines = 3)
@@ -109,7 +110,7 @@ class Bora
 
     def recreate(override_params = {})
       cfn_options = generate(override_params)
-      invoke_action("recreate", cfn_options)
+      invoke_action("Recreate", "recreate", cfn_options)
     end
 
     def show(override_params = {})
@@ -146,8 +147,17 @@ class Bora
       puts @cfn_stack.list_change_sets.map(&:to_s).join("\n")
     end
 
+    def describe_change_set(change_set_name)
+      puts @cfn_stack.describe_change_set(change_set_name)
+    end
+
     def delete_change_set(change_set_name)
       @cfn_stack.delete_change_set(change_set_name)
+      puts "Deleted change set '#{change_set_name}' for stack '#{@cfn_stack_name}' in region #{@region}"
+    end
+
+    def execute_change_set(change_set_name)
+      invoke_action("Execute change set '#{change_set_name}'", "execute_change_set", change_set_name)
     end
 
     def resolved_params(override_params = {})
@@ -259,16 +269,16 @@ class Bora
       cfn_options
     end
 
-    def invoke_action(action, *args)
-      puts "#{action.capitalize} stack '#{@cfn_stack_name}' in region #{@region}"
+    def invoke_action(action_desc, action, *args)
+      puts "#{action_desc} stack '#{@cfn_stack_name}' in region #{@region}"
       success = @cfn_stack.send(action, *args) { |event| puts event }
       if success
-        puts STACK_ACTION_SUCCESS_MESSAGE % [action.capitalize, @cfn_stack_name]
+        puts STACK_ACTION_SUCCESS_MESSAGE % [action_desc, @cfn_stack_name]
       else
         if success == nil
-          puts STACK_ACTION_NOT_CHANGED_MESSAGE % [action.capitalize, @cfn_stack_name]
+          puts STACK_ACTION_NOT_CHANGED_MESSAGE % [action_desc, @cfn_stack_name]
         else
-          raise(STACK_ACTION_FAILURE_MESSAGE % [action.capitalize, @cfn_stack_name])
+          raise(STACK_ACTION_FAILURE_MESSAGE % [action_desc, @cfn_stack_name])
         end
       end
       success

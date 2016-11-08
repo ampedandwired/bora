@@ -21,9 +21,19 @@ class Bora
       stack(options.file, stack_name).list_change_sets
     end
 
+    desc "show STACK_NAME CHANGE_SET_NAME", "Shows the details of the named change set"
+    def show(stack_name, change_set_name)
+      stack(options.file, stack_name).describe_change_set(change_set_name)
+    end
+
     desc "delete STACK_NAME CHANGE_SET_NAME", "Deletes the named change set"
     def delete(stack_name, change_set_name)
       stack(options.file, stack_name).delete_change_set(change_set_name)
+    end
+
+    desc "apply STACK_NAME CHANGE_SET_NAME", "Executes the named change set"
+    def apply(stack_name, change_set_name)
+      stack(options.file, stack_name).execute_change_set(change_set_name)
     end
 
   end
