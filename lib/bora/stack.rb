@@ -146,6 +146,10 @@ class Bora
       puts @cfn_stack.list_change_sets.map(&:to_s).join("\n")
     end
 
+    def delete_change_set(change_set_name)
+      @cfn_stack.delete_change_set(change_set_name)
+    end
+
     def resolved_params(override_params = {})
       params = @stack_config['params'] || {}
       params.merge!(override_params)

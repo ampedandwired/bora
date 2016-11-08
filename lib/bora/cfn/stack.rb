@@ -82,6 +82,10 @@ class Bora
         cfn_change_sets.summaries.map { |cs| ChangeSet.new(cs, true) }
       end
 
+      def delete_change_set(change_set_name)
+        cloudformation.delete_change_set(stack_name: @stack_name, change_set_name: change_set_name)
+      end
+
 
       # =============================================================================================
       private
