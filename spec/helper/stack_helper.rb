@@ -39,7 +39,11 @@ end
 def setup_create_change_set(stack, change_set_name, change_set)
   cfn_change_set_result = Hashie::Mash.new(change_set.merge({change_set_name: change_set_name}))
   bora_change_set = Bora::Cfn::ChangeSet.new(cfn_change_set_result)
-  allow(stack).to receive(:create_change_set).with(change_set_name, anything).and_return(bora_change_set)
+  if change_set_name
+    allow(stack).to receive(:create_change_set).with(change_set_name, anything).and_return(bora_change_set)
+  else
+    allow(stack).to receive(:create_change_set).with(anything, anything).and_return(bora_change_set)
+  end
   bora_change_set
 end
 
@@ -92,6 +96,7 @@ class BoraCli < BoraRunner
       rescue Exception => e
         puts e
         puts e.backtrace
+        raise e
       end
     end
   end
@@ -110,6 +115,7 @@ class BoraRake < BoraRunner
         rescue Exception => e
           puts e
           puts e.backtrace
+          raise e
         end
       end
     end

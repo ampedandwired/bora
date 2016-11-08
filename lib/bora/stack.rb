@@ -1,3 +1,4 @@
+require 'securerandom'
 require 'tempfile'
 require 'colorize'
 require 'cfndsl'
@@ -19,6 +20,7 @@ class Bora
     STACK_VALIDATE_SUCCESS_MESSAGE = "Template for stack '%s' is valid"
     STACK_DIFF_TEMPLATE_UNCHANGED_MESSAGE = "Template has not changed"
     STACK_DIFF_PARAMETERS_UNCHANGED_MESSAGE = "Parameters have not changed"
+    STACK_DIFF_NO_CHANGES_MESSAGE = "No changes will be applied"
 
     def initialize(stack_name, template_file, stack_config)
       @stack_name = stack_name
@@ -60,7 +62,8 @@ class Bora
     def diff(override_params = {}, context_lines = 3)
       cfn_options = generate(override_params)
       diff_parameters(cfn_options)
-      diff_template(override_params, context_lines, cfn_options)
+      diff_template(context_lines, cfn_options)
+      diff_change_set(cfn_options)
     end
 
     def events
@@ -219,7 +222,7 @@ class Bora
       params
     end
 
-    def diff_template(override_params, context_lines, cfn_options)
+    def diff_template(context_lines, cfn_options)
       diff = Diffy::Diff.new(get_current_template, get_new_template(cfn_options),
               context: context_lines,
               include_diff_info: true)
@@ -242,6 +245,24 @@ class Bora
       puts "--------"
       puts diff && !diff.empty? ? diff : STACK_DIFF_TEMPLATE_UNCHANGED_MESSAGE
       puts
+    end
+
+    def diff_change_set(cfn_options)
+      change_set_name = "cs-#{SecureRandom.uuid}"
+      if @cfn_stack.exists?
+        change_set = @cfn_stack.create_change_set(change_set_name, cfn_options)
+        @cfn_stack.delete_change_set(change_set_name)
+        if change_set.has_changes?
+          puts "Changes".colorize(mode: :bold)
+          puts "-------"
+          puts change_set.to_s(changes_only: true)
+          puts
+        else
+          puts "Changes".colorize(mode: :bold)
+          puts "-------"
+          puts STACK_DIFF_NO_CHANGES_MESSAGE
+        end
+      end
     end
 
     def generate(override_params = {}, pretty_json = false)

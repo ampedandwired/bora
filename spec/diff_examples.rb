@@ -26,6 +26,7 @@ shared_examples 'bora#diff' do
         @config["templates"]["web"]["stacks"]["prod"]["params"] = {"Port" => "80", "Timeout" => "60"}
         @stack = setup_stack("web-prod", status: :create_complete)
         setup_parameters(@stack, [{parameter_key: "Port", parameter_value: "22"}])
+        setup_changeset(@stack)
       end
 
       it "shows the difference between the current and new templates" do
@@ -40,6 +41,7 @@ shared_examples 'bora#diff' do
         expect(output).not_to match(/\+\s*"aaa": "1"/)
         expect(output).to match(/\+\s*"bbb": "2"/)
         expect(output).not_to match(/\+\s*"ccc": "3"/)
+        expect(output).to include("Modify", "MySG")
       end
 
       it "shows a configurable number of context lines around each diff" do
@@ -63,6 +65,7 @@ shared_examples 'bora#diff' do
         @config["templates"]["web"]["stacks"]["prod"]["params"] = {"Port" => "22"}
         @stack = setup_stack("web-prod", status: :create_complete)
         setup_parameters(@stack, [{parameter_key: "Port", parameter_value: "22"}])
+        setup_changeset(@stack, has_changes: false)
       end
 
       it "Indicates if the template has not changed" do
@@ -73,6 +76,7 @@ shared_examples 'bora#diff' do
         expect(output).to include("Parameters")
         expect(output).to include(Bora::Stack::STACK_DIFF_PARAMETERS_UNCHANGED_MESSAGE)
         expect(output).to include(Bora::Stack::STACK_DIFF_TEMPLATE_UNCHANGED_MESSAGE)
+        expect(output).to include(Bora::Stack::STACK_DIFF_NO_CHANGES_MESSAGE)
       end
     end
 
@@ -80,6 +84,7 @@ shared_examples 'bora#diff' do
       before do
         @stack = setup_stack("web-prod", status: :create_complete)
         setup_parameters(@stack, [])
+        setup_changeset(@stack)
       end
 
       it "does not show the parameters section in the diff" do
@@ -95,6 +100,7 @@ shared_examples 'bora#diff' do
       before do
         @stack = setup_stack("web-prod", status: :create_complete)
         setup_parameters(@stack, [{parameter_key: "Port", parameter_value: "22"}])
+        setup_changeset(@stack)
       end
 
       it "recognises parameters with defaults as not being changed" do
@@ -117,6 +123,33 @@ shared_examples 'bora#diff' do
     def setup_templates(current_template, new_template)
       expect(@stack).to receive(:template).and_return(current_template)
       setup_template(@config, "web", new_template)
+    end
+
+    def setup_changeset(stack, has_changes: true)
+      change_set_name = "test-change-set"
+      change_set_response = {
+        status: "CREATE_COMPLETE",
+        status_reason: "Finished",
+        execution_status: "AVAILABLE",
+        description: "My change set",
+        creation_time: Time.parse("2016-07-21 15:01:00")
+      }
+      if has_changes
+        change_set_response[:changes] = [
+          {
+            resource_change: {
+              action: "Modify",
+              resource_type: "AWS::EC2::SecurityGroup",
+              logical_resource_id: "MySG"
+            }
+          }
+        ]
+      else
+        change_set_response[:changes] = []
+      end
+      change_set = setup_create_change_set(stack, nil, change_set_response)
+      allow(stack).to receive(:delete_change_set)
+      change_set
     end
   end
 end
