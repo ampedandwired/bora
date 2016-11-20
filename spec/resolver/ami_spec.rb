@@ -20,7 +20,7 @@ describe Bora::Resolver::Ami do
 
   it "returns the latest image from the 'self' account" do
     expect(ec2).to receive(:describe_images)
-      .with(describe_images_request("my_ami_*", "self"))
+      .with(describe_images_request("my_ami_*", ['self']))
       .and_return(describe_images_response)
 
     expect(resolver.resolve(URI("ami://my_ami_*"))).to eq("ami-2")
@@ -28,7 +28,7 @@ describe Bora::Resolver::Ami do
 
   it "returns the latest image from the specified account" do
     expect(ec2).to receive(:describe_images)
-      .with(describe_images_request("my_ami_*", "amazon"))
+      .with(describe_images_request("my_ami_*", ['amazon']))
       .and_return(describe_images_response)
 
     expect(resolver.resolve(URI("ami://my_ami_*?owner=amazon"))).to eq("ami-2")
@@ -43,10 +43,20 @@ describe Bora::Resolver::Ami do
     expect{resolver.resolve(URI("ami:///foo"))}.to raise_exception(Bora::Resolver::Ami::InvalidParameter)
   end
 
+  it "raises an exception if the Owner parameter in URI is invalid" do
+    expect(ec2).to receive(:describe_images)
+      .with(describe_images_request("amzn-ami-hv*x86_64-gp2", ['111']))
+      .and_raise(Aws::EC2::Errors::InvalidUserIDMalformed.new(nil,nil))
+
+    expect{resolver.resolve(URI("ami://amzn-ami-hv*x86_64-gp2?owner=111"))}
+    .to raise_exception(Bora::Resolver::Ami::InvalidUserId)
+
+  end
+
 
   def describe_images_request(ami, owner)
     {
-      owners: [owner],
+      owners: owner,
       filters: [
         { name: "name", values: [ami] },
         { name:   'state', values: ['available'] }

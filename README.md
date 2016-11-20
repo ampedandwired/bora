@@ -288,9 +288,12 @@ ${hostedzone://example.com/private}
 
 Looks up an AMI given a name prefix which may contain wildcards. If query returns multiple images the latest is used.
 
+Owners takes a query string list of AWS account ID, self (owner is the sender of the request), or an AWS owner alias (valid values are amazon | aws-marketplace | microsoft). Omitting this option defaults to self
+
 ```bash
 ${ami://amzn-ami-hv*x86_64-gp2?owner=amazon}
 ${ami://my-windows-soe}
+${ami://my-windows-soe?owner=1234567890,self}
 ```
 
 ## Overriding Stack Parameters from the Command Line
