@@ -6,7 +6,7 @@ class Bora
       def initialize(change)
         @change = change
         @resource_change = @change.resource_change
-        @action = ChangeSetAction.new(@resource_change.action)
+        @action = ChangeSetAction.new(@resource_change.action, @resource_change.replacement)
       end
 
       def to_s
