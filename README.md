@@ -151,8 +151,10 @@ templates:
 The following commands are available through the command line and rake tasks.
 
 * **apply** - Creates the stack if it doesn't exist, or updates it otherwise
+* **changeset** - Manage CloudFormation change sets for the stack
 * **delete** - Deletes the stack
-* **diff** - Provides a visual diff between the local template and the currently applied template in AWS
+* **diff** - Provides a visual diff between the local template and the currently applied template in AWS.
+  The diff also shows the changes that CloudFormation will apply as reported by the CloudFormation [Change Set API](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-changesets.html).
 * **events** - Outputs the latest events from the stack
 * **list** - Outputs a list of all stacks defined in the config file
 * **outputs** - Shows the outputs from the stack
@@ -163,6 +165,20 @@ The following commands are available through the command line and rake tasks.
 * **status** - Displays the current status of the stack
 * **validate** - Validates the template using the AWS CloudFormation "validate" API call
 
+### Change Sets
+Bora provides full support for working with [CloudFormation Change Sets](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-updating-stacks-changesets.html)
+via the "changeset" command. The following subcommands are available (eg: `bora changeset <subcommand> ...`). Run `bora changeset help` for more information.
+
+* **changeset create** - Creates a change set for the stack
+* **changeset list** - Lists all available change sets for the stack
+* **changeset show** - Shows the details of a particular change set
+* **changeset apply** - Applies a change set. Any other available change sets will be automatically deleted by AWS after this action.
+* **changeset delete** - Deletes a particular change set for the stack
+
+Note that `bora diff` will also show you a summary of the change set that will be applied.
+It does this by creating (and automaticlly deleting) a temporary change set in order to get the change actions to display.
+
+Note that change set funtionality is not available via the Rake tasks at this time.
 
 ### Command Line
 
@@ -337,7 +353,8 @@ If this is of interest to you, please have a look at the [GitHub issue](https://
 
 
 ## Related Projects
-The following projects provided inspiration for Bora:
+The following projects provided inspiration for or are similar to Bora.
+If Bora doesn't meet your needs, one of these might.
 * [CfnDsl](https://github.com/stevenjack/cfndsl) - A Ruby DSL for CloudFormation templates
 * [StackMaster](https://github.com/envato/stack_master) - Very similar in goals to Bora
 * [CloudFormer](https://github.com/kunday/cloudformer) - Rake tasks for CloudFormation
