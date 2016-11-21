@@ -28,17 +28,17 @@ shared_examples 'bora' do
     }
   end
 
-  # include_examples "bora#apply"
-  # include_examples "bora#delete"
+  include_examples "bora#apply"
+  include_examples "bora#delete"
   include_examples "bora#diff"
-  # include_examples "bora#events"
-  # include_examples "bora#outputs"
-  # include_examples "bora#parameters"
-  # include_examples "bora#recreate"
-  # include_examples "bora#show"
-  # include_examples "bora#show_current"
-  # include_examples "bora#status"
-  # include_examples "bora#validate"
+  include_examples "bora#events"
+  include_examples "bora#outputs"
+  include_examples "bora#parameters"
+  include_examples "bora#recreate"
+  include_examples "bora#show"
+  include_examples "bora#show_current"
+  include_examples "bora#status"
+  include_examples "bora#validate"
 end
 
 

@@ -66,18 +66,18 @@ end
 
 class BoraRunner
   def capture
+    stream = StringIO.new
+    $stdout = stream
+    $stderr = stream
     begin
-      stream = StringIO.new
-      $stdout = stream
-      $stderr = stream
       yield
-      result = stream.string
     ensure
+      result = stream.string
       $stdout = STDOUT
       $stderr = STDERR
     end
 
-    puts result
+    # puts result
     result
   end
 end
@@ -96,7 +96,6 @@ class BoraCli < BoraRunner
       rescue Exception => e
         puts e
         puts e.backtrace
-        raise e
       end
     end
   end
@@ -115,7 +114,6 @@ class BoraRake < BoraRunner
         rescue Exception => e
           puts e
           puts e.backtrace
-          raise e
         end
       end
     end
