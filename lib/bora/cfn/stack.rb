@@ -74,7 +74,16 @@ class Bora
       end
 
       def create_change_set(change_set_name, options)
-        cfn_create_change_set(change_set_name, options)
+        change_set_options = {
+          stack_name: @stack_name,
+          change_set_name: change_set_name
+        }
+        cloudformation.create_change_set(change_set_options.merge(options))
+        begin
+          change_set = ChangeSet.new(cloudformation.describe_change_set(change_set_options))
+          sleep 5 unless change_set.status_complete?
+        end until change_set.status_complete?
+        change_set
       end
 
       def list_change_sets
@@ -159,18 +168,6 @@ class Bora
         events.length > 0 ? events[0].timestamp : Time.at(0)
       end
 
-      def cfn_create_change_set(change_set_name, options = {})
-        change_set_options = {
-          stack_name: @stack_name,
-          change_set_name: change_set_name
-        }
-        cloudformation.create_change_set(change_set_options.merge(options))
-        begin
-          change_set = ChangeSet.new(cloudformation.describe_change_set(change_set_options))
-          sleep 5 unless change_set.status_complete?
-        end until change_set.status_complete?
-        change_set
-      end
     end
 
 

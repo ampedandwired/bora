@@ -12,7 +12,7 @@ def setup_stack(stack_name, status: :not_created)
     allow(stack).to receive(:status).and_return(Bora::Cfn::StackStatus.new(nil))
     allow(stack).to receive("exists?").and_return(false)
   else
-    underlying_stack = OpenStruct.new
+    underlying_stack = Hashie::Mash.new
     underlying_stack.stack_status = status.to_s.upcase
     underlying_stack.stack_name = stack_name
     allow(stack).to receive(:status).and_return(Bora::Cfn::StackStatus.new(underlying_stack))

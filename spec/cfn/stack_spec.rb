@@ -1,4 +1,3 @@
-require 'ostruct'
 require 'aws-sdk'
 require 'helper/spec_helper'
 
@@ -22,7 +21,13 @@ describe Bora::Cfn::Stack do
     end
 
     before :each do
-      allow(@cfn).to receive(:describe_stacks).and_raise(Aws::CloudFormation::Errors::ValidationError.new("Stack does not exist", "Error"))
+      validation_error = Aws::CloudFormation::Errors::ValidationError.new("Stack does not exist", "Error")
+      allow(@cfn).to receive(:describe_stacks).and_raise(validation_error)
+      allow(@cfn).to receive(:create_change_set).and_raise(validation_error)
+      allow(@cfn).to receive(:describe_change_set).and_raise(validation_error)
+      allow(@cfn).to receive(:list_change_sets).and_raise(validation_error)
+      allow(@cfn).to receive(:delete_change_set).and_raise(validation_error)
+      allow(@cfn).to receive(:execute_change_set).and_raise(validation_error)
     end
 
     describe "#exists?" do
@@ -90,6 +95,36 @@ describe Bora::Cfn::Stack do
     describe "#status" do
       it "return an object representing the current status of the stack" do
         expect(@stack.status.exists?).to be_falsey
+      end
+    end
+
+    describe "#create_change_set" do
+      it "raises an exception if the stack does not exist" do
+        expect{@stack.create_change_set("mychangeset", {})}.to raise_exception(Aws::CloudFormation::Errors::ValidationError)
+      end
+    end
+
+    describe "#list_change_sets" do
+      it "raises an exception if the stack does not exist" do
+        expect{@stack.list_change_sets}.to raise_exception(Aws::CloudFormation::Errors::ValidationError)
+      end
+    end
+
+    describe "#describe_change_set" do
+      it "raises an exception if the stack does not exist" do
+        expect{@stack.describe_change_set("mychangeset")}.to raise_exception(Aws::CloudFormation::Errors::ValidationError)
+      end
+    end
+
+    describe "#delete_change_set" do
+      it "raises an exception if the stack does not exist" do
+        expect{@stack.delete_change_set("mychangeset")}.to raise_exception(Aws::CloudFormation::Errors::ValidationError)
+      end
+    end
+
+    describe "#execute_change_set" do
+      it "raises an exception if the stack does not exist" do
+        expect{@stack.execute_change_set("mychangeset")}.to raise_exception(Aws::CloudFormation::Errors::ValidationError)
       end
     end
 
@@ -185,7 +220,7 @@ describe Bora::Cfn::Stack do
 
     describe "#template" do
       it "returns the current stack template" do
-        expect(@cfn).to receive(:get_template).at_least(:once).and_return(OpenStruct.new(template_body: '{"foo": "bar"}'))
+        expect(@cfn).to receive(:get_template).at_least(:once).and_return(Hashie::Mash.new(template_body: '{"foo": "bar"}'))
         expect(@stack.template).to eq('{"foo": "bar"}')
       end
     end
@@ -195,6 +230,77 @@ describe Bora::Cfn::Stack do
         expect(@stack.status.exists?).to be_truthy
       end
     end
+
+    describe "#create_change_set" do
+      it "creates a change set in cloudformation" do
+        change_set_name = "mychangeset"
+        options = {
+          stack_name: TEST_STACK_NAME,
+          change_set_name: change_set_name
+        }
+        create_options = options.merge({capabilities: ["CAPABILITY_IAM"]})
+        expect(@cfn).to receive(:create_change_set).with(create_options)
+        expect(@cfn).to receive(:describe_change_set).with(options)
+          .and_return(describe_change_set_result(change_set_name, status: "CREATE_COMPLETE", description: "awesome change set"))
+        change_set = @stack.create_change_set(change_set_name, {capabilities: ["CAPABILITY_IAM"]})
+        expect(change_set.status_success?).to be_truthy
+        expect(change_set.to_s).to include("awesome change set")
+      end
+    end
+
+    describe "#list_change_sets" do
+      it "lists all the change sets available for this stack" do
+        expect(@cfn).to receive(:list_change_sets)
+          .with(hash_including(stack_name: TEST_STACK_NAME))
+          .and_return(list_change_sets_result(["cs-1", "cs-2"]))
+        change_sets = @stack.list_change_sets
+        expect(change_sets.size).to eq(2)
+        expect(change_sets[0].to_s).to include("cs-1")
+        expect(change_sets[1].to_s).to include("cs-2")
+      end
+    end
+
+    describe "#describe_change_set" do
+      it "returns the detail of the given change set" do
+        change_set_name = "mychangeset"
+        expect(@cfn).to receive(:describe_change_set)
+          .with(hash_including(stack_name: TEST_STACK_NAME, change_set_name: change_set_name))
+          .and_return(describe_change_set_result(change_set_name))
+        change_set = @stack.describe_change_set(change_set_name)
+        expect(change_set.to_s).to include(change_set_name)
+      end
+
+      it "raises an exception if the change set does not exist" do
+        change_set_name = "mychangeset"
+        expect(@cfn).to receive(:describe_change_set).and_raise(Aws::CloudFormation::Errors::ChangeSetNotFound.new("", "Change set does not exist"))
+        expect{@stack.describe_change_set(change_set_name)}.to raise_exception(Aws::CloudFormation::Errors::ChangeSetNotFound)
+      end
+    end
+
+    describe "#delete_change_set" do
+      it "deletes the given change set in cloudformation" do
+        change_set_name = "mychangeset"
+        expect(@cfn).to receive(:delete_change_set)
+          .with(hash_including(stack_name: TEST_STACK_NAME, change_set_name: change_set_name))
+        @stack.delete_change_set(change_set_name)
+      end
+    end
+
+    describe "#execute_change_set" do
+      it "applies the given change set" do
+        change_set_name = "mychangeset"
+        options = { stack_name: TEST_STACK_NAME, change_set_name: change_set_name }
+        expect(@cfn).to receive(:execute_change_set).with(options)
+        @stack.execute_change_set(change_set_name) { |e| expect(e.resource_status_reason).to eq("just because") }
+      end
+
+      it "raises an exception if the change set does not exist" do
+        change_set_name = "mychangeset"
+        expect(@cfn).to receive(:execute_change_set).and_raise(Aws::CloudFormation::Errors::ChangeSetNotFound.new("", "Change set does not exist"))
+        expect{@stack.execute_change_set(change_set_name)}.to raise_exception(Aws::CloudFormation::Errors::ChangeSetNotFound)
+      end
+    end
+
   end
 
   describe "#validate" do
