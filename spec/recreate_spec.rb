@@ -1,6 +1,9 @@
 require 'helper/spec_helper'
 
-shared_examples 'bora#recreate' do
+describe BoraCli do
+  let(:bora) { BoraCli.new }
+  before { @config = default_config }
+
   describe "#recreate" do
     context "stack does not exist" do
       before do

@@ -64,6 +64,19 @@ def setup_template(bora_config, template_name, template)
   template_path
 end
 
+def default_config
+  {
+    "templates" => {
+      "web" => {
+        "template_file" => File.join(__dir__, "../fixtures/web_template.json"),
+        "stacks" => {
+          "prod" => {}
+        }
+      }
+    }
+  }
+end
+
 class BoraRunner
   def capture
     stream = StringIO.new

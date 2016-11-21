@@ -1,6 +1,9 @@
 require 'helper/spec_helper'
 
-shared_examples 'bora#validate' do
+describe BoraCli do
+  let(:bora) { BoraCli.new }
+  before { @config = default_config }
+
   describe "#validate" do
     before { @stack = setup_stack("web-prod", status: :create_complete) }
 

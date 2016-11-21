@@ -1,6 +1,9 @@
 require 'helper/spec_helper'
 
-shared_examples 'bora#events' do
+describe BoraCli do
+  let(:bora) { BoraCli.new }
+  before { @config = default_config }
+
   describe "#events" do
     context "stack does not exist" do
       before { @stack = setup_stack("web-prod", status: :not_created) }
