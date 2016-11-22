@@ -2,15 +2,15 @@ require 'uri'
 require 'helper/spec_helper'
 
 describe Bora::ParameterResolver do
-  let(:parameter_resolver) { described_class.new(double) }
+  let(:parameter_resolver) { Bora::ParameterResolver.new(double) }
+  let(:resolver) { double }
 
   before do
-    @loader = double(Bora::ParameterResolverLoader)
-    @resolver_class = double
-    @resolver = double
-    allow(Bora::ParameterResolverLoader).to receive(:new).and_return(@loader)
-    allow(@loader).to receive(:load_resolver).and_return(@resolver_class)
-    allow(@resolver_class).to receive(:new).and_return(@resolver)
+    loader = double(Bora::ParameterResolverLoader)
+    resolver_class = double
+    allow(Bora::ParameterResolverLoader).to receive(:new).and_return(loader)
+    allow(loader).to receive(:load_resolver).and_return(resolver_class)
+    allow(resolver_class).to receive(:new).and_return(resolver)
   end
 
   it "resolves tokens in parameters" do
@@ -19,7 +19,7 @@ describe Bora::ParameterResolver do
       "key2" => "${foo://bar.baz/bing}"
     }
 
-    expect(@resolver).to receive(:resolve).with(URI("foo://bar.baz/bing")).and_return("foo")
+    expect(resolver).to receive(:resolve).with(URI("foo://bar.baz/bing")).and_return("foo")
     expect(parameter_resolver.resolve(params)).to eq({"key1" => "value1", "key2" => "foo"})
   end
 
@@ -28,9 +28,9 @@ describe Bora::ParameterResolver do
     expect(parameter_resolver.resolve(params)).to eq({"key1" => "value1", "key2" => "value1_foo"})
   end
 
-  it "handles multiple levels of parameer indirection" do
+  it "handles multiple levels of parameter indirection" do
     params = {"aaa" => "${ccc}_baz", "bbb" => "${ccc}_bing", "ccc" => "${ddd}_foo_${foo://bar}", "ddd" => "dvalue"}
-    expect(@resolver).to receive(:resolve).once.with(URI("foo://bar")).and_return("bar")
+    expect(resolver).to receive(:resolve).once.with(URI("foo://bar")).and_return("bar")
     expect(parameter_resolver.resolve(params)).to eq({"aaa" => "dvalue_foo_bar_baz", "bbb" => "dvalue_foo_bar_bing", "ccc" => "dvalue_foo_bar", "ddd" => "dvalue"})
   end
 
@@ -91,13 +91,13 @@ describe Bora::ParameterResolver do
 
   it "is compatible with legacy cfn output lookups" do
     params = { "key1": "${foo_stack/outputs/bar}" }
-    expect(@resolver).to receive(:resolve).with(URI("cfn://foo_stack/outputs/bar"))
+    expect(resolver).to receive(:resolve).with(URI("cfn://foo_stack/outputs/bar"))
     parameter_resolver.resolve(params)
   end
 
   it "resolves multiple substitutions within the one parameter" do
     params = { "key1": "${foo://foo}bar${foo://foo}bar${foo://foo}bar" }
-    expect(@resolver).to receive(:resolve).exactly(3).times.with(URI("foo://foo")).and_return("foo")
+    expect(resolver).to receive(:resolve).exactly(3).times.with(URI("foo://foo")).and_return("foo")
     expect(parameter_resolver.resolve(params)).to eq({"key1": "foobarfoobarfoobar"})
   end
 

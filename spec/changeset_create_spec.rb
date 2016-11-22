@@ -2,8 +2,9 @@ require "time"
 require "helper/spec_helper"
 
 describe BoraCli do
-  let(:bora) { described_class.new }
-  let(:stack) { setup_stack("web-prod") }
+  let(:bora) { BoraCli.new }
+  let(:stack) { setup_stack("web-prod", status: :created) }
+  let(:bora_config) { default_config }
 
   it "creates a change set" do
     change_set_name = "test-change-set"
@@ -26,25 +27,8 @@ describe BoraCli do
 
     expect(stack).to receive(:create_change_set).with(change_set_name, anything).and_return(change_set)
     output = bora.run(bora_config, "changeset", "create", "web-prod", change_set_name)
-    expect(output).to include("CREATE_COMPLETE")
-    expect(output).to include("AVAILABLE")
-    expect(output).to include("2016-07-21 15:01:00")
-    expect(output).to include("Modify")
-    expect(output).to include("AWS::EC2::SecurityGroup")
-    expect(output).to include("MySG")
-  end
-
-  def bora_config
-    config = {
-      "templates" => {
-        "web" => {
-          "template_file" => File.join(__dir__, "fixtures/web_template.json"),
-          "stacks" => {
-            "prod" => {}
-          }
-        }
-      }
-    }
+    expect(output).to include("CREATE_COMPLETE", "AVAILABLE", "2016-07-21 15:01:00")
+    expect(output).to include("Modify", "AWS::EC2::SecurityGroup", "MySG")
   end
 
 end

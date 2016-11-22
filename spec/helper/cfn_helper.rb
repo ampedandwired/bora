@@ -1,17 +1,6 @@
 require 'securerandom'
 require 'aws-sdk'
 
-def stack_event(stack_name, timestamp: Time.new, status: "CREATE_COMPLETE", reason: nil)
-  {
-    timestamp: timestamp,
-    event_id: SecureRandom.uuid,
-    resource_type: "AWS::CloudFormation::Stack",
-    logical_resource_id: stack_name,
-    resource_status: status,
-    resource_status_reason: reason
-  }
-end
-
 def describe_stack_events_result(stack_name, timestamp: Time.new, status: "CREATE_COMPLETE", reason: nil, count: 1)
   events = []
   count.times do

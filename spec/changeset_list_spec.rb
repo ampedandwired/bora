@@ -4,6 +4,7 @@ require "helper/spec_helper"
 describe BoraCli do
   let(:bora) { described_class.new }
   let(:stack) { setup_stack("web-prod") }
+  let(:bora_config) { default_config }
 
   it "creates a change set" do
     change_sets = setup_change_sets(stack, [
@@ -28,19 +29,6 @@ describe BoraCli do
     output = bora.run(bora_config, "changeset", "list", "web-prod")
     expect(output).to include("cs1", "CREATE_COMPLETE", "AVAILABLE", "Finished", "2016-07-21 15:01:00", "My change set")
     expect(output).to include("cs2", "CREATE_FAILED", "Error")
-  end
-
-  def bora_config
-    config = {
-      "templates" => {
-        "web" => {
-          "template_file" => File.join(__dir__, "fixtures/web_template.json"),
-          "stacks" => {
-            "prod" => {}
-          }
-        }
-      }
-    }
   end
 
 end

@@ -1,7 +1,7 @@
 require "helper/spec_helper"
 
 describe Bora::ParameterResolverLoader do
-  let(:loader) { described_class.new }
+  let(:loader) { Bora::ParameterResolverLoader.new }
 
   it "loads the named parameter resolver" do
     expect(loader.load_resolver("dummy").to_s).to eq("Bora::Resolver::Dummy")

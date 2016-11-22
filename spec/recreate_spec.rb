@@ -42,7 +42,7 @@ describe BoraCli do
         expect(@stack).to receive(:recreate)
           .with(hash_including(:template_body))
           .and_return(false)
-        output = bora.run(@config, "recreate", "web-prod")
+        output = bora.run(@config, "recreate", "web-prod", expect_exception: true)
         expect(output).to include(Bora::Stack::STACK_ACTION_FAILURE_MESSAGE % ["Recreate", "web-prod"])
       end
     end

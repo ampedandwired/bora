@@ -9,10 +9,10 @@ describe Bora::Resolver::Credstash do
     s
   end
 
-  let(:resolver) { described_class.new(stack) }
+  let(:resolver) { Bora::Resolver::Credstash.new(stack) }
 
   before do
-    client = double
+    client = double(Aws::CloudFormation::Client)
     allow(Aws::CloudFormation::Client).to receive(:new).and_return(client)
   end
 

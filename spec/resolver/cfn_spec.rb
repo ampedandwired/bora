@@ -9,12 +9,11 @@ describe Bora::Resolver::Cfn do
     s
   end
 
-  let(:resolver) { described_class.new(bora_stack) }
+  let(:resolver) { Bora::Resolver::Cfn.new(bora_stack) }
 
   context "when the stack exists" do
     before do
-      @stack = setup_stack("web-prod", status: :create_complete)
-      setup_outputs(@stack, [{
+      @stack = setup_stack("web-prod", status: :create_complete, outputs: [{
         output_key: "UserId",
         output_value: "joe"
       }])

@@ -3,6 +3,7 @@ require "helper/spec_helper"
 describe BoraCli do
   let(:bora) { described_class.new }
   let(:stack) { setup_stack("web-prod") }
+  let(:bora_config) { default_config }
 
   it "shows the given change set" do
     change_set_name = "test-change-set"
@@ -46,18 +47,5 @@ describe BoraCli do
     expect(output).to include("Modify", "AWS::EC2::SecurityGroup", "MySG")
     expect(output).to include("Replace", "AWS::EC2::SecurityGroup", "MySG2")
     expect(output).to include("Replace (conditional)", "AWS::EC2::SecurityGroup", "MySG3")
-  end
-
-  def bora_config
-    config = {
-      "templates" => {
-        "web" => {
-          "template_file" => File.join(__dir__, "fixtures/web_template.json"),
-          "stacks" => {
-            "prod" => {}
-          }
-        }
-      }
-    }
   end
 end

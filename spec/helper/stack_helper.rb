@@ -4,9 +4,10 @@ require 'bora/cli'
 
 DEFAULT_REGION = "us-stubbed-1"
 
-def setup_stack(stack_name, status: :not_created)
+def setup_stack(stack_name, status: :not_created, outputs: nil)
   stack = double(Bora::Cfn::Stack)
   allow(Bora::Cfn::Stack).to receive(:new).with(stack_name, DEFAULT_REGION).and_return(stack)
+  allow(stack).to receive(:region).and_return(DEFAULT_REGION)
 
   if status == :not_created
     allow(stack).to receive(:status).and_return(Bora::Cfn::StackStatus.new(nil))
@@ -19,7 +20,11 @@ def setup_stack(stack_name, status: :not_created)
     allow(stack).to receive("exists?").and_return(true)
   end
 
-  allow(stack).to receive(:outputs).and_return(nil)
+  if outputs
+    setup_outputs(stack, outputs)
+  else
+    allow(stack).to receive(:outputs).and_return(nil)
+  end
 
   stack
 end
@@ -36,13 +41,18 @@ def setup_parameters(stack, parameters)
   bora_parameters
 end
 
+def setup_events(stack, events)
+  bora_events = events.map { |e| Bora::Cfn::Event.new(Aws::CloudFormation::Types::StackEvent.new(e)) }
+  expect(stack).to receive(:events).and_return(bora_events)
+end
+
 def setup_create_change_set(stack, change_set_name, change_set)
   cfn_change_set_result = Hashie::Mash.new(change_set.merge({change_set_name: change_set_name}))
   bora_change_set = Bora::Cfn::ChangeSet.new(cfn_change_set_result)
   if change_set_name
     allow(stack).to receive(:create_change_set).with(change_set_name, anything).and_return(bora_change_set)
   else
-    allow(stack).to receive(:create_change_set).with(anything, anything).and_return(bora_change_set)
+    allow(stack).to receive(:create_change_set).with(any_args).and_return(bora_change_set)
   end
   bora_change_set
 end
@@ -64,8 +74,8 @@ def setup_template(bora_config, template_name, template)
   template_path
 end
 
-def default_config
-  {
+def default_config(overrides = {})
+  Hashie::Mash.new({
     "templates" => {
       "web" => {
         "template_file" => File.join(__dir__, "../fixtures/web_template.json"),
@@ -74,10 +84,10 @@ def default_config
         }
       }
     }
-  }
+  }).deep_merge(overrides)
 end
 
-class BoraRunner
+class BoraCli
   def capture
     stream = StringIO.new
     $stdout = stream
@@ -93,10 +103,8 @@ class BoraRunner
     # puts result
     result
   end
-end
 
-class BoraCli < BoraRunner
-  def run(config, *params)
+  def run(config, *params, expect_exception: false)
     bora_cfg = Tempfile.new(["bora", ".yaml"])
     bora_cfg.write(config.to_yaml)
     bora_cfg.close
@@ -109,25 +117,7 @@ class BoraCli < BoraRunner
       rescue Exception => e
         puts e
         puts e.backtrace
-      end
-    end
-  end
-end
-
-class BoraRake < BoraRunner
-  def run(config, cmd, stack, *params)
-    Rake.application = Rake::Application.new
-    bora = Bora.new(config_file_or_hash: config)
-    String.disable_colorization = true
-    capture do
-      Rake.application.instance_eval do
-        bora.rake_tasks
-        begin
-          Rake.application["#{stack}:#{cmd}"].invoke(*params)
-        rescue Exception => e
-          puts e
-          puts e.backtrace
-        end
+        raise e unless expect_exception
       end
     end
   end

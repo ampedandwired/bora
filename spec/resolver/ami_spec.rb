@@ -1,4 +1,3 @@
-require 'ostruct'
 require 'uri'
 require 'helper/spec_helper'
 require 'bora/resolver/ami'
@@ -10,7 +9,7 @@ describe Bora::Resolver::Ami do
     s
   end
 
-  let(:resolver) { described_class.new(bora_stack) }
+  let(:resolver) { Bora::Resolver::Ami.new(bora_stack) }
 
   let(:ec2) do
     ec2 = double(Aws::EC2::Client)
@@ -35,7 +34,7 @@ describe Bora::Resolver::Ami do
   end
 
   it "raises an exception if no ami is found" do
-    expect(ec2).to receive(:describe_images).and_return(OpenStruct.new(images: []))
+    expect(ec2).to receive(:describe_images).and_return(empty_describe_images_response)
     expect{resolver.resolve(URI("ami://my_ami"))}.to raise_exception(Bora::Resolver::Ami::NoAMI)
   end
 
@@ -46,7 +45,7 @@ describe Bora::Resolver::Ami do
   it "raises an exception if the Owner parameter in URI is invalid" do
     expect(ec2).to receive(:describe_images)
       .with(describe_images_request("amzn-ami-hv*x86_64-gp2", ['111']))
-      .and_raise(Aws::EC2::Errors::InvalidUserIDMalformed.new(nil,nil))
+      .and_raise(Aws::EC2::Errors::InvalidUserIDMalformed.new(nil, nil))
 
     expect{resolver.resolve(URI("ami://amzn-ami-hv*x86_64-gp2?owner=111"))}
     .to raise_exception(Bora::Resolver::Ami::InvalidUserId)
@@ -65,18 +64,22 @@ describe Bora::Resolver::Ami do
   end
 
   def describe_images_response
-    OpenStruct.new(
+    Hashie::Mash.new(
       images: [
-        OpenStruct.new(
+        {
           image_id: "ami-2",
           creation_date: "2016-09-21T02:50:46.000Z"
-        ),
-        OpenStruct.new(
+        },
+        {
           image_id: "ami-1",
           creation_date: "2016-09-21T02:50:45.000Z"
-        )
+        }
       ]
     )
+  end
+
+  def empty_describe_images_response
+    Hashie::Mash.new(images: [])
   end
 
 end
