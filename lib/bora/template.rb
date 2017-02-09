@@ -1,16 +1,13 @@
 require 'bora/stack'
+require 'hashie'
 
 class Bora
   class Template
-    # These are properties that you can define on the template, but which can also be defined in the stack
+    # These are properties that you can define on the template, but which can also be defined and overriden in the stack
     INHERITABLE_PROPERTIES = %w(capabilities default_region tags)
 
     # These are properties that can be passed in from the command line to override what's defined inthe stack
     OVERRIDABLE_PROPERTIES = %w(cfn_stack_name)
-
-    # These are properties defined in the stack that the template can override
-
-    TEMPLATE_MASTER_PROPERTIES = %w(tags)
 
     def initialize(template_name, template_config, override_config = {})
       @template_name = template_name
@@ -35,20 +32,12 @@ class Bora
       @stacks.each { |_, s| s.rake_tasks }
     end
 
-
     private
 
     def resolve_stack_config(template_config, stack_config, override_config)
-
-      stack_config.keys.each do |k|
-        if TEMPLATE_MASTER_PROPERTIES.include?(k) && !template_config[k].nil?
-          stack_config[k].update(template_config[k])
-        end
-      end
-
-      inheritable_properties(template_config)
-        .merge(stack_config)
-          .merge(overridable_properties(override_config))
+      Hashie::Mash.new(
+        inheritable_properties(template_config)
+      ).deep_merge(stack_config).merge(overridable_properties(override_config))
     end
 
     def inheritable_properties(config)
@@ -58,6 +47,5 @@ class Bora
     def overridable_properties(config)
       config.select { |k| INHERITABLE_PROPERTIES.include?(k) || OVERRIDABLE_PROPERTIES.include?(k) }
     end
-
   end
 end
