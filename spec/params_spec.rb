@@ -12,10 +12,12 @@ describe BoraCli do
     }
 
     expect(stack).to receive(:create)
-      .with(hash_including(
-        :template_body,
-        parameters: cfn_params(params)
-      ))
+      .with(
+        hash_including(
+          :template_body,
+          parameters: cfn_params(params)
+        )
+      )
       .and_return(true)
 
     output = bora.run(bora_config(params: params), "apply", "web-prod")
@@ -25,10 +27,12 @@ describe BoraCli do
     params = { "foo" => "bar" }
     expected_params = { "foo" => "overridden" }
     expect(stack).to receive(:create)
-      .with(hash_including(
-        :template_body,
-        parameters: cfn_params(expected_params)
-      ))
+      .with(
+        hash_including(
+          :template_body,
+          parameters: cfn_params(expected_params)
+        )
+      )
       .and_return(true)
 
     output = bora.run(bora_config(params: params), "apply", "web-prod", "--params", "foo=overridden")
@@ -43,96 +47,127 @@ describe BoraCli do
   end
 
   it "passes through cloudformation parameters from the stack config" do
-    config = bora_config(stack_config: {
-      "capabilities" => ["CAPABILITY_IAM"],
-      "tags" => 
-        { "Name" => "MyStack"}
+    config = bora_config(
+      stack_config: {
+        "capabilities" => ["CAPABILITY_IAM"],
+        "tags" =>
+          { "Name" => "MyStack" }
       }
     )
     expect(stack).to receive(:create)
-      .with(hash_including(
-        :template_body,
-        "capabilities" => ["CAPABILITY_IAM"],
-        "tags" => {"Name" => "MyStack"}
-      ))
+      .with(
+        hash_including(
+          :template_body,
+          "capabilities" => ["CAPABILITY_IAM"],
+          "tags" => [
+            {
+              "key" => "Name",
+              "value" => "MyStack"
+            }
+          ]
+        )
+      )
       .and_return(true)
 
     output = bora.run(config, "apply", "web-prod")
   end
 
   it "passes through cloudformation parameters from the template config" do
-    config = bora_config(template_config: {
-      "capabilities" => ["CAPABILITY_IAM"],
-      "tags" => 
-        { "Name" => "MyStack"}
+    config = bora_config(
+      template_config: {
+        "capabilities" => ["CAPABILITY_IAM"],
+        "tags" =>
+          { "Name" => "MyStack" }
       }
     )
 
     expect(stack).to receive(:create)
-      .with(hash_including(
-        :template_body,
-        "capabilities" => ["CAPABILITY_IAM"],
-        "tags" => {"Name" => "MyStack"}
-      ))
+      .with(
+        hash_including(
+          :template_body,
+          "capabilities" => ["CAPABILITY_IAM"],
+          "tags" => [
+            {
+              "key" => "Name",
+              "value" => "MyStack"
+            }
+          ]
+        )
+      )
       .and_return(true)
 
     output = bora.run(config, "apply", "web-prod")
   end
-  
-  it "combines tags from the template config into the stack config" do
+
+  it "combines tags from the stack config into the template config" do
     config = bora_config(
-      template_config: 
-        { "tags" =>
-           { "Name" => "MyStack"
+      template_config: {
+        "tags" =>
+        { "Name" => "MyStack" }
+      },
+      stack_config: {
+        "tags" =>
+        { "Environment" => "Live" }
+      }
+    )
+    expect(stack).to receive(:create)
+      .with(
+        hash_including(
+          :template_body,
+          "tags" => [
+            {
+              "key"   => "Name",
+              "value" => "MyStack"
+            },
+            {
+              "key"   => "Environment",
+              "value" => "Live"
             }
-        },
-      stack_config:
-      { "tags" =>
-         {
-           "Environment" => "Live"
+          ]
+        )
+      )
+      .and_return(true)
+    output = bora.run(config, "apply", "web-prod")
+  end
+
+  it "overwrite duplicate tags in the template config with the tags in the stack config" do
+    config = bora_config(
+      template_config: {
+        "tags" =>
+          {
+            "Name" => "MyStack",
+            "Environment" => "Live"
           }
       },
-      )
+      stack_config: {
+        "tags" =>
+         {
+           "Environment" => "Dev",
+           "Application" => "freds-awesome-app"
+         }
+      }
+    )
     expect(stack).to receive(:create)
-      .with(hash_including(
-        :template_body,
-        { "tags" =>
-           { "Name" => "MyStack",
-             "Environment" => "Live"
-            }
-        }
-      ))
-      .and_return(true)
-      output = bora.run(config, "apply", "web-prod")
-    end
-    
-    it "overwrite duplicated tags in the stack config with the tags in the template config" do
-      config = bora_config(
-        template_config: 
-          { "tags" =>
-             { "Name" => "MyStack",
-               "Application" => "my-awesome-app"
-              }
-          },
-        stack_config:
-        { "tags" =>
-           {
-             "Environment" => "Live",
-             "Application" => "freds-awesome-app"
-            }
-        },
-        )
-      expect(stack).to receive(:create)
-        .with(hash_including(
+      .with(
+        hash_including(
           :template_body,
-          { "tags" =>
-             { "Name" => "MyStack",
-               "Environment" => "Live",
-               "Application" => "my-awesome-app"
-              }
-          }
-        ))
-        .and_return(true)
+          "tags" => [
+            {
+              "key"   => "Name",
+              "value" => "MyStack"
+            },
+            {
+              "key"   => "Environment",
+              "value" => "Dev"
+            },
+            {
+              "key"   => "Application",
+              "value" => "freds-awesome-app"
+            }
+          ]
+        )
+      )
+      .and_return(true)
     output = bora.run(config, "apply", "web-prod")
   end
 
