@@ -316,7 +316,12 @@ class Bora
     end
 
     def cfn_options_from_stack_config
-      valid_options = ["capabilities"]
+      valid_options = %w(capabilities tags)
+
+      # Expand Tags to key, value pairs
+      if @stack_config[:tags]
+        @stack_config[:tags] = @stack_config[:tags].collect { |k, v| { key: k, value: v } }
+      end
       @stack_config.select { |k| valid_options.include?(k) }
     end
 
