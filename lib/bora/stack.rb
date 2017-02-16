@@ -287,6 +287,7 @@ class Bora
           end
         end
       end
+      #binding.pry
       cfn_options
     end
 
@@ -316,13 +317,16 @@ class Bora
     end
 
     def cfn_options_from_stack_config
-      valid_options = %w(capabilities tags)
+      valid_options = %w(capabilities tags disable_rollback on_failure)
 
-      # Expand Tags to key, value pairs
-      if @stack_config[:tags]
-        @stack_config[:tags] = @stack_config[:tags].collect { |k, v| { key: k, value: v } }
+      cfn_options = @stack_config.select { |k| valid_options.include?(k) }
+      # Expand any Tags to "key" => key, "value" => value pairs
+      if cfn_options['tags']
+        cfn_options['tags'] = cfn_options['tags'].map do |k, v|
+          { key: k, value: v }
+        end
       end
-      @stack_config.select { |k| valid_options.include?(k) }
+      cfn_options
     end
 
     def get_new_template(cfn_options)
