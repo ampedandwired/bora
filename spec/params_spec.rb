@@ -61,8 +61,8 @@ describe BoraCli do
           "capabilities" => ["CAPABILITY_IAM"],
           "tags" => [
             {
-              "key" => "Name",
-              "value" => "MyStack"
+              key: 'Name',
+              value: 'MyStack'
             }
           ]
         )
@@ -88,8 +88,8 @@ describe BoraCli do
           "capabilities" => ["CAPABILITY_IAM"],
           "tags" => [
             {
-              "key" => "Name",
-              "value" => "MyStack"
+              key:    "Name",
+              value:  "MyStack"
             }
           ]
         )
@@ -103,11 +103,11 @@ describe BoraCli do
     config = bora_config(
       template_config: {
         "tags" =>
-        { "Name" => "MyStack" }
+        { Name: "MyStack" }
       },
       stack_config: {
         "tags" =>
-        { "Environment" => "Live" }
+        { Environment: "Live" }
       }
     )
     expect(stack).to receive(:create)
@@ -116,12 +116,12 @@ describe BoraCli do
           :template_body,
           "tags" => [
             {
-              "key"   => "Name",
-              "value" => "MyStack"
+              key:    "Name",
+              value:  "MyStack"
             },
             {
-              "key"   => "Environment",
-              "value" => "Live"
+              key:    "Environment",
+              value:  "Live"
             }
           ]
         )
@@ -135,15 +135,15 @@ describe BoraCli do
       template_config: {
         "tags" =>
           {
-            "Name" => "MyStack",
-            "Environment" => "Live"
+            Name:         "MyStack",
+            Environment:  "Live"
           }
       },
       stack_config: {
         "tags" =>
          {
-           "Environment" => "Dev",
-           "Application" => "freds-awesome-app"
+           Environment: "Dev",
+           Application: "freds-awesome-app"
          }
       }
     )
@@ -153,16 +153,16 @@ describe BoraCli do
           :template_body,
           "tags" => [
             {
-              "key"   => "Name",
-              "value" => "MyStack"
+              key:   "Name",
+              value: "MyStack"
             },
             {
-              "key"   => "Environment",
-              "value" => "Dev"
+              key:   "Environment",
+              value: "Dev"
             },
             {
-              "key"   => "Application",
-              "value" => "freds-awesome-app"
+              key:   "Application",
+              value: "freds-awesome-app"
             }
           ]
         )
