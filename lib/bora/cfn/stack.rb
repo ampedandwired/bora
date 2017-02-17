@@ -78,11 +78,11 @@ class Bora
           change_set_name: change_set_name
         }
         cloudformation.create_change_set(change_set_options.merge(options))
-        begin
+        loop do
           change_set = ChangeSet.new(cloudformation.describe_change_set(change_set_options))
-          sleep 5 unless change_set.status_complete?
-        end until change_set.status_complete?
-        change_set
+          return change_set if change_set.status_complete?
+          sleep 5
+        end
       end
 
       def list_change_sets
@@ -127,14 +127,15 @@ class Bora
       end
 
       def wait_for_completion
-        begin
+        loop do
           events = unprocessed_events
           events.each { |e| yield e } if block_given?
           finished = events.find do |e|
             e.resource_type == 'AWS::CloudFormation::Stack' && e.logical_resource_id == @stack_name && e.status_complete?
           end
-          sleep 10 unless finished
-        end until finished
+          break if finished
+          sleep 10
+        end
         underlying_stack(refresh: true)
       end
 
