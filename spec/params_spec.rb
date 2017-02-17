@@ -20,7 +20,7 @@ describe BoraCli do
       )
       .and_return(true)
 
-    output = bora.run(bora_config(params: params), 'apply', 'web-prod')
+    bora.run(bora_config(params: params), 'apply', 'web-prod')
   end
 
   it 'overrides parameters in the config with parameters passed on the command line' do
@@ -35,7 +35,7 @@ describe BoraCli do
       )
       .and_return(true)
 
-    output = bora.run(bora_config(params: params), 'apply', 'web-prod', '--params', 'foo=overridden')
+    bora.run(bora_config(params: params), 'apply', 'web-prod', '--params', 'foo=overridden')
   end
 
   it 'passes no params to CloudFormation if params are empty' do
@@ -43,7 +43,7 @@ describe BoraCli do
       .with(hash_not_including(:parameters))
       .and_return(true)
 
-    output = bora.run(bora_config, 'apply', 'web-prod')
+    bora.run(bora_config, 'apply', 'web-prod')
   end
 
   it 'passes through cloudformation parameters from the stack config' do
@@ -69,7 +69,7 @@ describe BoraCli do
       )
       .and_return(true)
 
-    output = bora.run(config, 'apply', 'web-prod')
+    bora.run(config, 'apply', 'web-prod')
   end
 
   it 'passes through cloudformation parameters from the template config' do
@@ -96,7 +96,7 @@ describe BoraCli do
       )
       .and_return(true)
 
-    output = bora.run(config, 'apply', 'web-prod')
+    bora.run(config, 'apply', 'web-prod')
   end
 
   it 'combines tags from the stack config into the template config' do
@@ -127,7 +127,7 @@ describe BoraCli do
         )
       )
       .and_return(true)
-    output = bora.run(config, 'apply', 'web-prod')
+    bora.run(config, 'apply', 'web-prod')
   end
 
   it 'overwrite duplicate tags in the template config with the tags in the stack config' do
@@ -168,7 +168,7 @@ describe BoraCli do
         )
       )
       .and_return(true)
-    output = bora.run(config, 'apply', 'web-prod')
+    bora.run(config, 'apply', 'web-prod')
   end
 
   it 'passes declared CloudFormation parameters through from the config when using cfndsl' do
@@ -180,7 +180,7 @@ describe BoraCli do
       .and_return(true)
 
     config = bora_config(template_file: File.join(__dir__, 'fixtures/params_spec_template.rb'), params: bora_params)
-    output = bora.run(config, 'apply', 'web-prod')
+    bora.run(config, 'apply', 'web-prod')
   end
 
   def bora_config(template_file: File.join(__dir__, 'fixtures/web_template.json'), template_config: {}, stack_config: {}, params: {})
