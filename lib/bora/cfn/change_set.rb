@@ -24,7 +24,7 @@ class Bora
         status_success? || status_failure?
       end
 
-      def has_changes?
+      def changes?
         @status.success? && !@changes.empty?
       end
 

@@ -68,7 +68,7 @@ describe BoraCli do
       before do
         bora_config.templates.web.stacks.prod.params = { 'Port' => '22' }
         setup_parameters(stack, [{ parameter_key: 'Port', parameter_value: '22' }])
-        setup_changeset(stack, has_changes: false)
+        setup_changeset(stack, changes?: false)
       end
 
       it 'Indicates if the template has not changed' do
@@ -129,7 +129,7 @@ describe BoraCli do
       setup_template(bora_config, 'web', new_template)
     end
 
-    def setup_changeset(stack, has_changes: true)
+    def setup_changeset(stack, changes?: true)
       change_set_name = 'test-change-set'
       change_set_response = {
         status: 'CREATE_COMPLETE',
@@ -138,7 +138,7 @@ describe BoraCli do
         description: 'My change set',
         creation_time: Time.parse('2016-07-21 15:01:00')
       }
-      change_set_response[:changes] = if has_changes
+      change_set_response[:changes] = if changes?
                                         [
                                           {
                                             resource_change: {

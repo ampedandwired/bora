@@ -251,7 +251,7 @@ class Bora
       if @cfn_stack.exists?
         change_set = @cfn_stack.create_change_set(change_set_name, cfn_options)
         @cfn_stack.delete_change_set(change_set_name)
-        if change_set.has_changes?
+        if change_set.changes?
           puts 'Changes'.colorize(mode: :bold)
           puts '-------'
           puts change_set.to_s(changes_only: true)
