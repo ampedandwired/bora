@@ -15,7 +15,7 @@ class Bora
                        when 'True' then 'Replace'
                        when 'Conditional' then 'Replace (conditional)'
                        else action_str
-          end
+                       end
         end
         action_str.colorize(color)
       end
