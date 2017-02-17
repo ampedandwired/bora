@@ -1,0 +1,16 @@
+AllCops:
+  TargetRubyVersion: 2.3
+Metrics/LineLength:
+  Enabled: false
+Metrics/BlockLength:
+  Enabled: false
+Metrics/MethodLength:
+  CountComments: false
+  Max: 25
+Metrics/ClassLength:
+  CountComments: false
+  Max: 120
+Style/FrozenStringLiteralComment:
+  Enabled: false
+Style/Documentation:
+  Enabled: false
