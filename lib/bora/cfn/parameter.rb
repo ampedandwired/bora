@@ -17,6 +17,5 @@ class Bora
         "#{key} - #{value}"
       end
     end
-
   end
 end

@@ -2,7 +2,6 @@ require 'bora/cfn/status'
 
 class Bora
   module Cfn
-
     class Event
       def initialize(event)
         @event = event
@@ -26,10 +25,9 @@ class Bora
       end
 
       def to_s
-        status_reason = @event.resource_status_reason ? " - #{@event.resource_status_reason}" : ""
+        status_reason = @event.resource_status_reason ? " - #{@event.resource_status_reason}" : ''
         "#{@event.timestamp.getlocal} - #{@event.resource_type} - #{@event.logical_resource_id} - #{@status}#{status_reason}"
       end
     end
-
   end
 end

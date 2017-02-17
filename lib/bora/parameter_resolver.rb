@@ -31,7 +31,6 @@ class Bora
       params
     end
 
-
     private
 
     def process_param_substitutions(val, params)
@@ -79,15 +78,14 @@ class Bora
 
       # Support for legacy CFN substitutions without a scheme, eg: ${stack/outputs/foo}.
       # Will be removed in next breaking version.
-      if !uri.scheme && uri.path && uri.path.count("/") == 2
+      if !uri.scheme && uri.path && uri.path.count('/') == 2
         uri = URI("cfn://#{s}")
       end
       uri
     end
 
     def unresolved_placeholders_as_string(params)
-      params.select { |k, v| has_unresolved_placeholder?(v) }.to_a.map { |k, v| "#{k}: #{v}" }.join("\n")
+      params.select { |_k, v| has_unresolved_placeholder?(v) }.to_a.map { |k, v| "#{k}: #{v}" }.join("\n")
     end
-
   end
 end

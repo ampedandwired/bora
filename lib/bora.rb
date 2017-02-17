@@ -1,18 +1,18 @@
-require "yaml"
-require "colorize"
-require "bora/version"
-require "bora/template"
-require "bora/tasks"
+require 'yaml'
+require 'colorize'
+require 'bora/version'
+require 'bora/template'
+require 'bora/tasks'
 
 class Bora
-  DEFAULT_CONFIG_FILE = "bora.yml"
-  INHERITABLE_PROPERTIES = ["default_region"]
+  DEFAULT_CONFIG_FILE = 'bora.yml'.freeze
+  INHERITABLE_PROPERTIES = ['default_region'].freeze
 
   def initialize(config_file_or_hash: DEFAULT_CONFIG_FILE, override_config: {}, colorize: true)
     @templates = {}
     config = load_config(config_file_or_hash)
     String.disable_colorization = !colorize
-    raise "No templates defined" if !config['templates']
+    raise 'No templates defined' unless config['templates']
     config['templates'].each do |template_name, template_config|
       resolved_config = resolve_template_config(config, template_config, override_config)
       @templates[template_name] = Template.new(template_name, resolved_config, override_config)
@@ -28,7 +28,7 @@ class Bora
   end
 
   def stack(stack_name)
-    t = @templates.find { |_, template| template.stack(stack_name) != nil }
+    t = @templates.find { |_, template| !template.stack(stack_name).nil? }
     t ? t[1].stack(stack_name) : nil
   end
 
@@ -36,17 +36,15 @@ class Bora
     @templates.each { |_, t| t.rake_tasks }
   end
 
-
   protected
 
   def load_config(config)
     if config.class == String
-      return YAML.load_file(config)
+      YAML.load_file(config)
     elsif config.class == Hash
-      return config
+      config
     end
   end
-
 
   private
 
@@ -57,5 +55,4 @@ class Bora
   def inheritable_properties(config)
     config.select { |k| INHERITABLE_PROPERTIES.include?(k) }
   end
-
 end

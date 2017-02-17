@@ -3,7 +3,7 @@ class Bora
     ResolverNotFound = Class.new(StandardError)
 
     def load_resolver(name)
-      resolver_class = name.split("_").reject(&:empty?).map { |s| s.capitalize }.join
+      resolver_class = name.split('_').reject(&:empty?).map(&:capitalize).join
       class_name = "Bora::Resolver::#{resolver_class}"
       begin
         resolver_class = Kernel.const_get(class_name)
@@ -13,7 +13,6 @@ class Bora
       end
       resolver_class
     end
-
 
     private
 
@@ -25,7 +24,5 @@ class Bora
         raise ResolverNotFound, "Could not find resolver for '#{name}'. Expected to find it at '#{require_path}'"
       end
     end
-
-
   end
 end

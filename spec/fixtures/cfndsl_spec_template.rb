@@ -1,5 +1,5 @@
 CloudFormation do
   ElasticBeanstalk_Application(:EBApp) do
-    ApplicationName "MyApp"
+    ApplicationName 'MyApp'
   end
 end

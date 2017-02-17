@@ -9,9 +9,8 @@ require 'bora/cfn/parameter'
 
 class Bora
   module Cfn
-
     class Stack
-      NO_UPDATE_MESSAGE = "No updates are to be performed"
+      NO_UPDATE_MESSAGE = 'No updates are to be performed'.freeze
 
       def initialize(stack_name, region = nil)
         @stack_name = stack_name
@@ -33,7 +32,7 @@ class Bora
 
       def recreate(options, &block)
         delete(&block) if exists?
-        create(options, &block) if !exists?
+        create(options, &block) unless exists?
       end
 
       def delete(&block)
@@ -41,24 +40,24 @@ class Bora
       end
 
       def events
-        return if !exists?
-        events = cloudformation.describe_stack_events({stack_name: underlying_stack.stack_id}).stack_events
+        return unless exists?
+        events = cloudformation.describe_stack_events(stack_name: underlying_stack.stack_id).stack_events
         events.reverse.map { |e| Event.new(e) }
       end
 
       def outputs
-        return if !exists?
+        return unless exists?
         underlying_stack.outputs.map { |output| Output.new(output) }
       end
 
       def parameters
-        return if !exists?
+        return unless exists?
         underlying_stack.parameters.map { |parameter| Parameter.new(parameter) }
       end
 
       def template
-        return if !exists?
-        cloudformation.get_template({stack_name: @stack_name}).template_body
+        return unless exists?
+        cloudformation.get_template(stack_name: @stack_name).template_body
       end
 
       def validate(options)
@@ -100,9 +99,8 @@ class Bora
       end
 
       def execute_change_set(change_set_name, &block)
-        call_cfn_action(:execute_change_set, {change_set_name: change_set_name}, &block)
+        call_cfn_action(:execute_change_set, { change_set_name: change_set_name }, &block)
       end
-
 
       # =============================================================================================
       private
@@ -118,7 +116,7 @@ class Bora
         return true if action == :delete_stack && !exists?
         @previous_event_time = last_event_time
         begin
-          action_options = {stack_name: @stack_name}.merge(options)
+          action_options = { stack_name: @stack_name }.merge(options)
           cloudformation.method(action.to_s.downcase).call(action_options)
           wait_for_completion(&block)
         rescue Aws::CloudFormation::Errors::ValidationError => e
@@ -143,7 +141,7 @@ class Bora
       def underlying_stack(refresh: false)
         if !@_stack || refresh
           begin
-            response = cloudformation.describe_stacks({stack_name: @stack_name})
+            response = cloudformation.describe_stacks(stack_name: @stack_name)
             @_stack = response.stacks[0]
           rescue Aws::CloudFormation::Errors::ValidationError
             @_stack = nil
@@ -153,8 +151,8 @@ class Bora
       end
 
       def unprocessed_events
-        return [] if !underlying_stack
-        events = cloudformation.describe_stack_events({stack_name: underlying_stack.stack_id}).stack_events
+        return [] unless underlying_stack
+        events = cloudformation.describe_stack_events(stack_name: underlying_stack.stack_id).stack_events
         unprocessed_events = events.select do |event|
           !@processed_events.include?(event.event_id) && @previous_event_time < event.timestamp
         end
@@ -163,13 +161,10 @@ class Bora
       end
 
       def last_event_time
-        return Time.at(0) if !underlying_stack
-        events = cloudformation.describe_stack_events({stack_name: @stack_name}).stack_events
-        events.length > 0 ? events[0].timestamp : Time.at(0)
+        return Time.at(0) unless underlying_stack
+        events = cloudformation.describe_stack_events(stack_name: @stack_name).stack_events
+        !events.empty? ? events[0].timestamp : Time.at(0)
       end
-
     end
-
-
   end
 end

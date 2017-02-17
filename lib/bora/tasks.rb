@@ -5,10 +5,10 @@ require 'bora/cfn/stack'
 class Bora
   class Tasks < Rake::TaskLib
     def initialize(stack_name, template_uri = nil)
-      puts "--------------------------------------------------------------------------------"
-      puts "Bora::Tasks is deprecated. Please use YAML based configuration instead."
-      puts "See http://ampedandwired.com/bora for more information."
-      puts "--------------------------------------------------------------------------------"
+      puts '--------------------------------------------------------------------------------'
+      puts 'Bora::Tasks is deprecated. Please use YAML based configuration instead.'
+      puts 'See http://ampedandwired.com/bora for more information.'
+      puts '--------------------------------------------------------------------------------'
 
       @stack_name = stack_name
       @stack = Cfn::Stack.new(stack_name)
@@ -18,7 +18,7 @@ class Bora
 
       if template_uri
         if @stack_options[:template_body] || @stack_options[:template_url]
-          raise "You cannot specify a template in the constructor as well as in the stack_options"
+          raise 'You cannot specify a template in the constructor as well as in the stack_options'
         else
           @stack_options[:template_body] = File.read(template_uri)
         end
@@ -36,7 +36,6 @@ class Bora
       @colorize = value
       String.disable_colorization = !@colorize
     end
-
 
     private
 
@@ -57,12 +56,12 @@ class Bora
     def define_apply_task
       within_namespace do
         desc "Creates (or updates) the '#{@stack_name}' stack"
-        task :apply => :generate do
-          success = invoke_action(@stack.exists? ? "update" : "create", @stack_options)
+        task apply: :generate do
+          success = invoke_action(@stack.exists? ? 'update' : 'create', @stack_options)
           if success
             outputs = @stack.outputs
-            if outputs && outputs.length > 0
-              puts "Stack outputs"
+            if outputs && !outputs.empty?
+              puts 'Stack outputs'
               outputs.each { |output| puts output }
             end
           end
@@ -84,7 +83,7 @@ class Bora
       within_namespace do
         desc "Deletes the '#{@stack_name}' stack"
         task :delete do
-          invoke_action("delete")
+          invoke_action('delete')
         end
       end
     end
@@ -92,7 +91,7 @@ class Bora
     def define_diff_task
       within_namespace do
         desc "Diffs the new template with the '#{@stack_name}' stack's current template"
-        task :diff => :generate do
+        task diff: :generate do
           puts @stack.diff(@stack_options).to_s(@colorize ? :color : :text)
         end
       end
@@ -104,7 +103,7 @@ class Bora
         task :events do
           events = @stack.events
           if events
-            if events.length > 0
+            if !events.empty?
               puts "Events for stack '#{@stack_name}'"
               @stack.events.each { |e| puts e }
             else
@@ -126,7 +125,7 @@ class Bora
     def define_new_template_task
       within_namespace do
         desc "Shows the new template for '#{@stack_name}' stack"
-        task :new_template => :generate do
+        task new_template: :generate do
           puts @stack.new_template(@stack_options)
         end
       end
@@ -138,7 +137,7 @@ class Bora
         task :outputs do
           outputs = @stack.outputs
           if outputs
-            if outputs.length > 0
+            if !outputs.empty?
               puts "Outputs for stack '#{@stack_name}'"
               outputs.each { |output| puts output }
             else
@@ -154,8 +153,8 @@ class Bora
     def define_recreate_task
       within_namespace do
         desc "Recreates (deletes then creates) the '#{@stack_name}' stack"
-        task :recreate => :generate do
-          invoke_action("recreate", @stack_options)
+        task recreate: :generate do
+          invoke_action('recreate', @stack_options)
         end
       end
     end
@@ -172,7 +171,7 @@ class Bora
     def define_validate_task
       within_namespace do
         desc "Checks the '#{@stack_name}' stack's template for validity"
-        task :validate => :generate do
+        task validate: :generate do
           puts "Template for stack '#{@stack_name}' is valid" if @stack.validate(@stack_options)
         end
       end
@@ -184,10 +183,10 @@ class Bora
       if success
         puts "#{action.capitalize} stack '#{@stack_name}' completed successfully"
       else
-        if success == nil
+        if success.nil?
           puts "#{action.capitalize} stack '#{@stack_name}' skipped as template has not changed"
         else
-          fail("#{action.capitalize} stack '#{@stack_name}' failed")
+          raise("#{action.capitalize} stack '#{@stack_name}' failed")
         end
       end
       success
@@ -200,6 +199,5 @@ class Bora
         end
       end
     end
-
   end
 end

@@ -1,11 +1,11 @@
-require "thor"
+require 'thor'
 
 class Bora
   class CliBase < Thor
     # Fix for incorrect subcommand help. See https://github.com/erikhuda/thor/issues/261
-    def self.banner(command, namespace = nil, subcommand = false)
+    def self.banner(command, _namespace = nil, subcommand = false)
       subcommand = subcommand_prefix
-      subcommand_str = subcommand ? " #{subcommand}" : ""
+      subcommand_str = subcommand ? " #{subcommand}" : ''
       "#{basename}#{subcommand_str} #{command.usage}"
     end
 
@@ -16,15 +16,15 @@ class Bora
     no_commands do
       def stack(config_file, stack_name)
         region = options.region
-        cfn_stack_name = options["cfn-stack-name"]
+        cfn_stack_name = options['cfn-stack-name']
 
         override_config = {}
-        override_config["default_region"] = region if region
-        override_config["cfn_stack_name"] = cfn_stack_name if cfn_stack_name
+        override_config['default_region'] = region if region
+        override_config['cfn_stack_name'] = cfn_stack_name if cfn_stack_name
 
         bora = bora(config_file, override_config)
         stack = bora.stack(stack_name)
-        if !stack
+        unless stack
           STDERR.puts "Could not find stack #{stack_name}"
           exit(1)
         end
@@ -36,7 +36,7 @@ class Bora
       end
 
       def params
-        options.params ? Hash[options.params.map { |param| param.split("=", 2) }] : {}
+        options.params ? Hash[options.params.map { |param| param.split('=', 2) }] : {}
       end
     end
   end

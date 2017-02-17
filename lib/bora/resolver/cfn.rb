@@ -14,22 +14,22 @@ class Bora
 
       def resolve(uri)
         stack_name = uri.host
-        section, name = uri.path.split("/").reject(&:empty?)
+        section, name = uri.path.split('/').reject(&:empty?)
         if !stack_name || !section || !name || section != 'outputs'
           raise InvalidParameter, "Invalid parameter substitution: #{uri}"
         end
 
-        stack_name, uri_region = stack_name.split(".")
+        stack_name, uri_region = stack_name.split('.')
         region = uri_region || @stack.region
 
         param_stack = @stack_cache[stack_name] || Bora::Cfn::Stack.new(stack_name, region)
-        if !param_stack.exists?
+        unless param_stack.exists?
           raise StackDoesNotExist, "Output #{name} not found in stack #{stack_name} as the stack does not exist"
         end
 
         outputs = param_stack.outputs || []
         matching_output = outputs.find { |output| output.key == name }
-        if !matching_output
+        unless matching_output
           raise ValueNotFound, "Output #{name} not found in stack #{stack_name}"
         end
 
