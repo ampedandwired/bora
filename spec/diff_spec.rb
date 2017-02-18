@@ -130,7 +130,6 @@ describe BoraCli do
     end
 
     def setup_changeset(stack, changes: true)
-      change_set_name = 'test-change-set'
       change_set_response = {
         status: 'CREATE_COMPLETE',
         status_reason: 'Finished',
