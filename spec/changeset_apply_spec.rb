@@ -9,6 +9,6 @@ describe BoraCli do
     change_set_name = 'test-change-set'
     expect(stack).to receive(:execute_change_set).with(change_set_name).and_return(true)
     output = bora.run(bora_config, 'changeset', 'apply', 'web-prod', change_set_name)
-    expect(output).to include(Bora::Stack::STACK_ACTION_SUCCESS_MESSAGE % ["Execute change set '#{change_set_name}'", 'web-prod'])
+    expect(output).to include(format(Bora::Stack::STACK_ACTION_SUCCESS_MESSAGE, "Execute change set '#{change_set_name}'", 'web-prod'))
   end
 end

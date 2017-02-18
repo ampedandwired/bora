@@ -20,7 +20,7 @@ class Bora
         placeholders_were_substituted = false
         params.each do |k, v|
           resolved_value = process_param_substitutions(v, params)
-          unresolved_placeholders_still_remain ||= has_unresolved_placeholder?(resolved_value)
+          unresolved_placeholders_still_remain ||= unresolved_placeholder?(resolved_value)
           placeholders_were_substituted ||= resolved_value != v
           params[k] = resolved_value
         end
@@ -52,7 +52,7 @@ class Bora
       if !uri.scheme
         # This token refers to another parameter, rather than a resolver
         value_to_substitute = params[uri.path]
-        return !value_to_substitute || has_unresolved_placeholder?(value_to_substitute) ? placeholder : value_to_substitute
+        return !value_to_substitute || unresolved_placeholder?(value_to_substitute) ? placeholder : value_to_substitute
       else
         # This token needs to be resolved by a resolver
         resolver_name = uri.scheme
@@ -61,14 +61,14 @@ class Bora
       end
     end
 
-    def has_unresolved_placeholder?(val)
+    def unresolved_placeholder?(val)
       result = false
       if val.is_a? String
         result = val =~ PLACEHOLDER_REGEX
       elsif val.is_a? Array
-        result = val.find { |i| has_unresolved_placeholder?(i) }
+        result = val.find { |i| unresolved_placeholder?(i) }
       elsif val.is_a? Hash
-        result = val.find { |_, v| has_unresolved_placeholder?(v) }
+        result = val.find { |_, v| unresolved_placeholder?(v) }
       end
       result
     end
@@ -85,7 +85,7 @@ class Bora
     end
 
     def unresolved_placeholders_as_string(params)
-      params.select { |_k, v| has_unresolved_placeholder?(v) }.to_a.map { |k, v| "#{k}: #{v}" }.join("\n")
+      params.select { |_k, v| unresolved_placeholder?(v) }.to_a.map { |k, v| "#{k}: #{v}" }.join("\n")
     end
   end
 end

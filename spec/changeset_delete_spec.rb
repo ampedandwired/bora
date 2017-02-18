@@ -7,6 +7,6 @@ describe BoraCli do
 
   it 'deletes the given change set' do
     expect(stack).to receive(:delete_change_set).with('my-change-set')
-    output = bora.run(bora_config, 'changeset', 'delete', 'web-prod', 'my-change-set')
+    bora.run(bora_config, 'changeset', 'delete', 'web-prod', 'my-change-set')
   end
 end

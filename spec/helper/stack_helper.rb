@@ -112,7 +112,7 @@ class BoraCli
     capture do
       begin
         Bora::Cli.start(thor_args)
-      rescue Exception => e
+      rescue StandardError => e
         puts e
         puts e.backtrace
         raise e unless expect_exception

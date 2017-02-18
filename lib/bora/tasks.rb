@@ -17,11 +17,8 @@ class Bora
       within_namespace { yield self } if block_given?
 
       if template_uri
-        if @stack_options[:template_body] || @stack_options[:template_url]
-          raise 'You cannot specify a template in the constructor as well as in the stack_options'
-        else
-          @stack_options[:template_body] = File.read(template_uri)
-        end
+        raise 'You cannot specify a template in the constructor as well as in the stack_options' if @stack_options[:template_body] || @stack_options[:template_url]
+        @stack_options[:template_body] = File.read(template_uri)
       elsif @stack_options[:template_url]
         @stack_options[:template_body] = File.read(@stack_options[:template_url])
         @stack_options.delete(:template_url)
@@ -183,11 +180,8 @@ class Bora
       if success
         puts "#{action.capitalize} stack '#{@stack_name}' completed successfully"
       else
-        if success.nil?
-          puts "#{action.capitalize} stack '#{@stack_name}' skipped as template has not changed"
-        else
-          raise("#{action.capitalize} stack '#{@stack_name}' failed")
-        end
+        raise "#{action.capitalize} stack '#{@stack_name}' failed" unless success.nil?
+        puts "#{action.capitalize} stack '#{@stack_name}' skipped as template has not changed"
       end
       success
     end

@@ -122,7 +122,7 @@ class Bora
     end
 
     def show_current
-      template = get_current_template
+      template = current_template
       puts template ? template : (STACK_DOES_NOT_EXIST_MESSAGE % @cfn_stack_name)
     end
 
@@ -179,13 +179,15 @@ class Bora
 
       current_params_str = params_as_string(current_params)
       new_params_str = params_as_string(new_params)
-      if current_params_str || new_params_str
-        puts 'Parameters'.colorize(mode: :bold)
-        puts '----------'
-        diff = Diffy::Diff.new(current_params_str, new_params_str).to_s(String.disable_colorization ? :text : :color).chomp
-        puts diff && !diff.empty? ? diff : STACK_DIFF_PARAMETERS_UNCHANGED_MESSAGE
-        puts
-      end
+      return unless current_params_str || new_params_str
+      puts 'Parameters'.colorize(mode: :bold)
+      puts '----------'
+      diff = Diffy::Diff.new(current_params_str, new_params_str).to_s(String.disable_colorization ? :text : :color).chomp
+      # TODO: False positive?
+      # rubocop:disable  Lint/RequireParentheses
+      puts diff && !diff.empty? ? diff : STACK_DIFF_PARAMETERS_UNCHANGED_MESSAGE
+      # rubocop:enable Lint/RequireParentheses
+      puts
     end
 
     def params_as_string(params)
@@ -222,7 +224,7 @@ class Bora
     end
 
     def diff_template(context_lines, cfn_options)
-      diff = Diffy::Diff.new(get_current_template, get_new_template(cfn_options),
+      diff = Diffy::Diff.new(current_template, get_new_template(cfn_options),
                              context: context_lines,
                              include_diff_info: true)
       diff = diff.reject { |line| line =~ /^(---|\+\+\+|\\\\)/ }
@@ -242,26 +244,26 @@ class Bora
 
       puts 'Template'.colorize(mode: :bold)
       puts '--------'
+      # TODO: False positive?
+      # rubocop:disable  Lint/RequireParentheses
       puts diff && !diff.empty? ? diff : STACK_DIFF_TEMPLATE_UNCHANGED_MESSAGE
+      # rubocop:enable  Lint/RequireParentheses
       puts
     end
 
     def diff_change_set(cfn_options)
       change_set_name = "cs-#{SecureRandom.uuid}"
-      if @cfn_stack.exists?
-        change_set = @cfn_stack.create_change_set(change_set_name, cfn_options)
-        @cfn_stack.delete_change_set(change_set_name)
-        if change_set.changes?
-          puts 'Changes'.colorize(mode: :bold)
-          puts '-------'
-          puts change_set.to_s(changes_only: true)
-          puts
-        else
-          puts 'Changes'.colorize(mode: :bold)
-          puts '-------'
-          puts STACK_DIFF_NO_CHANGES_MESSAGE
-        end
+      return unless @cfn_stack.exists?
+      change_set = @cfn_stack.create_change_set(change_set_name, cfn_options)
+      @cfn_stack.delete_change_set(change_set_name)
+      puts 'Changes'.colorize(mode: :bold)
+      puts '-------'
+      if change_set.changes?
+        puts change_set.to_s(changes_only: true)
+      else
+        puts STACK_DIFF_NO_CHANGES_MESSAGE
       end
+      puts
     end
 
     def generate(override_params = {}, pretty_json = false)
@@ -294,13 +296,11 @@ class Bora
       puts "#{action_desc} stack '#{@cfn_stack_name}' in region #{@region}"
       success = @cfn_stack.send(action, *args) { |event| puts event }
       if success
-        puts STACK_ACTION_SUCCESS_MESSAGE % [action_desc, @cfn_stack_name]
+        puts format(STACK_ACTION_SUCCESS_MESSAGE, action_desc, @cfn_stack_name)
+      elsif success.nil?
+        puts format(STACK_ACTION_NOT_CHANGED_MESSAGE, action_desc, @cfn_stack_name)
       else
-        if success.nil?
-          puts STACK_ACTION_NOT_CHANGED_MESSAGE % [action_desc, @cfn_stack_name]
-        else
-          raise(STACK_ACTION_FAILURE_MESSAGE % [action_desc, @cfn_stack_name])
-        end
+        raise format(STACK_ACTION_FAILURE_MESSAGE, action_desc, @cfn_stack_name)
       end
       success
     end
@@ -333,7 +333,7 @@ class Bora
       JSON.pretty_generate(JSON.parse(template))
     end
 
-    def get_current_template
+    def current_template
       template = @cfn_stack.template
       template ? JSON.pretty_generate(JSON.parse(template)) : nil
     end

@@ -8,9 +8,22 @@ class Bora
         @status = Status.new(@event.resource_status)
       end
 
-      def method_missing(sym, *args, &block)
-        @event.send(sym, *args, &block)
+      def respond_to_missing?(method_name, include_private = false)
+        return false if method_name == :to_ary
+        super
       end
+
+      def method_missing(method_name, *args, &block)
+        if method_name.to_s =~ /(.*)/
+          @event.send(Regexp.last_match[1], *args, &block)
+        else
+          super
+        end
+      end
+
+      # def method_missing(sym, *args, &block)
+      #   @event.send(sym, *args, &block)
+      # end
 
       def status_success?
         @status.success?

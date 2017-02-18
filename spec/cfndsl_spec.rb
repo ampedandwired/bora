@@ -10,14 +10,14 @@ describe BoraCli do
     expect(stack).to receive(:create)
       .with(template_body: EXPECTED_JSON)
       .and_return(true)
-    output = bora.run(bora_config, 'apply', 'web-prod')
+    bora.run(bora_config, 'apply', 'web-prod')
   end
 
   it 'generates pretty json if specified' do
     expect(stack).to receive(:create)
       .with(template_body: JSON.pretty_generate(JSON.parse(EXPECTED_JSON)))
       .and_return(true)
-    output = bora.run(bora_config, 'apply', 'web-prod', '--pretty')
+    bora.run(bora_config, 'apply', 'web-prod', '--pretty')
   end
 
   def bora_config

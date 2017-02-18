@@ -128,8 +128,6 @@ class Bora
       end
     end
 
-    protected
-
     def extract_params_from_args(args)
       args ? Hash[args.map { |arg| arg.split('=', 2) }] : {}
     end

@@ -35,7 +35,7 @@ describe BoraCli do
           }
         ]
 
-        bora_events = setup_events(stack, events)
+        setup_events(stack, events)
         output = bora.run(bora_config, 'events', 'web-prod')
         events.map(&:values).flatten.each { |v| expect(output).to include(v.to_s) }
       end
