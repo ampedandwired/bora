@@ -19,7 +19,7 @@ describe BoraCli do
           .with(hash_including(:template_body))
           .and_return(true)
         output = bora.run(bora_config, 'apply', 'web-prod')
-        expect(output).to include(Bora::Stack::STACK_ACTION_SUCCESS_MESSAGE % ['Create', 'web-prod'])
+        expect(output).to include(format(Bora::Stack::STACK_ACTION_SUCCESS_MESSAGE, 'Create', 'web-prod'))
         expect(output).to include('output1', 'value1', 'desc1')
       end
     end
@@ -32,7 +32,7 @@ describe BoraCli do
           .with(hash_including(:template_body))
           .and_return(true)
         output = bora.run(bora_config, 'apply', 'web-prod')
-        expect(output).to include(Bora::Stack::STACK_ACTION_SUCCESS_MESSAGE % ['Update', 'web-prod'])
+        expect(output).to include(format(Bora::Stack::STACK_ACTION_SUCCESS_MESSAGE, 'Update', 'web-prod'))
       end
 
       it 'indicates that there are no changes if the template is the same' do
@@ -40,7 +40,7 @@ describe BoraCli do
           .with(hash_including(:template_body))
           .and_return(nil)
         output = bora.run(bora_config, 'apply', 'web-prod')
-        expect(output).to include(Bora::Stack::STACK_ACTION_NOT_CHANGED_MESSAGE % ['Update', 'web-prod'])
+        expect(output).to include(format(Bora::Stack::STACK_ACTION_NOT_CHANGED_MESSAGE, 'Update', 'web-prod'))
       end
 
       it 'indicates there was an error if the update fails' do
@@ -48,7 +48,7 @@ describe BoraCli do
           .with(hash_including(:template_body))
           .and_return(false)
         output = bora.run(bora_config, 'apply', 'web-prod', expect_exception: true)
-        expect(output).to include(Bora::Stack::STACK_ACTION_FAILURE_MESSAGE % ['Update', 'web-prod'])
+        expect(output).to include(format(Bora::Stack::STACK_ACTION_FAILURE_MESSAGE, 'Update', 'web-prod'))
       end
     end
   end

@@ -15,7 +15,7 @@ describe BoraCli do
           .with(hash_including(:template_body))
           .and_return(true)
         output = bora.run(@config, 'recreate', 'web-prod')
-        expect(output).to include(Bora::Stack::STACK_ACTION_SUCCESS_MESSAGE % ['Recreate', 'web-prod'])
+        expect(output).to include(format(Bora::Stack::STACK_ACTION_SUCCESS_MESSAGE, 'Recreate', 'web-prod'))
       end
     end
 
@@ -27,7 +27,7 @@ describe BoraCli do
           .with(hash_including(:template_body))
           .and_return(true)
         output = bora.run(@config, 'recreate', 'web-prod')
-        expect(output).to include(Bora::Stack::STACK_ACTION_SUCCESS_MESSAGE % ['Recreate', 'web-prod'])
+        expect(output).to include(format(Bora::Stack::STACK_ACTION_SUCCESS_MESSAGE, 'Recreate', 'web-prod'))
       end
 
       it 'indicates that there are no changes if the template is the same' do
@@ -35,7 +35,7 @@ describe BoraCli do
           .with(hash_including(:template_body))
           .and_return(nil)
         output = bora.run(@config, 'recreate', 'web-prod')
-        expect(output).to include(Bora::Stack::STACK_ACTION_NOT_CHANGED_MESSAGE % ['Recreate', 'web-prod'])
+        expect(output).to include(format(Bora::Stack::STACK_ACTION_NOT_CHANGED_MESSAGE, 'Recreate', 'web-prod'))
       end
 
       it 'indicates there was an error if the recreation fails' do
@@ -43,7 +43,7 @@ describe BoraCli do
           .with(hash_including(:template_body))
           .and_return(false)
         output = bora.run(@config, 'recreate', 'web-prod', expect_exception: true)
-        expect(output).to include(Bora::Stack::STACK_ACTION_FAILURE_MESSAGE % ['Recreate', 'web-prod'])
+        expect(output).to include(format(Bora::Stack::STACK_ACTION_FAILURE_MESSAGE, 'Recreate', 'web-prod'))
       end
     end
   end
