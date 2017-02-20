@@ -288,7 +288,6 @@ class Bora
           end
         end
       end
-      # binding.pry
       cfn_options
     end
 
