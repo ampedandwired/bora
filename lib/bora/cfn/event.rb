@@ -21,10 +21,6 @@ class Bora
         end
       end
 
-      # def method_missing(sym, *args, &block)
-      #   @event.send(sym, *args, &block)
-      # end
-
       def status_success?
         @status.success?
       end
