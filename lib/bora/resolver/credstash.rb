@@ -33,7 +33,7 @@ class Bora
       def parse_key_context(uri)
         return '' unless uri.query
         query = URI.decode_www_form(uri.query).to_h
-        context_params = query.map { |k, v| "#{k}=#{v}" }.join(' ') # Rubocop:disabl
+        context_params = query.map { |k, v| "#{k}=#{v}" }.join(' ')
         " #{context_params}"
       end
     end
