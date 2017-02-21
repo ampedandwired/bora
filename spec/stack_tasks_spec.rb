@@ -19,9 +19,12 @@ describe Bora::StackTasks do
     end
 
     it 'allows override params to be passed in' do
-      expect(@stack).to receive(:apply).with('foo' => 'bar',
-                                             'bing' => '',
-                                             'baz' => 'x=y')
+      expect(@stack).to receive(:apply)
+        .with(
+          'foo' => 'bar',
+          'bing' => '',
+          'baz' => 'x=y'
+        )
       invoke_rake('apply', 'foo=bar', 'bing=', 'baz=x=y')
     end
   end

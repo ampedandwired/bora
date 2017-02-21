@@ -7,11 +7,15 @@ describe BoraCli do
   describe '#apply' do
     context 'stack does not exist' do
       let(:stack) do
-        setup_stack('web-prod', status: :not_created, outputs: [
-                      output_key: 'output1',
-                      output_value: 'value1',
-                      description: 'desc1'
-                    ])
+        setup_stack(
+          'web-prod',
+          status: :not_created,
+          outputs: [
+            output_key: 'output1',
+            output_value: 'value1',
+            description: 'desc1'
+          ]
+        )
       end
 
       it 'creates the stack' do

@@ -137,19 +137,20 @@ describe BoraCli do
         description: 'My change set',
         creation_time: Time.parse('2016-07-21 15:01:00')
       }
-      change_set_response[:changes] = if changes
-                                        [
-                                          {
-                                            resource_change: {
-                                              action: 'Modify',
-                                              resource_type: 'AWS::EC2::SecurityGroup',
-                                              logical_resource_id: 'MySG'
-                                            }
-                                          }
-                                        ]
-                                      else
-                                        []
-                                      end
+      change_set_response[:changes] =
+        if changes
+          [
+            {
+              resource_change: {
+                action: 'Modify',
+                resource_type: 'AWS::EC2::SecurityGroup',
+                logical_resource_id: 'MySG'
+              }
+            }
+          ]
+        else
+          []
+        end
       change_set = setup_create_change_set(stack, nil, change_set_response)
       expect(stack).to receive(:delete_change_set)
       change_set

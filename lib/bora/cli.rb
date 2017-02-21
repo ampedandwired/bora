@@ -5,23 +5,27 @@ require 'bora/cli_change_set'
 
 class Bora
   class Cli < CliBase
-    class_option :file,
-                 type: :string,
-                 aliases: :f,
-                 default: Bora::DEFAULT_CONFIG_FILE,
-                 desc: 'The Bora config file to use'
-
-    class_option :region,
-                 type: :string,
-                 aliases: :r,
-                 default: nil,
-                 desc: 'The region to use for the stack operation. Overrides any regions specified in the Bora config file.'
-
-    class_option 'cfn-stack-name',
-                 type: :string,
-                 aliases: :n,
-                 default: nil,
-                 desc: 'The name to give the stack in CloudFormation. Overrides any CFN stack name setting in the Bora config file.'
+    class_option(
+      :file,
+      type: :string,
+      aliases: :f,
+      default: Bora::DEFAULT_CONFIG_FILE,
+      desc: 'The Bora config file to use'
+    )
+    class_option(
+      :region,
+      type: :string,
+      aliases: :r,
+      default: nil,
+      desc: 'The region to use for the stack operation. Overrides any regions specified in the Bora config file.'
+    )
+    class_option(
+      'cfn-stack-name',
+      type: :string,
+      aliases: :n,
+      default: nil,
+      desc: 'The name to give the stack in CloudFormation. Overrides any CFN stack name setting in the Bora config file.'
+    )
 
     desc 'list', 'Lists the available stacks'
     def list
