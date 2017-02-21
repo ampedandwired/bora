@@ -7,36 +7,40 @@ describe BoraCli do
 
   it 'shows the given change set' do
     change_set_name = 'test-change-set'
-    change_set = setup_create_change_set(stack, change_set_name, status: 'CREATE_COMPLETE',
-                                                                 status_reason: 'Finished',
-                                                                 execution_status: 'AVAILABLE',
-                                                                 description: 'My change set',
-                                                                 creation_time: Time.parse('2016-07-21 15:01:00'),
-                                                                 changes: [
-                                                                   {
-                                                                     resource_change: {
-                                                                       action: 'Modify',
-                                                                       resource_type: 'AWS::EC2::SecurityGroup',
-                                                                       logical_resource_id: 'MySG'
-                                                                     }
-                                                                   },
-                                                                   {
-                                                                     resource_change: {
-                                                                       action: 'Modify',
-                                                                       replacement: 'True',
-                                                                       resource_type: 'AWS::EC2::SecurityGroup',
-                                                                       logical_resource_id: 'MySG2'
-                                                                     }
-                                                                   },
-                                                                   {
-                                                                     resource_change: {
-                                                                       action: 'Modify',
-                                                                       replacement: 'Conditional',
-                                                                       resource_type: 'AWS::EC2::SecurityGroup',
-                                                                       logical_resource_id: 'MySG3'
-                                                                     }
-                                                                   }
-                                                                 ])
+    change_set = setup_create_change_set(
+      stack,
+      change_set_name,
+      status: 'CREATE_COMPLETE',
+      status_reason: 'Finished',
+      execution_status: 'AVAILABLE',
+      description: 'My change set',
+      creation_time: Time.parse('2016-07-21 15:01:00'),
+      changes: [
+        {
+          resource_change: {
+            action: 'Modify',
+            resource_type: 'AWS::EC2::SecurityGroup',
+            logical_resource_id: 'MySG'
+          }
+        },
+        {
+          resource_change: {
+            action: 'Modify',
+            replacement: 'True',
+            resource_type: 'AWS::EC2::SecurityGroup',
+            logical_resource_id: 'MySG2'
+          }
+        },
+        {
+          resource_change: {
+            action: 'Modify',
+            replacement: 'Conditional',
+            resource_type: 'AWS::EC2::SecurityGroup',
+            logical_resource_id: 'MySG3'
+          }
+        }
+      ]
+    )
 
     expect(stack).to receive(:describe_change_set).with(change_set_name).and_return(change_set)
     output = bora.run(bora_config, 'changeset', 'show', 'web-prod', change_set_name)

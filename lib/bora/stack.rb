@@ -184,10 +184,8 @@ class Bora
       puts 'Parameters'.colorize(mode: :bold)
       puts '----------'
       diff = Diffy::Diff.new(current_params_str, new_params_str).to_s(String.disable_colorization ? :text : :color).chomp
-      # TODO: False positive?
-      # rubocop:disable  Lint/RequireParentheses
-      puts diff && !diff.empty? ? diff : STACK_DIFF_PARAMETERS_UNCHANGED_MESSAGE
-      # rubocop:enable Lint/RequireParentheses
+      unchanged = diff.nil? || diff.empty?
+      puts unchanged ? STACK_DIFF_PARAMETERS_UNCHANGED_MESSAGE : diff
       puts
     end
 
@@ -245,10 +243,8 @@ class Bora
 
       puts 'Template'.colorize(mode: :bold)
       puts '--------'
-      # TODO: False positive?
-      # rubocop:disable  Lint/RequireParentheses
-      puts diff && !diff.empty? ? diff : STACK_DIFF_TEMPLATE_UNCHANGED_MESSAGE
-      # rubocop:enable  Lint/RequireParentheses
+      unchanged = diff.nil? || diff.empty?
+      puts unchanged ? STACK_DIFF_TEMPLATE_UNCHANGED_MESSAGE : diff
       puts
     end
 

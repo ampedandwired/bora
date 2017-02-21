@@ -13,10 +13,16 @@ describe Bora::Resolver::Cfn do
 
   context 'when the stack exists' do
     before do
-      @stack = setup_stack('web-prod', status: :create_complete, outputs: [{
-                             output_key: 'UserId',
-                             output_value: 'joe'
-                           }])
+      @stack = setup_stack(
+        'web-prod',
+        status: :create_complete,
+        outputs: [
+          {
+            output_key: 'UserId',
+            output_value: 'joe'
+          }
+        ]
+      )
     end
 
     it 'retrieves the given output from the stack' do

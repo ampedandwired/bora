@@ -75,14 +75,16 @@ def setup_template(bora_config, template_name, template)
 end
 
 def default_config(overrides = {})
-  Hashie::Mash.new('templates' => {
-                     'web' => {
-                       'template_file' => File.join(__dir__, '../fixtures/web_template.json'),
-                       'stacks' => {
-                         'prod' => {}
-                       }
-                     }
-                   }).deep_merge(overrides)
+  Hashie::Mash.new(
+    'templates' => {
+      'web' => {
+        'template_file' => File.join(__dir__, '../fixtures/web_template.json'),
+        'stacks' => {
+          'prod' => {}
+        }
+      }
+    }
+  ).deep_merge(overrides)
 end
 
 class BoraCli

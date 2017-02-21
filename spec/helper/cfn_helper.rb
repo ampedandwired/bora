@@ -21,11 +21,15 @@ def empty_describe_stack_events_result
 end
 
 def describe_stacks_result(status: 'CREATE_COMPLETE', outputs: [], parameters: [])
-  Hashie::Mash.new(stacks: [{
-                     stack_status: status,
-                     outputs: outputs,
-                     parameters: parameters
-                   }])
+  Hashie::Mash.new(
+    stacks: [
+      {
+        stack_status: status,
+        outputs: outputs,
+        parameters: parameters
+      }
+    ]
+  )
 end
 
 def change_set_base_result(change_set_name)
