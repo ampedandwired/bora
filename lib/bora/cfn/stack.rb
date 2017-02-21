@@ -23,6 +23,9 @@ class Bora
       end
 
       def update(options, &block)
+        invalid_update_stack_options = %w(on_failure disable_rollback)
+        options = invalid_update_stack_options.each { |option| options.delete(option) }
+        # binding.pry
         call_cfn_action(:update_stack, options, &block)
       end
 
