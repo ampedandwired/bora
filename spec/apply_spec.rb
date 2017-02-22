@@ -29,9 +29,6 @@ describe BoraCli do
       end
     end
 
-
-
-
     context 'stack exists' do
       let(:stack) { setup_stack('web-prod', status: :create_complete) }
 
@@ -70,11 +67,10 @@ describe BoraCli do
           .with(
             hash_including(
               :template_body,
-              'capabilities' => ['CAPABILITY_IAM'],
+              'capabilities' => ['CAPABILITY_IAM']
             )
           )
           .and_return(true)
-          binding.pry
         output = bora.run(bora_config, 'apply', 'web-prod')
         expect(output).to include(format(Bora::Stack::STACK_ACTION_SUCCESS_MESSAGE, 'Update', 'web-prod'))
       end
