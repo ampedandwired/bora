@@ -1,11 +1,10 @@
 class Bora
   module Resolver
     class Dummy
-      def initialize(stack)
-      end
+      def initialize(stack); end
 
-      def resolve(uri)
-        "foo"
+      def resolve(_uri)
+        'foo'
       end
     end
   end

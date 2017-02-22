@@ -7,7 +7,6 @@ class Bora
       define_tasks
     end
 
-
     protected
 
     def define_tasks
@@ -91,7 +90,7 @@ class Bora
       within_namespace do
         desc "Shows the new template for '#{@stack.stack_name}' stack"
         task :show do |_, args|
-          @stack.show(self.extract_params_from_args(args.extras))
+          @stack.show(extract_params_from_args(args.extras))
         end
       end
     end
@@ -129,12 +128,8 @@ class Bora
       end
     end
 
-
-    protected
-
     def extract_params_from_args(args)
-      args ? Hash[args.map { |arg| arg.split("=", 2) }] : {}
+      args ? Hash[args.map { |arg| arg.split('=', 2) }] : {}
     end
-
   end
 end

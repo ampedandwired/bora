@@ -1,4 +1,4 @@
-require "bora/cfn/change_set_action"
+require 'bora/cfn/change_set_action'
 
 class Bora
   module Cfn

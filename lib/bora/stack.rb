@@ -9,18 +9,18 @@ require 'bora/parameter_resolver'
 
 class Bora
   class Stack
-    STACK_ACTION_SUCCESS_MESSAGE = "%s stack '%s' completed successfully"
-    STACK_ACTION_FAILURE_MESSAGE = "%s stack '%s' failed"
-    STACK_ACTION_NOT_CHANGED_MESSAGE = "%s stack '%s' skipped as template has not changed"
-    STACK_DOES_NOT_EXIST_MESSAGE = "Stack '%s' does not exist"
-    STACK_EVENTS_DO_NOT_EXIST_MESSAGE = "Stack '%s' has no events"
-    STACK_EVENTS_MESSAGE = "Events for stack '%s'"
-    STACK_OUTPUTS_DO_NOT_EXIST_MESSAGE = "Stack '%s' has no outputs"
-    STACK_PARAMETERS_DO_NOT_EXIST_MESSAGE = "Stack '%s' has no parameters"
-    STACK_VALIDATE_SUCCESS_MESSAGE = "Template for stack '%s' is valid"
-    STACK_DIFF_TEMPLATE_UNCHANGED_MESSAGE = "Template has not changed"
-    STACK_DIFF_PARAMETERS_UNCHANGED_MESSAGE = "Parameters have not changed"
-    STACK_DIFF_NO_CHANGES_MESSAGE = "No changes will be applied"
+    STACK_ACTION_SUCCESS_MESSAGE = "%s stack '%s' completed successfully".freeze
+    STACK_ACTION_FAILURE_MESSAGE = "%s stack '%s' failed".freeze
+    STACK_ACTION_NOT_CHANGED_MESSAGE = "%s stack '%s' skipped as template has not changed".freeze
+    STACK_DOES_NOT_EXIST_MESSAGE = "Stack '%s' does not exist".freeze
+    STACK_EVENTS_DO_NOT_EXIST_MESSAGE = "Stack '%s' has no events".freeze
+    STACK_EVENTS_MESSAGE = "Events for stack '%s'".freeze
+    STACK_OUTPUTS_DO_NOT_EXIST_MESSAGE = "Stack '%s' has no outputs".freeze
+    STACK_PARAMETERS_DO_NOT_EXIST_MESSAGE = "Stack '%s' has no parameters".freeze
+    STACK_VALIDATE_SUCCESS_MESSAGE = "Template for stack '%s' is valid".freeze
+    STACK_DIFF_TEMPLATE_UNCHANGED_MESSAGE = 'Template has not changed'.freeze
+    STACK_DIFF_PARAMETERS_UNCHANGED_MESSAGE = 'Parameters have not changed'.freeze
+    STACK_DIFF_NO_CHANGES_MESSAGE = 'No changes will be applied'.freeze
 
     def initialize(stack_name, template_file, stack_config)
       @stack_name = stack_name
@@ -43,12 +43,12 @@ class Bora
 
     def apply(override_params = {}, pretty_json = false)
       cfn_options = generate(override_params, pretty_json)
-      action = @cfn_stack.exists? ? "update" : "create"
+      action = @cfn_stack.exists? ? 'update' : 'create'
       success = invoke_action(action.capitalize, action, cfn_options)
       if success
         outputs = @cfn_stack.outputs
-        if outputs && outputs.length > 0
-          puts "Stack outputs"
+        if outputs && !outputs.empty?
+          puts 'Stack outputs'
           outputs.each { |output| puts output }
         end
       end
@@ -56,7 +56,7 @@ class Bora
     end
 
     def delete
-      invoke_action("Delete", "delete")
+      invoke_action('Delete', 'delete')
     end
 
     def diff(override_params = {}, context_lines = 3)
@@ -69,7 +69,7 @@ class Bora
     def events
       events = @cfn_stack.events
       if events
-        if events.length > 0
+        if !events.empty?
           puts STACK_EVENTS_MESSAGE % @cfn_stack_name
           events.each { |e| puts e }
         else
@@ -84,7 +84,7 @@ class Bora
     def outputs
       outputs = @cfn_stack.outputs
       if outputs
-        if outputs.length > 0
+        if !outputs.empty?
           puts "Outputs for stack '#{@cfn_stack_name}'"
           outputs.each { |output| puts output }
         else
@@ -99,7 +99,7 @@ class Bora
     def parameters
       parameters = @cfn_stack.parameters
       if parameters
-        if parameters.length > 0
+        if !parameters.empty?
           puts "Parameters for stack '#{@cfn_stack_name}'"
           parameters.each { |parameter| puts parameter }
         else
@@ -113,7 +113,7 @@ class Bora
 
     def recreate(override_params = {})
       cfn_options = generate(override_params)
-      invoke_action("Recreate", "recreate", cfn_options)
+      invoke_action('Recreate', 'recreate', cfn_options)
     end
 
     def show(override_params = {})
@@ -122,7 +122,7 @@ class Bora
     end
 
     def show_current
-      template = get_current_template
+      template = current_template
       puts template ? template : (STACK_DOES_NOT_EXIST_MESSAGE % @cfn_stack_name)
     end
 
@@ -160,7 +160,7 @@ class Bora
     end
 
     def execute_change_set(change_set_name)
-      invoke_action("Execute change set '#{change_set_name}'", "execute_change_set", change_set_name)
+      invoke_action("Execute change set '#{change_set_name}'", 'execute_change_set', change_set_name)
     end
 
     def resolved_params(override_params = {})
@@ -168,7 +168,6 @@ class Bora
       params.merge!(override_params)
       @resolver.resolve(params)
     end
-
 
     protected
 
@@ -180,26 +179,26 @@ class Bora
 
       current_params_str = params_as_string(current_params)
       new_params_str = params_as_string(new_params)
-      if current_params_str || new_params_str
-        puts "Parameters".colorize(mode: :bold)
-        puts "----------"
-        diff = Diffy::Diff.new(current_params_str, new_params_str).to_s(String.disable_colorization ? :text : :color).chomp
-        puts diff && !diff.empty? ? diff : STACK_DIFF_PARAMETERS_UNCHANGED_MESSAGE
-        puts
-      end
+      return unless current_params_str || new_params_str
+      puts 'Parameters'.colorize(mode: :bold)
+      puts '----------'
+      diff = Diffy::Diff.new(current_params_str, new_params_str).to_s(String.disable_colorization ? :text : :color).chomp
+      unchanged = diff.nil? || diff.empty?
+      puts unchanged ? STACK_DIFF_PARAMETERS_UNCHANGED_MESSAGE : diff
+      puts
     end
 
     def params_as_string(params)
-      params ? params.sort.map {|k, v| "#{k} - #{v}" }.join("\n") + "\n" : nil
+      params ? params.sort.map { |k, v| "#{k} - #{v}" }.join("\n") + "\n" : nil
     end
 
     def template_default_parameters(cfn_options)
       params = nil
       template = JSON.parse(cfn_options[:template_body])
-      if template["Parameters"]
-        params_with_defaults = template["Parameters"].select { |_, v| v["Default"] }
-        if !params_with_defaults.empty?
-          params = params_with_defaults.map { |k, v| [k, v["Default"]] }.to_h
+      if template['Parameters']
+        params_with_defaults = template['Parameters'].select { |_, v| v['Default'] }
+        unless params_with_defaults.empty?
+          params = params_with_defaults.map { |k, v| [k, v['Default']] }.to_h
         end
       end
       params
@@ -223,9 +222,9 @@ class Bora
     end
 
     def diff_template(context_lines, cfn_options)
-      diff = Diffy::Diff.new(get_current_template, get_new_template(cfn_options),
-              context: context_lines,
-              include_diff_info: true)
+      diff = Diffy::Diff.new(current_template, get_new_template(cfn_options),
+                             context: context_lines,
+                             include_diff_info: true)
       diff = diff.reject { |line| line =~ /^(---|\+\+\+|\\\\)/ }
       diff = diff.map do |line|
         case line
@@ -241,53 +240,50 @@ class Bora
       end
       diff = diff.join("\n")
 
-      puts "Template".colorize(mode: :bold)
-      puts "--------"
-      puts diff && !diff.empty? ? diff : STACK_DIFF_TEMPLATE_UNCHANGED_MESSAGE
+      puts 'Template'.colorize(mode: :bold)
+      puts '--------'
+      unchanged = diff.nil? || diff.empty?
+      puts unchanged ? STACK_DIFF_TEMPLATE_UNCHANGED_MESSAGE : diff
       puts
     end
 
     def diff_change_set(cfn_options)
       change_set_name = "cs-#{SecureRandom.uuid}"
-      if @cfn_stack.exists?
-        change_set = @cfn_stack.create_change_set(change_set_name, cfn_options)
-        @cfn_stack.delete_change_set(change_set_name)
-        if change_set.has_changes?
-          puts "Changes".colorize(mode: :bold)
-          puts "-------"
-          puts change_set.to_s(changes_only: true)
-          puts
-        else
-          puts "Changes".colorize(mode: :bold)
-          puts "-------"
-          puts STACK_DIFF_NO_CHANGES_MESSAGE
-        end
+      return unless @cfn_stack.exists?
+      change_set = @cfn_stack.create_change_set(change_set_name, cfn_options)
+      @cfn_stack.delete_change_set(change_set_name)
+      puts 'Changes'.colorize(mode: :bold)
+      puts '-------'
+      if change_set.changes?
+        puts change_set.to_s(changes_only: true)
+      else
+        puts STACK_DIFF_NO_CHANGES_MESSAGE
       end
+      puts
     end
 
     def generate(override_params = {}, pretty_json = false)
       cfn_options = cfn_options_from_stack_config
       params = resolved_params(override_params)
-      if File.extname(@template_file) == ".rb"
+      if File.extname(@template_file) == '.rb'
         template_body = run_cfndsl(@template_file, params, pretty_json)
         template_json = JSON.parse(template_body)
-        if template_json["Parameters"]
-          cfn_param_keys = template_json["Parameters"].keys
-          cfn_params = params.select { |k, v| cfn_param_keys.include?(k) }.map do |k, v|
+        if template_json['Parameters']
+          cfn_param_keys = template_json['Parameters'].keys
+          cfn_params = params.select { |k, _v| cfn_param_keys.include?(k) }.map do |k, v|
             { parameter_key: k, parameter_value: v }
           end
-          cfn_options[:parameters] = cfn_params if !cfn_params.empty?
+          cfn_options[:parameters] = cfn_params unless cfn_params.empty?
         end
         cfn_options[:template_body] = template_body
       else
         cfn_options[:template_body] = File.read(@template_file)
-        if !params.empty?
+        unless params.empty?
           cfn_options[:parameters] = params.map do |k, v|
             { parameter_key: k, parameter_value: v }
           end
         end
       end
-      #binding.pry
       cfn_options
     end
 
@@ -295,19 +291,17 @@ class Bora
       puts "#{action_desc} stack '#{@cfn_stack_name}' in region #{@region}"
       success = @cfn_stack.send(action, *args) { |event| puts event }
       if success
-        puts STACK_ACTION_SUCCESS_MESSAGE % [action_desc, @cfn_stack_name]
+        puts format(STACK_ACTION_SUCCESS_MESSAGE, action_desc, @cfn_stack_name)
+      elsif success.nil?
+        puts format(STACK_ACTION_NOT_CHANGED_MESSAGE, action_desc, @cfn_stack_name)
       else
-        if success == nil
-          puts STACK_ACTION_NOT_CHANGED_MESSAGE % [action_desc, @cfn_stack_name]
-        else
-          raise(STACK_ACTION_FAILURE_MESSAGE % [action_desc, @cfn_stack_name])
-        end
+        raise format(STACK_ACTION_FAILURE_MESSAGE, action_desc, @cfn_stack_name)
       end
       success
     end
 
     def run_cfndsl(template_file, params, pretty_json)
-      temp_extras = Tempfile.new(["bora", ".yaml"])
+      temp_extras = Tempfile.new(['bora', '.yaml'])
       temp_extras.write(params.to_yaml)
       temp_extras.close
       cfndsl_model = CfnDsl.eval_file_with_extras(template_file, [[:yaml, temp_extras.path]])
@@ -334,10 +328,9 @@ class Bora
       JSON.pretty_generate(JSON.parse(template))
     end
 
-    def get_current_template
+    def current_template
       template = @cfn_stack.template
       template ? JSON.pretty_generate(JSON.parse(template)) : nil
     end
-
   end
 end

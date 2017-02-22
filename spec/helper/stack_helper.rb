@@ -1,8 +1,8 @@
-require "hashie"
+require 'hashie'
 require 'rake'
 require 'bora/cli'
 
-DEFAULT_REGION = "us-stubbed-1"
+DEFAULT_REGION = 'us-stubbed-1'.freeze
 
 def setup_stack(stack_name, status: :not_created, outputs: nil)
   stack = double(Bora::Cfn::Stack)
@@ -11,13 +11,13 @@ def setup_stack(stack_name, status: :not_created, outputs: nil)
 
   if status == :not_created
     allow(stack).to receive(:status).and_return(Bora::Cfn::StackStatus.new(nil))
-    allow(stack).to receive("exists?").and_return(false)
+    allow(stack).to receive('exists?').and_return(false)
   else
     underlying_stack = Hashie::Mash.new
     underlying_stack.stack_status = status.to_s.upcase
     underlying_stack.stack_name = stack_name
     allow(stack).to receive(:status).and_return(Bora::Cfn::StackStatus.new(underlying_stack))
-    allow(stack).to receive("exists?").and_return(true)
+    allow(stack).to receive('exists?').and_return(true)
   end
 
   if outputs
@@ -47,7 +47,7 @@ def setup_events(stack, events)
 end
 
 def setup_create_change_set(stack, change_set_name, change_set)
-  cfn_change_set_result = Hashie::Mash.new(change_set.merge({change_set_name: change_set_name}))
+  cfn_change_set_result = Hashie::Mash.new(change_set.merge(change_set_name: change_set_name))
   bora_change_set = Bora::Cfn::ChangeSet.new(cfn_change_set_result)
   if change_set_name
     allow(stack).to receive(:create_change_set).with(change_set_name, anything).and_return(bora_change_set)
@@ -65,26 +65,26 @@ end
 
 def setup_template(bora_config, template_name, template)
   # Use a class variable to ensure ruby doesn't GC and delete the temp file until the spec is complete
-  @_temp_template_file = Tempfile.new(["bora_template", ".yaml"])
+  @_temp_template_file = Tempfile.new(['bora_template', '.yaml'])
   template = template.to_json if template.is_a?(Hash) || template.is_a?(Array)
   @_temp_template_file.write(template)
   @_temp_template_file.close
   template_path = @_temp_template_file.path
-  bora_config["templates"][template_name]["template_file"] = template_path
+  bora_config['templates'][template_name]['template_file'] = template_path
   template_path
 end
 
 def default_config(overrides = {})
-  Hashie::Mash.new({
-    "templates" => {
-      "web" => {
-        "template_file" => File.join(__dir__, "../fixtures/web_template.json"),
-        "stacks" => {
-          "prod" => {}
+  Hashie::Mash.new(
+    'templates' => {
+      'web' => {
+        'template_file' => File.join(__dir__, '../fixtures/web_template.json'),
+        'stacks' => {
+          'prod' => {}
         }
       }
     }
-  }).deep_merge(overrides)
+  ).deep_merge(overrides)
 end
 
 class BoraCli
@@ -105,16 +105,16 @@ class BoraCli
   end
 
   def run(config, *params, expect_exception: false)
-    bora_cfg = Tempfile.new(["bora", ".yaml"])
+    bora_cfg = Tempfile.new(['bora', '.yaml'])
     bora_cfg.write(config.to_yaml)
     bora_cfg.close
     bora_cfg_path = bora_cfg.path
-    thor_args = params + ["--file", bora_cfg_path]
+    thor_args = params + ['--file', bora_cfg_path]
     String.disable_colorization = true
     capture do
       begin
         Bora::Cli.start(thor_args)
-      rescue Exception => e
+      rescue StandardError => e
         puts e
         puts e.backtrace
         raise e unless expect_exception

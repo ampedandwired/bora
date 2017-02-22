@@ -3,9 +3,9 @@ $LOAD_PATH.unshift File.expand_path('../../fixtures', __FILE__)
 
 require 'simplecov'
 SimpleCov.start do
-  add_filter "/.direnv/"
-  add_filter "/spec/"
-  add_filter "/lib/bora/tasks.rb" # This file is deprecated
+  add_filter '/.direnv/'
+  add_filter '/spec/'
+  add_filter '/lib/bora/tasks.rb' # This file is deprecated
 end
 
 require 'aws-sdk'

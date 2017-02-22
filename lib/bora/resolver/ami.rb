@@ -21,7 +21,6 @@ class Bora
           owners << 'self'
         end
 
-
         ec2 = Aws::EC2::Client.new(region: @stack.region)
         begin
           images = ec2.describe_images(

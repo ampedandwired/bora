@@ -1,5 +1,5 @@
-require "bora/cfn/change"
-require "bora/cfn/status"
+require 'bora/cfn/change'
+require 'bora/cfn/status'
 
 class Bora
   module Cfn
@@ -24,19 +24,19 @@ class Bora
         status_success? || status_failure?
       end
 
-      def has_changes?
-        @status.success? && @changes.size > 0
+      def changes?
+        @status.success? && !@changes.empty?
       end
 
       def to_s(changes_only: false)
-        reason = @change_set.status_reason ? " (#{@change_set.status_reason})" : ""
-        description = @change_set.description ? " - #{@change_set.description}" : ""
-        changes_str = !@is_summary ? @changes.map(&:to_s).join("\n") : ""
+        reason = @change_set.status_reason ? " (#{@change_set.status_reason})" : ''
+        description = @change_set.description ? " - #{@change_set.description}" : ''
+        changes_str = !@is_summary ? @changes.map(&:to_s).join("\n") : ''
         if changes_only
           s = changes_str
         else
           s = "#{@change_set.change_set_name.bold} - #{@change_set.creation_time.getlocal} - #{@status}#{reason} - #{@execution_status}#{description}"
-          s += "\n#{changes_str}" if !changes_str.empty?
+          s += "\n#{changes_str}" unless changes_str.empty?
         end
         s
       end

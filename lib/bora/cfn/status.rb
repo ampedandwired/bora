@@ -8,15 +8,15 @@ class Bora
       end
 
       def success?
-        @status.end_with?("_COMPLETE") && !@status.include?("ROLLBACK")
+        @status.end_with?('_COMPLETE') && !@status.include?('ROLLBACK')
       end
 
       def failure?
-        @status.end_with?("FAILED") || @status.include?("ROLLBACK")
+        @status.end_with?('FAILED') || @status.include?('ROLLBACK')
       end
 
       def deleted?
-        @status == "DELETE_COMPLETE"
+        @status == 'DELETE_COMPLETE'
       end
 
       def complete?
@@ -27,17 +27,14 @@ class Bora
         @status.colorize(color)
       end
 
-
       private
 
       def color
-        case
-          when success?; :green
-          when failure?; :red
-          else; :yellow;
+        if success? then :green
+        elsif failure? then :red
+        else; :yellow
         end
       end
     end
-
   end
 end
