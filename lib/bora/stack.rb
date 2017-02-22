@@ -6,7 +6,6 @@ require 'diffy'
 require 'bora/cfn/stack'
 require 'bora/stack_tasks'
 require 'bora/parameter_resolver'
-require 'pry'
 
 class Bora
   class Stack

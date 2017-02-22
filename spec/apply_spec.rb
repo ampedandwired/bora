@@ -1,5 +1,4 @@
 require 'helper/spec_helper'
-require 'pry'
 
 describe BoraCli do
   let(:bora) { BoraCli.new }
