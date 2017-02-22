@@ -5,7 +5,7 @@ class Bora
   class Template
     # These are properties that you can define on the template, but which can also be defined and overriden in the stack
 
-    INHERITABLE_PROPERTIES = %w(capabilities default_region tags on_failure disable_rollback)
+    INHERITABLE_PROPERTIES = %w(capabilities default_region tags on_failure disable_rollback).freeze
 
     # These are properties that can be passed in from the command line to override what's defined inthe stack
     OVERRIDABLE_PROPERTIES = %w(cfn_stack_name).freeze
