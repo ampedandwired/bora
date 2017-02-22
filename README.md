@@ -76,11 +76,14 @@ templates:
   app:
     # This template is a plain old CloudFormation JSON file
     template_file: app.json
-
-    # Optional. An array of "capabilities" to be passed to the CloudFormation API
-    # (see CloudFormation docs for more details)
-    capabilities: [CAPABILITY_IAM]
-
+    # Tag Key / Value pairs for the Cloudformation stack
+    # Tags are inherited by stack resources
+    tags:
+      Name: my-app
+    # Optional create stack parameters
+    # See - http://docs.aws.amazon.com/sdkforruby/api/Aws/CloudFormation/Client.html#create_stack-instance_method
+    capabilities: [CAPABILITY_IAM] # An array of "capabilities" to be passed to the CloudFormation API
+    on_failure: DO_NOTHING # See docs - disable_rollback is also supported
     # Optional. The default region for all stacks in this template.
     # Overrides "default_region" at the global level.
     # See below for further information.
@@ -91,24 +94,27 @@ templates:
     stacks:
       # The "uat" stack
       uat:
-        # The CloudFormation parameters to pass into the stack
+
         params:
           InstanceType: t2.micro
           AMI: ami-11032472
-
       # The "prod" stack
       prod:
+        # Overrides template level
+        on_failure: DELETE
+        # Tags here are merged with the template
+        tags:
+          Environment: uat
+        # The CloudFormation parameters to pass into the stack
         # Optional. The stack name to use in CloudFormation
         # If you don't supply this, the name will be the template
         # name concatenated with the stack name as defined in this file,
         # eg: "app-prod".
         cfn_stack_name: prod-application-stack
-
         # Optional. Default region for this stack.
         # Overrides "default_region" at the template level.
         # See below for further information.
         default_region: ap-southeast-2
-
         params:
           InstanceType: m4.xlarge
           AMI: ami-11032472
