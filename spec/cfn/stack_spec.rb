@@ -1,5 +1,6 @@
 require 'aws-sdk'
 require 'helper/spec_helper'
+require 'pry'
 
 TEST_STACK_NAME = 'test-stack'.freeze
 
@@ -154,6 +155,30 @@ describe Bora::Cfn::Stack do
       it 'returns nil if the template has not changed' do
         expect(@cfn).to receive(:update_stack).and_raise(Aws::CloudFormation::Errors::ValidationError.new('', Bora::Cfn::Stack::NO_UPDATE_MESSAGE))
         expect(@stack.update(template_body: 'foo')).to be_nil
+      end
+
+      it 'removes create stack only api parameters when updating a stack' do
+        options = { stack_name: TEST_STACK_NAME, on_failure: 'DELETE', capabilities: ['CAPABILITY_IAM'], template_body: 'foo' }
+        expect(@cfn).to receive(:update_stack).with(options).and_raise(validation_error)
+        @stack.update(options)
+        allow(@cfn).to receive(:describe_stacks).and_return(describe_stacks_result)
+        #   allow(@cfn).to receive(:describe_stacks).and_return(describe_stacks_result)
+        # end
+        # expect @stack.update(options) { |e| expect(e.resource_status_reason).to eq('just because') }
+        # # binding.pry
+        # expect(@stack.update(options)).to be(true)
+        #   .with(
+        #     hash_including(
+        #       :template_body,
+        #       'capabilities' => ['CAPABILITY_IAM']
+        #     )
+        #   )
+          # .and_return(true)
+        # output = bora.run(bora_config, 'apply', 'web-prod')
+        # expect(output).to include(format(Bora::Stack::STACK_ACTION_SUCCESS_MESSAGE, 'Update', 'web-prod'))
+        # output = bora.run(bora_config, 'apply', 'web-prod')
+        # binding.pry
+        # expect(@cfn).to receive(:update_stack).and_include(format(Bora::Stack::STACK_ACTION_SUCCESS_MESSAGE, 'Update', 'web-prod'))
       end
     end
 

@@ -25,7 +25,7 @@ class Bora
       def update(options, &block)
         # Parameters that are not valid for the update_stack api
         invalid_update_stack_options = %w(on_failure disable_rollback)
-        options = options.select { |key| !invalid_update_stack_options.include?(key) }
+        options.select! { |key| !invalid_update_stack_options.include?(key) }
         call_cfn_action(:update_stack, options, &block)
       end
 

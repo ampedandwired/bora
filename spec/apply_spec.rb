@@ -54,25 +54,6 @@ describe BoraCli do
         output = bora.run(bora_config, 'apply', 'web-prod', expect_exception: true)
         expect(output).to include(format(Bora::Stack::STACK_ACTION_FAILURE_MESSAGE, 'Update', 'web-prod'))
       end
-
-      it 'removes create stack only api parameters when updating a stack' do
-        stack_config = {
-          'on_failure' => 'DELETE',
-          'capabilities' => ['CAPABILITY_IAM']
-        }
-
-        bora_config.templates.web.stacks.prod.merge!(stack_config)
-        expect(stack).to receive(:update)
-          .with(
-            hash_including(
-              :template_body,
-              'capabilities' => ['CAPABILITY_IAM']
-            )
-          )
-          .and_return(true)
-        output = bora.run(bora_config, 'apply', 'web-prod')
-        expect(output).to include(format(Bora::Stack::STACK_ACTION_SUCCESS_MESSAGE, 'Update', 'web-prod'))
-      end
     end
   end
 end
