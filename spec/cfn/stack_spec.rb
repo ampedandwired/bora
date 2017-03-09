@@ -169,8 +169,7 @@ describe Bora::Cfn::Stack do
               {
                 stack_status: 'UPDATE_COMPLETE',
                 outputs: [],
-                parameters: [],
-                on_failure: 'DELETE'
+                parameters: []
               }
             ]
           )
