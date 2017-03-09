@@ -158,27 +158,25 @@ describe Bora::Cfn::Stack do
       end
 
       it 'removes create stack only api parameters when updating a stack' do
-        options = { stack_name: TEST_STACK_NAME, on_failure: 'DELETE', capabilities: ['CAPABILITY_IAM'], template_body: 'foo' }
-        expect(@cfn).to receive(:update_stack).with(options).and_raise(validation_error)
-        @stack.update(options)
-        allow(@cfn).to receive(:describe_stacks).and_return(describe_stacks_result)
-        #   allow(@cfn).to receive(:describe_stacks).and_return(describe_stacks_result)
+        options = { stack_name: TEST_STACK_NAME, on_failure: 'DELETE', template_body: 'foo' }
+        # expect(@cfn).to receive(:update_stack).with(options) do
+        #   allow(@cfn).to receive(:describe_stacks).and_return(Hashie::Mash.new(options))
         # end
-        # expect @stack.update(options) { |e| expect(e.resource_status_reason).to eq('just because') }
-        # # binding.pry
-        # expect(@stack.update(options)).to be(true)
-        #   .with(
-        #     hash_including(
-        #       :template_body,
-        #       'capabilities' => ['CAPABILITY_IAM']
-        #     )
-        #   )
-          # .and_return(true)
-        # output = bora.run(bora_config, 'apply', 'web-prod')
-        # expect(output).to include(format(Bora::Stack::STACK_ACTION_SUCCESS_MESSAGE, 'Update', 'web-prod'))
-        # output = bora.run(bora_config, 'apply', 'web-prod')
+        expect(@cfn).to receive(:update_stack).with(options)
+        expect(@cfn).to receive(:describe_stacks).and_return(
+          Hashie::Mash.new(
+            stacks: [
+              {
+                stack_status: 'UPDATE_COMPLETE',
+                outputs: [],
+                parameters: [],
+                on_failure: 'DELETE'
+              }
+            ]
+          )
+        )
         # binding.pry
-        # expect(@cfn).to receive(:update_stack).and_include(format(Bora::Stack::STACK_ACTION_SUCCESS_MESSAGE, 'Update', 'web-prod'))
+        expect(@stack.update(options)).to be true
       end
     end
 

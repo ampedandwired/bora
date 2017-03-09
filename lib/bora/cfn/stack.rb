@@ -6,6 +6,7 @@ require 'bora/cfn/change_set'
 require 'bora/cfn/event'
 require 'bora/cfn/output'
 require 'bora/cfn/parameter'
+require 'pry'
 
 class Bora
   module Cfn
@@ -146,6 +147,7 @@ class Bora
         if !@_stack || refresh
           begin
             response = cloudformation.describe_stacks(stack_name: @stack_name)
+            # binding.pry
             @_stack = response.stacks[0]
           rescue Aws::CloudFormation::Errors::ValidationError
             @_stack = nil
