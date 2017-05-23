@@ -1,5 +1,6 @@
 require 'aws-sdk'
 require 'helper/spec_helper'
+require 'pry'
 
 TEST_STACK_NAME = 'test-stack'.freeze
 
@@ -154,6 +155,27 @@ describe Bora::Cfn::Stack do
       it 'returns nil if the template has not changed' do
         expect(@cfn).to receive(:update_stack).and_raise(Aws::CloudFormation::Errors::ValidationError.new('', Bora::Cfn::Stack::NO_UPDATE_MESSAGE))
         expect(@stack.update(template_body: 'foo')).to be_nil
+      end
+
+      it 'removes create stack only api parameters when updating a stack' do
+        options = { stack_name: TEST_STACK_NAME, on_failure: 'DELETE', template_body: 'foo' }
+        # expect(@cfn).to receive(:update_stack).with(options) do
+        #   allow(@cfn).to receive(:describe_stacks).and_return(Hashie::Mash.new(options))
+        # end
+        expect(@cfn).to receive(:update_stack).with(options)
+        expect(@cfn).to receive(:describe_stacks).and_return(
+          Hashie::Mash.new(
+            stacks: [
+              {
+                stack_status: 'UPDATE_COMPLETE',
+                outputs: [],
+                parameters: []
+              }
+            ]
+          )
+        )
+        # binding.pry
+        expect(@stack.update(options)).to be true
       end
     end
 

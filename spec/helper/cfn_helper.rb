@@ -26,7 +26,8 @@ def describe_stacks_result(status: 'CREATE_COMPLETE', outputs: [], parameters: [
       {
         stack_status: status,
         outputs: outputs,
-        parameters: parameters
+        parameters: parameters,
+        on_failure: 'delete'
       }
     ]
   )
