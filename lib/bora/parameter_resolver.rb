@@ -5,7 +5,10 @@ class Bora
   class ParameterResolver
     UnresolvedSubstitutionError = Class.new(StandardError)
 
-    PLACEHOLDER_REGEX = /\${[^}]+}/
+    # Regular expression that can match placeholders nested to two levels.
+    # For example it will match: "${foo-${bar}}".
+    # See https://stackoverflow.com/questions/17759004/how-to-match-string-within-parentheses-nested-in-java
+    PLACEHOLDER_REGEX = /\${([^{}]*|{[^{}]*})*}/
 
     def initialize(stack)
       @stack = stack
@@ -37,6 +40,12 @@ class Bora
       result = val
       if val.is_a? String
         result = val.gsub(PLACEHOLDER_REGEX) do |placeholder|
+          # Handle nested substitutions, like "${foo-${bar}}
+          if unresolved_placeholder?(placeholder)
+            placeholder_contents = placeholder[2..-2]
+            placeholder = "${#{process_param_substitutions(placeholder_contents, params)}}"
+          end
+
           process_placeholder(placeholder, params)
         end
       elsif val.is_a? Array

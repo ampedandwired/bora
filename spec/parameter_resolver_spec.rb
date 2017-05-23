@@ -68,6 +68,20 @@ describe Bora::ParameterResolver do
     expect(parameter_resolver.resolve(params)).to eq(resolved_params)
   end
 
+  it 'handles nested substitutions' do
+    params = {
+      'ami_owner' => 'amazon',
+      'ami' => '${ami://amzn-ami-hv*x86_64-gp2?owner=${ami_owner}}'
+    }
+    resolved_params = {
+      'ami_owner' => 'amazon',
+      'ami' => 'ami-deadbeef'
+    }
+
+    expect(resolver).to receive(:resolve).with(URI('ami://amzn-ami-hv*x86_64-gp2?owner=amazon')).and_return('ami-deadbeef')
+    expect(parameter_resolver.resolve(params)).to eq(resolved_params)
+  end
+
   it 'raises an error on a circular series of parameter references' do
     params = { 'aaa' => '${bbb}_foo', 'bbb' => '${ccc}_bar', 'ccc' => '${aaa}_baz' }
     expect { parameter_resolver.resolve(params) }.to raise_exception(Bora::ParameterResolver::UnresolvedSubstitutionError)
