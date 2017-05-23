@@ -71,10 +71,12 @@ describe Bora::ParameterResolver do
   it 'handles nested substitutions' do
     params = {
       'ami_owner' => 'amazon',
-      'ami' => '${ami://amzn-ami-hv*x86_64-gp2?owner=${ami_owner}}'
+      'arch' => 'x86_64',
+      'ami' => '${ami://amzn-ami-hv*${arch}-gp2?owner=${ami_owner}}'
     }
     resolved_params = {
       'ami_owner' => 'amazon',
+      'arch' => 'x86_64',
       'ami' => 'ami-deadbeef'
     }
 
