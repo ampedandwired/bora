@@ -83,7 +83,7 @@ templates:
     # Optional create stack parameters
     # See - http://docs.aws.amazon.com/sdkforruby/api/Aws/CloudFormation/Client.html#create_stack-instance_method
     capabilities: [CAPABILITY_IAM] # An array of "capabilities" to be passed to the CloudFormation API
-    on_failure: DO_NOTHING # See docs - disable_rollback is also supported
+    on_failure: DO_NOTHING # See CloudFormation API docs for valid values and their meanings; "disable_rollback" is also supported
     # Optional. The default region for all stacks in this template.
     # Overrides "default_region" at the global level.
     # See below for further information.

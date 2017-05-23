@@ -158,24 +158,9 @@ describe Bora::Cfn::Stack do
       end
 
       it 'removes create stack only api parameters when updating a stack' do
-        options = { stack_name: TEST_STACK_NAME, on_failure: 'DELETE', template_body: 'foo' }
-        # expect(@cfn).to receive(:update_stack).with(options) do
-        #   allow(@cfn).to receive(:describe_stacks).and_return(Hashie::Mash.new(options))
-        # end
-        expect(@cfn).to receive(:update_stack).with(options)
-        expect(@cfn).to receive(:describe_stacks).and_return(
-          Hashie::Mash.new(
-            stacks: [
-              {
-                stack_status: 'UPDATE_COMPLETE',
-                outputs: [],
-                parameters: []
-              }
-            ]
-          )
-        )
-        # binding.pry
-        expect(@stack.update(options)).to be true
+        options = { stack_name: TEST_STACK_NAME, on_failure: 'DELETE', disable_rollback: true, template_body: 'foo' }
+        expect(@cfn).to receive(:update_stack).with(hash_not_including(:on_failure, :disable_rollback))
+        @stack.update(options)
       end
     end
 

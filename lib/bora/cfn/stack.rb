@@ -6,7 +6,6 @@ require 'bora/cfn/change_set'
 require 'bora/cfn/event'
 require 'bora/cfn/output'
 require 'bora/cfn/parameter'
-require 'pry'
 
 class Bora
   module Cfn
@@ -25,9 +24,9 @@ class Bora
 
       def update(options, &block)
         # Parameters that are not valid for the update_stack api
-        invalid_update_stack_options = %w(on_failure disable_rollback)
-        options.select! { |key| !invalid_update_stack_options.include?(key) }
-        call_cfn_action(:update_stack, options, &block)
+        invalid_update_stack_options = %i(on_failure disable_rollback)
+        update_options = options.select { |key| !invalid_update_stack_options.include?(key) }
+        call_cfn_action(:update_stack, update_options, &block)
       end
 
       def create_or_update(options, &block)
@@ -147,7 +146,6 @@ class Bora
         if !@_stack || refresh
           begin
             response = cloudformation.describe_stacks(stack_name: @stack_name)
-            # binding.pry
             @_stack = response.stacks[0]
           rescue Aws::CloudFormation::Errors::ValidationError
             @_stack = nil
