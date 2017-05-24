@@ -1,5 +1,5 @@
 require 'bora/stack'
-require 'hashie'
+require 'deep_merge'
 
 class Bora
   class Template
@@ -36,9 +36,7 @@ class Bora
     private
 
     def resolve_stack_config(template_config, stack_config, override_config)
-      Hashie::Mash.new(
-        inheritable_properties(template_config)
-      ).deep_merge(stack_config).merge(overridable_properties(override_config))
+      inheritable_properties(template_config).deep_merge!(stack_config).merge(overridable_properties(override_config))
     end
 
     def inheritable_properties(config)

@@ -106,6 +106,9 @@ class BoraCli
 
   def run(config, *params, expect_exception: false)
     bora_cfg = Tempfile.new(['bora', '.yaml'])
+    if config.is_a?(Hashie::Mash)
+      config = config.to_hash
+    end
     bora_cfg.write(config.to_yaml)
     bora_cfg.close
     bora_cfg_path = bora_cfg.path
