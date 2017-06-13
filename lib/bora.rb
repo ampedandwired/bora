@@ -40,7 +40,7 @@ class Bora
 
   def load_config(config)
     if config.class == String
-      YAML.load_file(config)
+      YAML.load(ERB.new(File.read(config)).result)
     elsif config.class == Hash
       config
     end
