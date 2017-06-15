@@ -1,3 +1,4 @@
+[![Gem](https://img.shields.io/gem/v/bora.svg)]()
 [![Build Status](https://travis-ci.org/ampedandwired/bora.svg?branch=master)](https://travis-ci.org/ampedandwired/bora)
 
 # Bora
