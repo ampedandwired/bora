@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/ampedandwired/bora.svg?branch=master)](https://travis-ci.org/ampedandwired/bora)
+
 # Bora
 
 This Ruby gem contains a command line utility and [rake](https://github.com/ruby/rake) tasks
