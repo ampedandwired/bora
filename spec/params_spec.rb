@@ -58,8 +58,8 @@ describe BoraCli do
       .with(
         hash_including(
           :template_body,
-          :capabilities => ['CAPABILITY_IAM'],
-          :tags => [
+          capabilities: ['CAPABILITY_IAM'],
+          tags: [
             {
               key: 'Name',
               value: 'MyStack'
@@ -85,8 +85,8 @@ describe BoraCli do
       .with(
         hash_including(
           :template_body,
-          :capabilities => ['CAPABILITY_IAM'],
-          :tags => [
+          capabilities: ['CAPABILITY_IAM'],
+          tags: [
             {
               key:    'Name',
               value:  'MyStack'
@@ -114,7 +114,7 @@ describe BoraCli do
       .with(
         hash_including(
           :template_body,
-          :tags => [
+          tags: [
             {
               key:    'Name',
               value:  'MyStack'
@@ -151,7 +151,7 @@ describe BoraCli do
       .with(
         hash_including(
           :template_body,
-          :tags => [
+          tags: [
             {
               key:   'Name',
               value: 'MyStack'

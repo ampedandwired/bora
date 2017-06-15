@@ -53,7 +53,7 @@ describe Bora::ParameterResolver do
     resolved_params = {
       'a1' => 'v1_v5',
       'a2' => {
-        'b1' => %w(v1_v5 v5),
+        'b1' => %w[v1_v5 v5],
         'b2' => {
           'c1' => 'v1_v5'
         }

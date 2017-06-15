@@ -311,7 +311,7 @@ class Bora
     end
 
     def cfn_options_from_stack_config
-      valid_options = %w(capabilities tags disable_rollback on_failure)
+      valid_options = %w[capabilities tags disable_rollback on_failure]
 
       # Pick out any stack config keys that are valid cfn options
       cfn_options = @stack_config.select { |k| valid_options.include?(k) }

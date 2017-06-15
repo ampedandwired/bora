@@ -248,7 +248,8 @@ describe Bora::Cfn::Stack do
         }
         create_options = options.merge(capabilities: ['CAPABILITY_IAM'])
         expect(@cfn).to receive(:create_change_set).with(create_options)
-        expect(@cfn).to receive(:describe_change_set).with(options)
+        expect(@cfn).to receive(:describe_change_set)
+          .with(options)
           .and_return(describe_change_set_result(change_set_name, status: 'CREATE_COMPLETE', description: 'awesome change set'))
         change_set = @stack.create_change_set(change_set_name, capabilities: ['CAPABILITY_IAM'])
         expect(change_set.status_success?).to be_truthy

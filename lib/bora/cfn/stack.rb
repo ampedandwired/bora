@@ -24,8 +24,8 @@ class Bora
 
       def update(options, &block)
         # Parameters that are not valid for the update_stack api
-        invalid_update_stack_options = %i(on_failure disable_rollback)
-        update_options = options.select { |key| !invalid_update_stack_options.include?(key) }
+        invalid_update_stack_options = %i[on_failure disable_rollback]
+        update_options = options.reject { |key| invalid_update_stack_options.include?(key) }
         call_cfn_action(:update_stack, update_options, &block)
       end
 
@@ -64,7 +64,7 @@ class Bora
       end
 
       def validate(options)
-        cloudformation.validate_template(options.select { |k| [:template_body, :template_url].include?(k) })
+        cloudformation.validate_template(options.select { |k| %i[template_body template_url].include?(k) })
       end
 
       def status
