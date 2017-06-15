@@ -106,14 +106,14 @@ describe Bora::ParameterResolver do
   end
 
   it 'is compatible with legacy cfn output lookups' do
-    params = { "key1": '${foo_stack/outputs/bar}' }
+    params = { 'key1' => '${foo_stack/outputs/bar}' }
     expect(resolver).to receive(:resolve).with(URI('cfn://foo_stack/outputs/bar'))
     parameter_resolver.resolve(params)
   end
 
   it 'resolves multiple substitutions within the one parameter' do
-    params = { "key1": '${foo://foo}bar${foo://foo}bar${foo://foo}bar' }
+    params = { 'key1' => '${foo://foo}bar${foo://foo}bar${foo://foo}bar' }
     expect(resolver).to receive(:resolve).exactly(3).times.with(URI('foo://foo')).and_return('foo')
-    expect(parameter_resolver.resolve(params)).to eq("key1": 'foobarfoobarfoobar')
+    expect(parameter_resolver.resolve(params)).to eq('key1' => 'foobarfoobarfoobar')
   end
 end
