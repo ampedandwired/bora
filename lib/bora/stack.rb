@@ -313,13 +313,19 @@ class Bora
     def cfn_options_from_stack_config
       valid_options = %w(capabilities tags disable_rollback on_failure)
 
+      # Pick out any stack config keys that are valid cfn options
       cfn_options = @stack_config.select { |k| valid_options.include?(k) }
-      # Expand any Tags to "key" => key, "value" => value pairs
-      if cfn_options['tags']
-        cfn_options['tags'] = cfn_options['tags'].map do |k, v|
+
+      # Replace string keys with symbols
+      cfn_options = cfn_options.map { |k, v| [k.to_sym, v] }.to_h
+
+      # Expand any Tags to {key: key, value: => value} pairs
+      if cfn_options[:tags]
+        cfn_options[:tags] = cfn_options[:tags].map do |k, v|
           { key: k, value: v }
         end
       end
+
       cfn_options
     end
 
