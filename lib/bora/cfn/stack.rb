@@ -80,7 +80,9 @@ class Bora
           stack_name: @stack_name,
           change_set_name: change_set_name
         }
-        cloudformation.create_change_set(change_set_options.merge(options))
+        invalid_create_change_set_options = %i[on_failure disable_rollback]
+        filtered_options = options.reject { |key| invalid_create_change_set_options.include?(key) }
+        cloudformation.create_change_set(change_set_options.merge(filtered_options))
         loop do
           change_set = ChangeSet.new(cloudformation.describe_change_set(change_set_options))
           return change_set if change_set.status_complete?
