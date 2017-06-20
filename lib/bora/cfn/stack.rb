@@ -112,7 +112,12 @@ class Bora
 
       def cloudformation
         @cfn ||= begin
-          @region ? Aws::CloudFormation::Client.new(region: @region) : Aws::CloudFormation::Client.new
+          options = {
+            retry_limit: 10,
+            retry_backoff: proc { |attempts| sleep(2**attempts) }
+          }
+          options['region'] = @region if @region
+          Aws::CloudFormation::Client.new options
         end
       end
 
