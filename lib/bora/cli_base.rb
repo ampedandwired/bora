@@ -3,7 +3,7 @@ require 'thor'
 class Bora
   class CliBase < Thor
     # Fix for incorrect subcommand help. See https://github.com/erikhuda/thor/issues/261
-    def self.banner(command, _namespace = nil, subcommand = false)
+    def self.banner(command, _namespace = nil, _subcommand = false)
       subcommand = subcommand_prefix
       subcommand_str = subcommand ? " #{subcommand}" : ''
       "#{basename}#{subcommand_str} #{command.usage}"

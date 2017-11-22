@@ -33,7 +33,7 @@ class Bora
   end
 
   def rake_tasks
-    @templates.each { |_, t| t.rake_tasks }
+    @templates.each_value { |_, t| t.rake_tasks }
   end
 
   protected

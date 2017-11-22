@@ -29,13 +29,14 @@ class Bora
     end
 
     def rake_tasks
-      @stacks.each { |_, s| s.rake_tasks }
+      @stacks.each_value { |_, s| s.rake_tasks }
     end
 
     private
 
     def resolve_stack_config(template_config, stack_config, override_config)
-      inheritable_properties(template_config).deep_merge!(stack_config).merge(overridable_properties(override_config))
+      template_config_copy = Marshal.load(Marshal.dump(template_config))
+      inheritable_properties(template_config_copy).deep_merge!(stack_config).merge(overridable_properties(override_config))
     end
 
     def inheritable_properties(config)
