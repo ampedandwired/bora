@@ -29,7 +29,7 @@ class Bora
     end
 
     def rake_tasks
-      @stacks.each { |_, s| s.rake_tasks }
+      @stacks.each_value { |_, s| s.rake_tasks }
     end
 
     private
