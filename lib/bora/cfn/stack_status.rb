@@ -15,7 +15,7 @@ class Bora
       end
 
       def success?
-        @status&.success?
+        @status && @status.success?
       end
 
       def to_s
