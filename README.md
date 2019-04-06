@@ -364,7 +364,7 @@ If this is of interest to you, please have a look at the [GitHub issue](https://
 ## Related Projects
 The following projects provided inspiration for or are similar to Bora.
 If Bora doesn't meet your needs, one of these might.
-* [CfnDsl](https://github.com/stevenjack/cfndsl) - A Ruby DSL for CloudFormation templates
+* [CfnDsl](https://github.com/cfndsl/cfndsl) - A Ruby DSL for CloudFormation templates
 * [StackMaster](https://github.com/envato/stack_master) - Very similar in goals to Bora
 * [CloudFormer](https://github.com/kunday/cloudformer) - Rake tasks for CloudFormation
 * [Cumulus](https://github.com/cotdsa/cumulus) - A Python YAML based tool for working with CloudFormation
