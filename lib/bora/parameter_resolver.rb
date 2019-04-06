@@ -8,7 +8,7 @@ class Bora
     # Regular expression that can match placeholders nested to two levels.
     # For example it will match: "${foo-${bar}}".
     # See https://stackoverflow.com/questions/17759004/how-to-match-string-within-parentheses-nested-in-java
-    PLACEHOLDER_REGEX = /\${([^{}]*|{[^{}]*})*}/
+    PLACEHOLDER_REGEX = /\${([^{}]*|{[^{}]*})*}/.freeze
 
     def initialize(stack)
       @stack = stack
@@ -27,9 +27,7 @@ class Bora
           placeholders_were_substituted ||= resolved_value != v
           params[k] = resolved_value
         end
-        if unresolved_placeholders_still_remain && !placeholders_were_substituted
-          raise UnresolvedSubstitutionError, "Parameter substitutions could not be resolved:\n#{unresolved_placeholders_as_string(params)}"
-        end
+        raise UnresolvedSubstitutionError, "Parameter substitutions could not be resolved:\n#{unresolved_placeholders_as_string(params)}" if unresolved_placeholders_still_remain && !placeholders_were_substituted
       end
       params
     end
@@ -82,14 +80,12 @@ class Bora
       result
     end
 
-    def parse_uri(s)
-      uri = URI(s)
+    def parse_uri(uri_to_parse)
+      uri = URI(uri_to_parse)
 
       # Support for legacy CFN substitutions without a scheme, eg: ${stack/outputs/foo}.
       # Will be removed in next breaking version.
-      if !uri.scheme && uri.path && uri.path.count('/') == 2
-        uri = URI("cfn://#{s}")
-      end
+      uri = URI("cfn://#{uri_to_parse}") if !uri.scheme && uri.path && uri.path.count('/') == 2
       uri
     end
 

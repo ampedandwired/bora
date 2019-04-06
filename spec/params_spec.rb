@@ -88,8 +88,8 @@ describe BoraCli do
           capabilities: ['CAPABILITY_IAM'],
           tags: [
             {
-              key:    'Name',
-              value:  'MyStack'
+              key: 'Name',
+              value: 'MyStack'
             }
           ]
         )
@@ -116,12 +116,12 @@ describe BoraCli do
           :template_body,
           tags: [
             {
-              key:    'Name',
-              value:  'MyStack'
+              key: 'Name',
+              value: 'MyStack'
             },
             {
-              key:    'Environment',
-              value:  'Live'
+              key: 'Environment',
+              value: 'Live'
             }
           ]
         )
@@ -135,8 +135,8 @@ describe BoraCli do
       template_config: {
         'tags' =>
           {
-            Name:         'MyStack',
-            Environment:  'Live'
+            Name: 'MyStack',
+            Environment: 'Live'
           }
       },
       stack_config: {
@@ -153,15 +153,15 @@ describe BoraCli do
           :template_body,
           tags: [
             {
-              key:   'Name',
+              key: 'Name',
               value: 'MyStack'
             },
             {
-              key:   'Environment',
+              key: 'Environment',
               value: 'Dev'
             },
             {
-              key:   'Application',
+              key: 'Application',
               value: 'freds-awesome-app'
             }
           ]

@@ -4,7 +4,9 @@ class Bora
   class CliBase < Thor
     # Fix for incorrect subcommand help. See https://github.com/erikhuda/thor/issues/261
     def self.banner(command, _namespace = nil, subcommand = false)
+      # rubocop:disable Lint/ShadowedArgument
       subcommand = subcommand_prefix
+      # rubocop:enable Lint/ShadowedArgument
       subcommand_str = subcommand ? " #{subcommand}" : ''
       "#{basename}#{subcommand_str} #{command.usage}"
     end
@@ -25,7 +27,7 @@ class Bora
         bora = bora(config_file, override_config)
         stack = bora.stack(stack_name)
         unless stack
-          STDERR.puts "Could not find stack #{stack_name}"
+          warn "Could not find stack #{stack_name}"
           exit(1)
         end
         stack

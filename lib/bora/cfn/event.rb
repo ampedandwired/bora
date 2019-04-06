@@ -10,6 +10,7 @@ class Bora
 
       def respond_to_missing?(method_name, include_private = false)
         return false if method_name == :to_ary
+
         super
       end
 

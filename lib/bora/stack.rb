@@ -25,9 +25,7 @@ class Bora
     def initialize(stack_name, template_file, stack_config)
       @stack_name = stack_name
       @cfn_stack_name = stack_config['cfn_stack_name'] || stack_config['stack_name'] || @stack_name
-      if stack_config['stack_name']
-        puts "DEPRECATED: The 'stack_name' setting is deprecated. Please use 'cfn_stack_name' instead."
-      end
+      puts "DEPRECATED: The 'stack_name' setting is deprecated. Please use 'cfn_stack_name' instead." if stack_config['stack_name']
       @template_file = template_file
       @stack_config = stack_config
       @region = @stack_config['default_region'] || Aws::CloudFormation::Client.new.config[:region]
@@ -123,7 +121,7 @@ class Bora
 
     def show_current
       template = current_template
-      puts template ? template : (STACK_DOES_NOT_EXIST_MESSAGE % @cfn_stack_name)
+      puts template || (STACK_DOES_NOT_EXIST_MESSAGE % @cfn_stack_name)
     end
 
     def status
@@ -180,6 +178,7 @@ class Bora
       current_params_str = params_as_string(current_params)
       new_params_str = params_as_string(new_params)
       return unless current_params_str || new_params_str
+
       puts 'Parameters'.colorize(mode: :bold)
       puts '----------'
       diff = Diffy::Diff.new(current_params_str, new_params_str).to_s(String.disable_colorization ? :text : :color).chomp
@@ -197,27 +196,21 @@ class Bora
       template = JSON.parse(cfn_options[:template_body])
       if template['Parameters']
         params_with_defaults = template['Parameters'].select { |_, v| v['Default'] }
-        unless params_with_defaults.empty?
-          params = params_with_defaults.map { |k, v| [k, v['Default']] }.to_h
-        end
+        params = params_with_defaults.map { |k, v| [k, v['Default']] }.to_h unless params_with_defaults.empty?
       end
       params
     end
 
     def current_cfn_parameters
       params = nil
-      if @cfn_stack.parameters && !@cfn_stack.parameters.empty?
-        params = @cfn_stack.parameters.map { |p| [p.key, p.value] }.to_h
-      end
+      params = @cfn_stack.parameters.map { |p| [p.key, p.value] }.to_h if @cfn_stack.parameters && !@cfn_stack.parameters.empty?
       params
     end
 
     def new_bora_parameters(cfn_options)
       params = nil
       cfn_parameters = cfn_options[:parameters]
-      if cfn_parameters && !cfn_parameters.empty?
-        params = cfn_parameters.map { |p| [p[:parameter_key], p[:parameter_value]] }.to_h
-      end
+      params = cfn_parameters.map { |p| [p[:parameter_key], p[:parameter_value]] }.to_h if cfn_parameters && !cfn_parameters.empty?
       params
     end
 
@@ -250,6 +243,7 @@ class Bora
     def diff_change_set(cfn_options)
       change_set_name = "cs-#{SecureRandom.uuid}"
       return unless @cfn_stack.exists?
+
       change_set = @cfn_stack.create_change_set(change_set_name, cfn_options)
       @cfn_stack.delete_change_set(change_set_name)
       puts 'Changes'.colorize(mode: :bold)

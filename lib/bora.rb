@@ -13,6 +13,7 @@ class Bora
     config = load_config(config_file_or_hash)
     String.disable_colorization = !colorize
     raise 'No templates defined' unless config['templates']
+
     config['templates'].each do |template_name, template_config|
       resolved_config = resolve_template_config(config, template_config, override_config)
       @templates[template_name] = Template.new(template_name, resolved_config, override_config)
