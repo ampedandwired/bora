@@ -14,6 +14,7 @@ class Bora
         owners = []
         ami_prefix = uri.host
         raise InvalidParameter, "Invalid ami parameter #{uri}" unless ami_prefix
+
         if !uri.query.nil? && uri.query.include?('owner')
           query = URI.decode_www_form(uri.query).to_h
           owners = query['owner'].split(',')
@@ -27,11 +28,11 @@ class Bora
             owners: owners,
             filters: [
               {
-                name:   'name',
+                name: 'name',
                 values: [ami_prefix]
               },
               {
-                name:   'state',
+                name: 'state',
                 values: ['available']
               }
             ]
@@ -41,6 +42,7 @@ class Bora
         end
 
         raise NoAMI, "No Matching AMI's for prefix #{ami_prefix}" if images.empty?
+
         images.sort! { |a, b| DateTime.parse(a.creation_date) <=> DateTime.parse(b.creation_date) }.last.image_id
       end
     end

@@ -18,6 +18,7 @@ class Bora
 
       if template_uri
         raise 'You cannot specify a template in the constructor as well as in the stack_options' if @stack_options[:template_body] || @stack_options[:template_url]
+
         @stack_options[:template_body] = File.read(template_uri)
       elsif @stack_options[:template_url]
         @stack_options[:template_body] = File.read(@stack_options[:template_url])
@@ -71,7 +72,7 @@ class Bora
         desc "Shows the current template for '#{@stack_name}' stack"
         task :current_template do
           template = @stack.template
-          puts template ? template : "Stack '#{@stack_name}' does not exist"
+          puts template || "Stack '#{@stack_name}' does not exist"
         end
       end
     end
@@ -181,6 +182,7 @@ class Bora
         puts "#{action.capitalize} stack '#{@stack_name}' completed successfully"
       else
         raise "#{action.capitalize} stack '#{@stack_name}' failed" unless success.nil?
+
         puts "#{action.capitalize} stack '#{@stack_name}' skipped as template has not changed"
       end
       success
