@@ -28,7 +28,6 @@ class Bora
             next_token = certs.next_token
             acm_args[:next_token] = next_token unless next_token.nil?
           end
-
           certs = acm_client.list_certificates(acm_args)
           acm_certs << certs.certificate_summary_list
         end
